@@ -1,118 +1,74 @@
-# Meta & YouTube Analytics API v2.1
+# Meta Social & SEO Analytics API v4.0
 
-Facebook Page + Instagram Business + YouTube Channel — unified, frontend‑ready JSON.
+**6 platforms:** Facebook · Instagram · YouTube · LinkedIn · Pinterest · Google Search Console
 
 ## Quick Start
-
 ```bash
-cp .env.example .env
-# Edit .env with your credentials (see below)
-npm install
-npm start
+cp .env.example .env  # fill all credentials
+npm install && npm start
 ```
 
-## .env Setup
+## .env (all credentials required — there are 3 separate Google credential sets)
 
 ```env
 # Meta (Facebook + Instagram)
-ACCESS_TOKEN=your_facebook_user_access_token
-INSTAGRAM_ID=your_ig_business_account_id
-FACEBOOK_PAGE_ID=your_fb_page_id
+ACCESS_TOKEN=
+INSTAGRAM_ID=
+FACEBOOK_PAGE_ID=
 
-# YouTube (only yt-analytics.readonly required; add youtube.readonly for channel info)
-YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+# YouTube (set #1)
+YOUTUBE_REFRESH_TOKEN=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 
-# Optional
-PORT=5000
-ACCOUNT_CREATED=2026-07-05
+# Google Search Console (set #2 — different from YouTube!)
+GSC_REFRESH_TOKEN=
+GSC_CLIENT_ID=
+GSC_CLIENT_SECRET=
+GSC_SITE_URL=https://www.your-site.com/
+
+# Zernio (LinkedIn + Pinterest)
+ZERNIO_API_KEY=
 ```
 
-## Getting a YouTube Refresh Token
+## Getting GSC Refresh Token
 
-1. [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) → Create OAuth 2.0 Client ID (Web application)
-2. Add `https://developers.google.com/oauthplayground` as redirect URI
-3. Go to [OAuth 2.0 Playground](https://developers.google.com/oauthplayground) → ⚙️ → Use your own credentials
-4. Select scopes: `https://www.googleapis.com/auth/yt-analytics.readonly` (required) + `https://www.googleapis.com/auth/youtube.readonly` (optional, for channel thumbnails/names)
-5. Authorize → Exchange authorization code → Copy **Refresh token**
+1. Google Cloud Console → Create project → Enable "Google Search Console API"
+2. Create OAuth 2.0 Client ID → add redirect URI: `https://developers.google.com/oauthplayground`
+3. OAuth Playground → ⚙️ Use your own credentials → Select `webmasters.readonly` scope → Authorize → Exchange → Copy refresh token
+4. Verify your website in Google Search Console
+5. Set `GSC_SITE_URL` in .env
 
 ## Endpoints
 
-| Endpoint | Description |
+| Endpoint | Platform |
 |---|---|
-| `GET /api/facebook` | Facebook Page Insights |
-| `GET /api/instagram` | Instagram Business Insights |
-| `GET /api/youtube` | YouTube Channel Analytics |
-| `GET /api/youtube/debug` | Step-by-step YouTube diagnostics |
-| `GET /api/combined` | All 3 platforms in one call |
-| `GET /api/health` | Token health check for all platforms |
+| GET /api/facebook | Facebook Page |
+| GET /api/instagram | Instagram Business |
+| GET /api/youtube | YouTube Channel |
+| GET /api/linkedin | LinkedIn (via Zernio) |
+| GET /api/pinterest | Pinterest (via Zernio) |
+| GET /api/gsc | Google Search Console |
+| GET /api/combined | All 6 in one call |
+| GET /api/health | Token check for all |
 
-All accept: `?date_preset=last_30d` or `?since=2026-07-01&until=2026-07-10`
+## GSC Special Features
 
-## Response Shape
+**Time-based (default):** Returns overview, timeseries, metrics (clicks, impressions, CTR, position)
 
-```json
-{
-  "success": true,
-  "platform": "facebook",
-  "meta": { "dateRange": { "from": "2026-06-10", "to": "2026-07-10" }, "metricCount": 8, "dataPoints": 240 },
-  "data": {
-    "overview": {
-      "followers": { "total": 1250, "trend": 3.2 },
-      "pageViews": { "total": 8400, "average": 280, "trend": -1.5 }
-    },
-    "timeseries": [
-      { "date": "2026-07-05", "page_views_total": 310, "page_follows": 1240 }
-    ],
-    "metrics": [
-      {
-        "id": "page_views_total",
-        "label": "Daily Total Views",
-        "values": [ { "date": "2026-07-05", "value": 310 } ],
-        "summary": { "total": 8400, "average": 280, "latest": 310, "previous": 285, "trend": 8.77 }
-      }
-    ]
-  }
-}
-```
+**Top keywords:** `GET /api/gsc?dimensions=query&rowLimit=20`
+Returns `topItems[]` — top search queries ranked by clicks
 
-## Frontend Integration Map
+**Top pages:** `GET /api/gsc?dimensions=page&rowLimit=20`
+Returns `topItems[]` — top landing pages
 
-| Field | Use for |
-|---|---|
-| `data.overview` | Dashboard summary cards (totals + % trends) |
-| `data.overview.channel` | YouTube channel header (name, thumbnail, lifetime stats) |
-| `data.timeseries` | Line/bar charts — one row per date |
-| `data.metrics[].values` | Drill‑down tables |
-| `data.metrics[].summary.trend` | Percentage arrow indicators |
+**By country:** `GET /api/gsc?dimensions=country`
 
-## YouTube: analytics‑only mode
+**By device:** `GET /api/gsc?dimensions=device`
 
-If you only have `yt-analytics.readonly` scope (without `youtube.readonly`):
-- Analytics will still work perfectly
-- Channel name/thumbnail will show as "YouTube Channel" / empty
-- A notice will tell you to add the scope for full channel details
-
-## Project Structure
-
-```
-src/
-├── app.js                  # Entry point
-├── config/index.js         # All environment config
-├── routes/
-│   ├── facebook.js         # GET /api/facebook
-│   ├── instagram.js        # GET /api/instagram
-│   ├── youtube.js          # GET /api/youtube + /debug
-│   ├── combined.js         # GET /api/combined (all 3)
-│   └── health.js           # GET /api/health
-├── services/
-│   ├── tokenService.js     # UserToken → PageToken
-│   ├── facebookService.js  # FB fetch + transform
-│   ├── instagramService.js # IG fetch + transform
-│   └── youtubeService.js   # YT refresh + analytics
-└── utils/
-    ├── response.js         # Error handler (surfaces real API errors)
-    ├── dateUtils.js        # Date parsing
-    └── transform.js        # Raw → overview + timeseries + metrics
-```
+### Data Latency
+- Google Search Console: 2-3 day delay (API automatically clips to safe range)
+- LinkedIn: near real-time
+- Pinterest: 24-48h
+- Facebook/Instagram: 1-2 days
+- YouTube: 24-48h
