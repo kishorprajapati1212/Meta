@@ -2,108 +2,240 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meta Social & SEO Analytics API v4.0</title>
+<title>Meta Social &amp; SEO Analytics API v4.1</title>
 <style>
-  :root{--bg:#0f1117;--card:#1a1d27;--text:#d4d4d8;--hl:#7c8aff;--gn:#4ade80;--am:#fbbf24}
+  :root{--bg:#F5F7FA;--card:#fff;--ink:#0C1526;--body:#3E4A5E;--muted:#6B7A90;--line:#E7EAF0;--brand:#2F6BFF;--pos:#12924F;--am:#C8871B}
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);padding:40px;max-width:1100px;margin:0 auto}
-  h1{color:#fff;font-size:28px}h2{color:var(--hl);font-size:20px;margin:32px 0 12px;border-bottom:1px solid #222;padding-bottom:6px}
-  h3{color:#fff;font-size:16px;margin:16px 0 8px}.sub{color:#888;margin-bottom:28px}
-  .card{background:var(--card);border-radius:10px;padding:20px;margin-bottom:14px}
-  .method{display:inline-block;padding:3px 10px;border-radius:4px;font-weight:700;font-size:11px;margin-right:10px}
-  .get{background:var(--gn);color:#000}.path{font-family:monospace;font-size:15px;color:#ffd580}
-  .desc{color:#999;font-size:13px;margin-top:6px}.badge{display:inline-block;background:#333;color:#aaa;font-size:10px;padding:2px 7px;border-radius:3px;margin-left:6px}
-  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
-  th{text-align:left;padding:8px 12px;background:#222;color:#aaa}td{padding:8px 12px;border-bottom:1px solid #1a1a1a}
-  pre{background:#111;padding:14px;border-radius:8px;overflow-x:auto;font-size:12px;line-height:1.6;color:#e0e0e0}
-  code{font-family:monospace;background:#1e1e2e;padding:1px 5px;border-radius:3px}a{color:var(--hl)}
+  body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--body);padding:40px 24px;max-width:1120px;margin:0 auto;line-height:1.6}
+  h1{color:var(--ink);font-size:28px;letter-spacing:-.02em}
+  h2{color:var(--ink);font-size:18px;margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{color:var(--ink);font-size:15px;margin:18px 0 6px}
+  .sub{color:var(--muted);margin-bottom:8px;font-size:14px}
+  .ver{display:inline-block;background:#EAF0FF;color:var(--brand);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .get{display:inline-block;padding:3px 9px;border-radius:6px;font-weight:700;font-size:11px;margin-right:10px;background:#E7F6EE;color:var(--pos)}
+  .new{background:#FFF4E0;color:var(--am)}
+  .path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;color:var(--ink);font-weight:600}
+  .desc{color:var(--muted);font-size:13px;margin-top:4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th{text-align:left;padding:9px 12px;background:#F7F9FC;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  pre{background:#0C1526;color:#E6EDF7;padding:16px;border-radius:12px;overflow-x:auto;font-size:12px;line-height:1.65;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#EEF2F8;color:var(--ink);padding:1px 5px;border-radius:4px;font-size:12px}
+  pre code{background:none;color:inherit;padding:0}
+  a{color:var(--brand);text-decoration:none}a:hover{text-decoration:underline}
+  .note{border-left:3px solid var(--brand);background:#F5F8FF;padding:12px 16px;border-radius:0 10px 10px 0;font-size:13px;margin:12px 0}
+  .warn{border-left-color:var(--am);background:#FFFAF0}
+  ul{margin:6px 0 6px 20px}li{margin-bottom:4px;font-size:13px}
+  .kind{font-weight:700;color:var(--ink)}
 </style>
 </head>
 <body>
-<h1>📊 Meta Social & SEO Analytics API</h1>
-<p class="sub">v4.0 — 6 Platforms: Facebook · Instagram · YouTube · LinkedIn · Pinterest · Google Search Console</p>
+<h1>Meta Social &amp; SEO Analytics API</h1>
+<p class="sub">Facebook · Instagram · YouTube · LinkedIn · Pinterest · Google Search Console — one contract, one dashboard.</p>
+<span class="ver">v4.1.0</span>
 
-<h2>Environment Variables (.env)</h2>
-<div class="card"><pre># === META (Facebook + Instagram) ===
-ACCESS_TOKEN=your_facebook_user_access_token
-INSTAGRAM_ID=your_ig_business_account_id
-FACEBOOK_PAGE_ID=your_fb_page_id
-
-# === YOUTUBE (separate credentials) ===
-YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token
-GOOGLE_CLIENT_ID=your_youtube_google_client_id
-GOOGLE_CLIENT_SECRET=your_youtube_google_client_secret
-
-# === GOOGLE SEARCH CONSOLE (separate credentials) ===
-GSC_REFRESH_TOKEN=your_gsc_refresh_token
-GSC_CLIENT_ID=your_gsc_google_client_id
-GSC_CLIENT_SECRET=your_gsc_google_client_secret
-GSC_SITE_URL=https://www.your-website.com/
-
-# === ZERNIO (LinkedIn + Pinterest) ===
-ZERNIO_API_KEY=sk_your_zernio_api_key</pre></div>
-
-<h2>Getting GSC Credentials</h2>
-<div class="card">
-<p>1. Go to <a href="https://console.cloud.google.com">Google Cloud Console</a> → Create a new project (or use existing)</p>
-<p>2. Enable <strong>Google Search Console API</strong></p>
-<p>3. Create OAuth 2.0 Client ID (Web application), add <code>https://developers.google.com/oauthplayground</code> as redirect URI</p>
-<p>4. Go to <a href="https://developers.google.com/oauthplayground">OAuth Playground</a> → ⚙️ → Use your own credentials</p>
-<p>5. Select scope: <code>https://www.googleapis.com/auth/webmasters.readonly</code></p>
-<p>6. Authorize → Exchange → Copy <strong>Refresh token</strong></p>
-<p>7. Add your website to <a href="https://search.google.com/search-console">Google Search Console</a> and verify ownership</p>
-<p>8. Set <code>GSC_SITE_URL</code> in .env to your verified site URL</p>
+<div class="note">
+  <strong>New in 4.1:</strong> every metric in <code>data.overview</code> is self-describing
+  (<code>kind</code>, <code>unit</code>, <code>group</code>, <code>trend</code>, <code>hasData</code>),
+  zero-value metrics are no longer dropped, trends compare the second half of the range to the first,
+  <code>/api/combined</code> passes full platform payloads through and adds <code>data.summary</code>,
+  <code>/api/health</code> explains exactly what to fix, Pinterest boards and account stats are included,
+  and the dashboard is served from <a href="./app/">/app</a>.
 </div>
 
 <h2>Endpoints</h2>
 <table>
-<tr><th>Method</th><th>Path</th><th>Platform</th><th>Auth</th></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/facebook</span></td><td>Facebook Page</td><td>User Token → Page Token</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/instagram</span></td><td>Instagram Business</td><td>User Token</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/youtube</span></td><td>YouTube Channel</td><td>Refresh Token</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/linkedin</span></td><td>LinkedIn (Zernio)</td><td>Zernio API Key</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/pinterest</span></td><td>Pinterest (Zernio)</td><td>Zernio API Key</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/gsc</span></td><td>Google Search Console</td><td>Refresh Token</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/combined</span></td><td>All 6 platforms</td><td>All</td></tr>
-<tr><td><span class="get">GET</span></td><td><span class="path">/api/health</span></td><td>Token check</td><td>All</td></tr>
+<tr><th>Path</th><th>Returns</th><th>Credentials</th></tr>
+<tr><td><span class="get">GET</span><span class="path">/api</span></td><td>Machine-readable index of every route, its params and accepted values</td><td>none</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/facebook</span></td><td>Fans &amp; growth, reach, impressions, views, engagement, interactions</td><td>Meta Page token</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/instagram</span></td><td>Followers, reach, impressions, profile visits, website clicks, engagement</td><td>Meta Page token</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/youtube</span></td><td>Views, watch time, avg view %, subscribers, likes/comments/shares + lifetime channel stats</td><td>Google set #1</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/linkedin</span></td><td>Followers, impressions, clicks, shares, comments, reactions, profile views, posts</td><td>Zernio key</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/pinterest</span></td><td>Impressions, clicks, outbound clicks, saves, follows, pins, boards, monthly views, pin list</td><td>Zernio key</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/gsc</span></td><td>Clicks, impressions, CTR, position — by date, or grouped by query/page/country/device</td><td>Google set #2</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/combined</span></td><td>All six in one call, plus <code>data.summary</code> cross-channel roll-up</td><td>all</td></tr>
+<tr><td><span class="get">GET</span><span class="path">/api/health</span></td><td>Per-platform <code>{status,message,hint,configured,source}</code> + legacy string map</td><td>all</td></tr>
+<tr><td><span class="get new">GET</span><span class="path">/api/zernio/debug</span></td><td>Zernio connectivity, scopes, account list, analytics access — raw upstream detail</td><td>Zernio key</td></tr>
+<tr><td><span class="get new">GET</span><span class="path">/api/zernio/accounts</span></td><td>Connected Zernio accounts with platform, username and metadata</td><td>Zernio key</td></tr>
 </table>
 
-<h2>Query Parameters</h2>
-<p><strong>date_preset:</strong> <code>today yesterday last_7d last_14d last_30d last_90d last_365d</code></p>
-<p><strong>Custom range:</strong> <code>?since=YYYY-MM-DD&until=YYYY-MM-DD</code></p>
-<p><strong>Compact:</strong> <code>?compact=true</code> — removes zero-value days</p>
-<p><strong>GSC dimensions:</strong> <code>?dimensions=query,page&rowLimit=50</code> — group by query/page/country/device</p>
-
-<h2>Response Shape</h2>
-<pre>{
-  "success": true, "platform": "gsc",
-  "meta": { "dateRange": {"from":"2026-06-18","to":"2026-07-15"}, "siteUrl": "https://example.com", "dimensions": ["date"] },
-  "data": {
-    "overview": { "clicks": {"total":420}, "impressions": {"total":12800}, "ctr": {"total":3.28}, "position": {"total":8.4} },
-    "timeseries": [ {"date":"2026-07-01","clicks":14,"impressions":520,"ctr":2.69,"position":9.3} ],
-    "metrics": [ {"id":"clicks","label":"Clicks","values":[...],"summary":{"total":420,"average":14,"latest":18,"trend":12.5}} ]
-  }
-}
-
-<b>With dimensions=query</b>: returns topItems[] instead of timeseries/metrics — top keywords by clicks</pre>
-
-<h2>Frontend Integration</h2>
+<h2>Query parameters</h2>
 <table>
-<tr><th>Field</th><th>Component</th></tr>
-<tr><td><code>data.overview</code></td><td>Dashboard cards</td></tr>
-<tr><td><code>data.timeseries</code></td><td>Line/Bar chart</td></tr>
-<tr><td><code>data.metrics[].values</code></td><td>Table rows</td></tr>
-<tr><td><code>data.metrics[].summary</code></td><td>Stat card (total, avg, trend)</td></tr>
-<tr><td><code>data.topItems[]</code></td><td>Ranked list (keywords/pages by clicks)</td></tr>
-<tr><td><code>data.posts[]</code></td><td>Post feed (LinkedIn/Pinterest)</td></tr>
+<tr><th>Param</th><th>Values</th><th>Effect</th></tr>
+<tr><td><code>date_preset</code></td><td><code>today · yesterday · last_7d · last_14d · last_30d · last_90d · last_365d</code></td><td>Selects the window (default <code>last_30d</code>)</td></tr>
+<tr><td><code>since</code> / <code>until</code></td><td><code>YYYY-MM-DD</code></td><td>Explicit window; overrides the preset</td></tr>
+<tr><td><code>compact</code></td><td><code>true</code></td><td>Drops all-zero days from <code>timeseries</code> (Meta, YouTube, GSC). Zernio timelines stay dense.</td></tr>
+<tr><td><code>dimensions</code></td><td><code>date · query · page · country · device</code></td><td>GSC only. Anything but <code>date</code> returns <code>data.topItems[]</code></td></tr>
+<tr><td><code>compare</code></td><td><code>false</code></td><td>GSC only. Skips the previous-period window (saves one API call)</td></tr>
+<tr><td><code>rowLimit</code></td><td>1–25000</td><td>GSC only. 1000 for date, 250 for groupings</td></tr>
+<tr><td><code>sync</code></td><td><code>false</code></td><td>LinkedIn/Pinterest. Don't trigger the external-post sync</td></tr>
 </table>
 
-<h2>Project Structure</h2>
-<pre>src/
-├── app.js
-├── config/index.js
-├── routes/    (facebook, instagram, youtube, linkedin, pinterest, gsc, combined, health)
-├── services/  (token, facebook, instagram, youtube, gsc, zernio)
-└── utils/     (response, dateUtils, transform)</pre>
+<div class="note warn"><strong>Zernio upstream limits:</strong> max range 366 days, page size 1–100 (the API paginates for you). Pinterest post-level impressions/clicks lag 24–48h after publishing. LinkedIn personal-profile analytics are only available for posts published through Zernio.</div>
+
+<h2>The response contract</h2>
+<pre><code>{
+  "success": true,
+  "platform": "pinterest",
+  "meta": {
+    "dateRange": { "from": "2026-09-15", "to": "2026-10-15", "preset": "last_30d", "days": 31 },
+    "source": "Zernio",
+    "postCount": 3,
+    "hasAnalyticsAccess": true,
+    "account": { "id": "…", "displayName": "Kishor Pins", "username": "kishorpins",
+                 "platform": "pinterest", "avatar": "…", "url": "…" },
+    "boards": [ { "id": "…", "name": "UI Design", "pinCount": 42 } ],
+    "boardCount": 3,
+    "sync": { "attempted": true, "requested": 3, "accepted": 3, "cached": false },
+    "diagnostics": { "steps": { "accounts": { "ok": true, "count": 1 },
+                               "analytics": { "ok": true, "posts": 3 },
+                               "boards": { "ok": true, "count": 3 } } }
+  },
+  "data": {
+    "overview": {
+      "impressions": { "key":"impressions", "label":"Impressions", "kind":"sum", "unit":"",
+                       "group":"Traffic", "total":23700, "previous":21100,
+                       "trend":12.3, "hasData":true },
+      "pins":        { "key":"pins", "label":"Total pins", "kind":"gauge", "total":342,
+                       "hasData":true, "source":"account" }
+    },
+    "totals": { "impressions": 23700, "clicks": 480, "saves": 96, "…": 0 },
+    "timeseries": [ { "date":"2026-09-15", "impressions":760, "clicks":14, "followers":1284 } ],
+    "avgEngagementRate": 3.4,
+    "platformBreakdown": { "pinterest": { "posts": 3, "impressions": 23700 } },
+    "followerTimeseries": [ { "date":"2026-09-15", "followers":1284, "growth":2 } ],
+    "topPosts": [ { "id":"…", "title":"…", "impressions":4200, "engagementRate":5.1 } ],
+    "posts": [ { "id":"…", "title":"…", "url":"…", "publishedAt":"…", "mediaType":"image",
+                 "thumbnailUrl":"…", "analytics": { "impressions":4200, "clicks":88, "saves":21 } } ]
+  },
+  "notice": "3 pins found in range. Pinterest impressions can lag 24–48h after publishing."
+}</code></pre>
+
+<h3>Metric kinds — how values are aggregated</h3>
+<table>
+<tr><th>kind</th><th>Aggregation</th><th>Formatting</th><th>Examples</th></tr>
+<tr><td class="kind">sum</td><td>Σ over the range</td><td>compact integer</td><td><code>impressions</code>, <code>likes</code>, <code>clicks</code>, <code>reach</code></td></tr>
+<tr><td class="kind">gauge</td><td><strong>last</strong> value in the range</td><td>compact integer</td><td><code>followers</code>, <code>pins</code>, <code>boards</code>, <code>monthlyViews</code></td></tr>
+<tr><td class="kind">rate</td><td><strong>mean</strong> of daily values</td><td>0–10 with 1–2 dp + %</td><td><code>ctr</code>, <code>engagementRate</code>, <code>avgViewPercentage</code></td></tr>
+<tr><td class="kind">avg</td><td>mean of daily averages</td><td>value + unit</td><td><code>averageViewDuration</code>, GSC <code>position</code></td></tr>
+<tr><td class="kind">duration</td><td>Σ with unit conversion</td><td>h / min / s</td><td><code>estimatedMinutesWatched</code></td></tr>
+<tr><td class="kind">count</td><td>Σ of items</td><td>integer</td><td>posts published</td></tr>
+</table>
+<p class="desc">Always read <code>kind</code> before summing anything. <code>hasData:false</code> means a genuine zero — the value is still present and should still be rendered (muted).</p>
+
+<h3>Trends</h3>
+<ul>
+<li><code>trend</code> = % change of the <strong>second half of the range vs the first half</strong>.</li>
+<li><code>previous</code> = the first-half value the trend was computed against.</li>
+<li>GSC additionally returns a real previous window of equal length (<code>meta.previousRange</code>).</li>
+<li>For <code>position</code>, a falling number is favourable — the dashboard inverts the colour.</li>
+</ul>
+
+<h3><code>/api/combined</code></h3>
+<p class="desc">Each platform key holds the full single-platform <code>data</code> block <em>plus its own <code>meta</code></em>. Failures degrade instead of throwing:</p>
+<pre><code>"data": {
+  "facebook":  { "error": "Request failed with status code 400", "errorCode": "ERR_BAD_REQUEST",
+                 "httpStatus": 400, "hint": "ACCESS_TOKEN expired…", "overview": {}, "timeseries": [] },
+  "pinterest": { "overview": {…}, "posts": […], "meta": {…} },
+  "summary": {
+    "generatedAt": "2026-10-15T13:40:11.000Z",
+    "platforms": [ { "platform":"pinterest", "label":"Pinterest", "status":"ok",
+                     "audience":1284, "impressions":23700, "engagement":612,
+                     "clicks":480, "posts":3, "engagementRate":2.6, "hasData":true } ],
+    "totals": { "audience":1284, "impressions":23700, "engagement":612, "clicks":480,
+                "posts":3, "engagementRate":2.6, "searchClicks":1, "searchImpressions":30,
+                "searchCtr":3.33, "searchPosition":3.42 },
+    "connected": ["youtube","searchConsole","linkedin","pinterest"],
+    "failed": [ { "platform":"facebook", "error":"…", "hint":"…" } ],
+    "topReachPlatform": "pinterest"
+  }
+}</code></pre>
+<div class="note"><strong>Client gotcha:</strong> on single-platform routes <code>meta</code> and <code>notice</code> sit <em>outside</em> <code>data</code>; inside <code>/api/combined</code> each platform carries its own <code>meta</code>. Merge them if you normalise both shapes.</div>
+
+<h3><code>/api/health</code></h3>
+<pre><code>"data": {
+  "healthy": false,
+  "details": {
+    "facebook":  { "status":"error", "message":"Request failed with status code 400",
+                   "hint":"ACCESS_TOKEN has expired…", "configured":true, "source":"Graph API" },
+    "pinterest": { "status":"ok", "message":"Connected", "configured":true, "source":"Zernio" },
+    "youtube":   { "status":"not_configured", "message":"YOUTUBE_REFRESH_TOKEN not set",
+                   "hint":"Add it to .env and restart." }
+  },
+  "platforms": { "facebook":"Request failed with status code 400", "pinterest":"ok" }
+}</code></pre>
+<p class="desc"><code>status</code> ∈ <code>ok · error · not_configured · no_account · untested</code>. The flat <code>platforms</code> map is kept for older clients.</p>
+
+<h2>Environment variables</h2>
+<pre><code># META (Facebook + Instagram)
+ACCESS_TOKEN=          FACEBOOK_PAGE_ID=          INSTAGRAM_ID=
+FB_API_VERSION=v19.0   FB_API_BASE=https://graph.facebook.com
+
+# YOUTUBE (Google credential set #1)
+YOUTUBE_REFRESH_TOKEN=  GOOGLE_CLIENT_ID=  GOOGLE_CLIENT_SECRET=
+GOOGLE_TOKEN_URL=https://oauth2.googleapis.com/token
+YOUTUBE_ANALYTICS_URL=https://youtubeanalytics.googleapis.com/v2/reports
+YOUTUBE_DATA_API_URL=https://www.googleapis.com/youtube/v3
+
+# GOOGLE SEARCH CONSOLE (Google credential set #2)
+GSC_REFRESH_TOKEN=  GSC_CLIENT_ID=  GSC_CLIENT_SECRET=  GSC_SITE_URL=
+GSC_API_BASE=https://www.googleapis.com/webmasters/v3
+
+# ZERNIO (LinkedIn + Pinterest)
+ZERNIO_API_KEY=  ZERNIO_BASE_URL=https://zernio.com/api
+
+# SHARED
+PORT=5000   ACCOUNT_CREATED=2020-01-01</code></pre>
+
+<h3>Getting Search Console credentials</h3>
+<div class="card">
+<ol style="margin-left:18px;font-size:13px">
+<li><a href="https://console.cloud.google.com">Google Cloud Console</a> → new project (or existing).</li>
+<li>Enable the <strong>Google Search Console API</strong>.</li>
+<li>Create an OAuth 2.0 Client ID (Web application); add <code>https://developers.google.com/oauthplayground</code> as a redirect URI.</li>
+<li><a href="https://developers.google.com/oauthplayground">OAuth Playground</a> → ⚙️ → use your own credentials.</li>
+<li>Scope: <code>https://www.googleapis.com/auth/webmasters.readonly</code> → Authorize → Exchange → copy the <strong>refresh token</strong>.</li>
+<li>Verify your property in <a href="https://search.google.com/search-console">Search Console</a>, then set <code>GSC_SITE_URL</code>. <code>/api/gsc</code> lists every verified site in <code>meta.verifiedSites</code>.</li>
+</ol>
+</div>
+
+<h2>Dashboard</h2>
+<p class="desc">Open <a href="./app/">/app</a> (requires <code>Pulse/dist</code> to be built). Built from React 18 + Vite 6 + Tailwind 3 + Recharts 2.</p>
+<table>
+<tr><th>Field</th><th>Used for</th></tr>
+<tr><td><code>data.overview</code></td><td>KPI cards — grouped by <code>group</code>, ordered by registry, zeros included</td></tr>
+<tr><td><code>data.timeseries</code></td><td>Main chart + daily drill-down table</td></tr>
+<tr><td><code>data.metrics[]</code></td><td>Meta/YouTube series (values + summary)</td></tr>
+<tr><td><code>data.topPosts</code> / <code>data.posts</code></td><td>Post and pin grids</td></tr>
+<tr><td><code>data.topItems[]</code></td><td>Ranked keyword/page/country/device lists</td></tr>
+<tr><td><code>data.summary</code></td><td>Overview KPI tiles and channel comparison table</td></tr>
+<tr><td><code>meta.account</code> / <code>meta.boards</code></td><td>Channel identity, Pinterest boards panel, audience gauges</td></tr>
+<tr><td><code>meta.diagnostics</code> / <code>notice</code></td><td>Notices and the diagnostics drawer</td></tr>
+</table>
+
+<h2>Troubleshooting</h2>
+<table>
+<tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+<tr><td>Facebook / Instagram → 400</td><td>Expired token, wrong page or IG id, missing <code>pages_read_engagement</code> / <code>instagram_manage_insights</code></td><td>New long-lived Page token → restart. <code>/api/health</code> returns the exact steps.</td></tr>
+<tr><td>Pinterest / LinkedIn metrics all zero</td><td><code>hasAnalyticsAccess:false</code>, posts outside the range, or 24–48h metric lag</td><td>Enable analytics on the Zernio plan; widen the range; check <code>notice</code> and <code>/api/zernio/debug</code>.</td></tr>
+<tr><td>YouTube shows "YouTube Channel", 0 subscribers</td><td>Refresh token lacks <code>youtube.readonly</code></td><td>Add the scope. Analytics keep working without it.</td></tr>
+<tr><td>GSC position <code>0.00</code></td><td>No impressions in the window</td><td>Expected — rendered muted with a note.</td></tr>
+</table>
+
+<h2>Project structure</h2>
+<pre><code>src/
+├── app.js            Express bootstrap · mounts routes · serves /app + /docs.html
+├── config/index.js   Every env var, all base URLs overridable
+├── routes/           facebook instagram youtube linkedin pinterest gsc combined health zernio
+├── services/         facebook instagram youtube gsc zernio token
+└── utils/            metrics.js (kinds) · transform.js · dateUtils.js · response.js
+scripts/
+├── mockZernio.js     Local Zernio stand-in with switchable failure modes
+├── selftest.js       npm test      — 33 assertions, no network
+└── make-fixtures.js  npm run fixtures — records real payloads for the UI tests
+Pulse/                Dashboard (React + Vite + Tailwind + Recharts)</code></pre>
+
+<p class="sub" style="margin-top:28px">See <a href="../context.md"><code>context.md</code></a> in the repo root for the full architecture, decisions and changelog.</p>
 </body>
 </html>

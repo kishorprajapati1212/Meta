@@ -1,60 +1,141 @@
-# Social Pulse — Cross-Platform Analytics Dashboard
+# Pulse — Social &amp; SEO Analytics Dashboard
 
-A React + Tailwind dashboard for the **Meta & YouTube Analytics API**. Unifies Facebook Page, Instagram Business, and YouTube Channel analytics into one live-updating command center.
+React 18 + Vite 6 + Tailwind 3 + Recharts 2. The frontend half of the
+`Meta Social & SEO Analytics` project; the API half lives in `../src`.
 
-## Stack
+Rebuilt from scratch for **v2.0.0**: a clean light SaaS design, every metric the
+API returns rendered with its correct number and aggregation, and graceful
+degradation when a channel is broken or when an older API version is deployed.
 
-- **React 18** + **Vite** — app shell and dev server
-- **Tailwind CSS** — styling, with a custom design token set (see `tailwind.config.js`)
-- **Recharts** — sparklines and trend charts
-- **lucide-react** — icons
-- **axios** — API calls
+---
 
-## Setup
+## Run it
 
 ```bash
 npm install
-cp .env.example .env
+npm run dev          # http://localhost:5173 — proxies /api to the deployed backend
+npm run dev:local    # proxies /api to http://localhost:5000 instead
+npm run build        # → dist/  (the API then serves it at /app)
+npm run preview      # serve the production build locally
+npm run smoke        # 43 SSR render assertions against recorded API payloads
 ```
 
-Edit `.env` if your backend URL is different from the default:
+Environment:
 
-```env
-VITE_API_BASE_URL=https://meta-ptze.onrender.com
+| Variable | Purpose |
+|---|---|
+| `VITE_API_BASE_URL` | Absolute API origin. Leave unset to use the dev proxy / same origin. |
+| `VITE_PROXY_TARGET` | Where `npm run dev` proxies `/api`. Defaults to the deployed Render URL. |
+
+There is also a **runtime** base-URL override on the Connections page (saved to
+`localStorage`) — handy for pointing one build at another backend without
+rebuilding.
+
+---
+
+## Pages
+
+| Page | What it shows |
+|---|---|
+| **Overview** | Six cross-channel KPI tiles with per-channel breakdown bars, channel comparison table, cross-channel trend with a metric switcher (Reach / Engagement / Views / Clicks / Audience), engagement donut, Search Console panel with top queries, recent content feed, and a "Needs attention" list of every failing or zero-data channel. |
+| **Facebook · Instagram · YouTube · LinkedIn · Pinterest** | Channel header (identity, source, range, last sync, account stats) → notices → grouped KPI grid (click any card to chart that series) → main + secondary chart → daily drill-down table with range totals and CSV export → **All metrics** table → platform extras (post/pin grid, Pinterest boards, follower history) → collapsible API diagnostics. |
+| **Search Console** | Clicks / impressions / CTR / position with compare-window deltas, clicks-vs-impressions combo chart, device donut, dimension switcher (Timeline · Keywords · Pages · Countries · Devices) with ranked bars and an exportable table, "Quick wins" (high impressions, below-average CTR), verified properties. |
+| **Connections** | Per-channel credential state with the exact upstream message and the fix, Zernio + YouTube diagnostic runners, API base override and test, backend runtime facts, sample-data switch. |
+
+---
+
+## Design system
+
+Light SaaS: canvas `#F5F7FA`, white cards, hairline borders `#E7EAF0`,
+`rounded-card: 14px`, soft `shadow-card` / hover `shadow-lift`. Ink `#0C1526`,
+body `#3E4A5E`, muted `#6B7A90`. Brand `#2F6BFF`, positive `#12924F`,
+negative `#DC4849`, warning `#C8871B`. Brand-accurate platform colours.
+Plus Jakarta Sans for headings, Inter for text, IBM Plex Mono for eyebrow labels,
+tabular numerals everywhere.
+
+Tokens: `tailwind.config.js`. Component classes (`.card`, `.btn`, `.th`,
+`.eyebrow`, `.skeleton`): `src/index.css`.
+
+---
+
+## Source map
+
+```
+src/
+├── App.jsx                 Shell: sidebar + topbar + page switch
+├── hooks/
+│   ├── useAnalytics.js     /api/combined + /api/health, refresh, sample mode, errors
+│   └── usePlatformDetail.js Per-platform drill-down fetch + range state
+├── lib/
+│   ├── normalize.js        ★ payload → view model. If a metric is missing on
+│   │                         screen, the bug is here.
+│   ├── format.js           formatValue(value,{kind,unit}), minutes, seconds,
+│   │                         percent, trendTone, compact, decimal
+│   ├── platforms.js        Registry: labels, colours, METRIC_ORDER, ID_TO_KEY,
+│   │                         SERIES_KEY, KEY_LABELS
+│   ├── api.js              Base-URL resolution, all fetchers, describeError
+│   ├── sample.js           Complete payload generator in the exact v4.1 shape
+│   ├── csv.js              Table → CSV download
+│   ├── prefs.js            localStorage helpers (base URL, range, density)
+│   └── cls.js              Tiny classnames helper
+└── components/
+    ├── layout/     Sidebar · Topbar · DateRangePicker
+    ├── panels/     OverviewPage · PlatformPage · GscPage · ConnectionsPage
+    ├── ui/         Card · Pill · States · Segmented · DataTable · BrandIcon
+    ├── charts/     AreaTrend · MultiLine · ColumnChart · Sparkline · Donut ·
+    │               BarList · ChartTooltip
+    ├── metrics/    KpiCard · MetricTable
+    └── platform/   PageHeader · PostGrid · BoardList
 ```
 
-Then run:
+### `normalize.js` guarantees
 
-```bash
-npm run dev
-```
+1. **Union, never filter.** `metricsOf()` merges `overview` ∪ `metrics[]` ∪
+   `totals` ∪ `meta.account` gauges. A metric with value `0` is kept.
+2. **Ordering.** Registry `METRIC_ORDER` first, then remaining keys
+   alphabetically; grouped by the `group` the API supplies (inferred when an
+   older API omits it).
+3. **Kind-aware formatting.** `gauge` → last value, `rate` → mean + %,
+   `duration` → h/min/s, everything else compact integers.
+4. **Version tolerance.** `inferKind()` / `KEY_LABELS` label untyped v4.0
+   overview entries; `healthDetailsOf()` derives rich health detail from the
+   legacy flat string map.
+5. **Never a blank page.** Error payloads render an actionable card with the
+   upstream message, the hint, and a Retry button.
 
-Open the printed local URL (usually `http://localhost:5173`).
+---
 
-## Build for production
+## Sample data mode
 
-```bash
-npm run build
-```
+The flask icon in the topbar renders the entire dashboard from `lib/sample.js` —
+generated data in the exact API v4.1 shape (dense timelines, all metric kinds,
+one deliberately failing channel). It exists so the design can be reviewed while
+live credentials are broken. Always labelled "Sample data" in the topbar,
+sidebar and Connections page. Off by default, writes nothing anywhere.
 
-Output goes to `dist/`. Deploy `dist/` to any static host (Vercel, Netlify, Render static site, Cloudflare Pages, GitHub Pages, etc). Remember to set `VITE_API_BASE_URL` as an environment variable on whatever host you deploy to — Vite bakes `VITE_*` vars in at build time.
+---
 
-## What it does
+## Tests
 
-- **Signal strip** (top bar) — live health dot for each platform, pulled from `GET /api/health`, plus a manual refresh.
-- **Pulse Ring** — a single radial dial fusing the three platforms' headline trend into one glance.
-- **Platform cards** — Facebook / Instagram / YouTube summary with primary metric + trend + sparkline. Click a card (or a tab) to drill in.
-- **Overview tab** — side-by-side trend charts for all three platforms.
-- **Platform tabs** — full metrics grid, a large trend chart for whichever metric you select, and a sortable drill-down table of raw daily values. YouTube also shows a channel header (avatar, subscriber count, lifetime stats).
-- **Date range control** — 7D / 14D / 30D / 90D presets or a custom `since`/`until` range, wired straight to the API's own query params.
-- Handles partial failures gracefully — if one platform's token is bad or a metric group fails, that platform shows an inline error instead of breaking the page.
+`npm run smoke` server-renders the real panels against payloads recorded from the
+actual API (`scripts/fixtures/`) and asserts on the HTML:
 
-## Notes on the API contract
+- Pinterest renders **every** metric label and value (Impressions, Pin clicks,
+  Outbound clicks, Saves, Total pins `342`, Boards `3`, Monthly views `96.4K`,
+  Followers `1,284`, Engagement rate) and all three pin bodies — this is the
+  regression test for the "shows only Posts" bug.
+- Rich-mode numbers format correctly (`23700` → `23.7K`).
+- Degraded modes (`/v1/accounts` 500, boards 404, no analytics access) render the
+  right message instead of crashing.
+- Backwards compatibility with the **deployed v4.0** backend: empty overview,
+  `meta.account: null`, a combined payload with no `summary`, and a health
+  payload with strings only.
 
-This UI was built directly against the actual backend code (not just the README), so field names match exactly:
+Regenerate the fixtures from a live backend with `npm run fixtures` in the repo
+root, then re-run this suite.
 
-- `GET /api/combined` → `data.{facebook,instagram,youtube}`, each shaped like `{ platform, meta, overview, timeseries, metrics, notice?, partialErrors? }` (no extra `data` wrapper inside — that's only on the single-platform endpoints).
-- `overview` keys are one of: `followers`, `pageViews`, `contentViews`, `uniqueViewers`, `engagement`, `newFollows`, `reach`, `profileVisits`, `interactions`, `views`, `watchTime`, `subsGained`, `likes`, `comments`, `shares`, plus `channel` (YouTube only).
-- Failed platforms come back as `{ success: false, error: { code, message, details } }` inside the combined response — the UI checks for this and renders an inline error card instead of crashing.
+---
 
-If the backend's response shape changes, the places to update are `src/utils/format.js` (the `primaryTrend`/`primaryMetricLabel` field-priority lists) and the `idGuess` maps in `PlatformCard.jsx` / `OverviewTrends.jsx`.
+## Version
+
+**2.0.0** — see `../context.md` for the changelog and API contract.

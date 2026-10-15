@@ -3,6 +3,16 @@
   "version": "4.0.0",
   "description": "Facebook + Instagram + YouTube + LinkedIn + Pinterest + Google Search Console analytics API",
   "main": "src/app.js",
-  "scripts": { "start": "node src/app.js", "dev": "node --watch src/app.js" },
-  "dependencies": { "axios": "^1.7.0", "cors": "^2.8.5", "dotenv": "^16.4.0", "express": "^4.19.0" }
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "node scripts/selftest.js",
+    "fixtures": "node scripts/make-fixtures.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0"
+  }
 }

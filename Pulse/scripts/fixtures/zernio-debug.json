@@ -1,0 +1,367 @@
+{
+  "success": true,
+  "platform": "zernio/debug",
+  "meta": {
+    "baseUrl": "http://127.0.0.1:4988/api"
+  },
+  "data": {
+    "configured": true,
+    "baseUrl": "http://127.0.0.1:4988/api",
+    "steps": {
+      "accounts": {
+        "ok": true,
+        "error": null,
+        "count": 2,
+        "platforms": [
+          "pinterest:kishor.pins",
+          "linkedin:kishor-prajapati"
+        ],
+        "hasAnalyticsAccess": true,
+        "sample": {
+          "_id": "acct_pin_1",
+          "platform": "pinterest",
+          "username": "kishor.pins",
+          "displayName": "Kishor Pins",
+          "profilePicture": "https://example.com/pin-avatar.jpg",
+          "currentFollowers": 1284,
+          "externalPostCount": 7,
+          "analyticsLastSyncedAt": "2026-10-15T13:35:14.421Z",
+          "isActive": true,
+          "accountStats": {
+            "pinCount": 342,
+            "boardCount": 18,
+            "monthlyViews": 96400
+          }
+        }
+      },
+      "linkedin": {
+        "ok": true,
+        "accountId": "acct_li_1",
+        "posts": 1,
+        "firstPost": {
+          "postId": "li_post_1",
+          "platform": "linkedin",
+          "content": "Shipped a cross-platform analytics dashboard this week — 6 APIs, one view.",
+          "publishedAt": "2026-10-03T13:35:16.651Z",
+          "platformPostUrl": "https://linkedin.com/feed/update/urn:li:share:1",
+          "mediaType": "text",
+          "status": "published",
+          "isExternal": false,
+          "syncStatus": "synced",
+          "analytics": {
+            "impressions": 0,
+            "reach": 0,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "clicks": 0
+          }
+        },
+        "warnings": []
+      },
+      "linkedin_followers": {
+        "ok": true,
+        "rows": [
+          {
+            "date": "2026-09-16",
+            "followers": 425
+          },
+          {
+            "date": "2026-09-17",
+            "followers": 428
+          },
+          {
+            "date": "2026-09-18",
+            "followers": 431
+          },
+          {
+            "date": "2026-09-19",
+            "followers": 434
+          },
+          {
+            "date": "2026-09-20",
+            "followers": 437
+          },
+          {
+            "date": "2026-09-21",
+            "followers": 440
+          },
+          {
+            "date": "2026-09-22",
+            "followers": 443
+          },
+          {
+            "date": "2026-09-23",
+            "followers": 446
+          },
+          {
+            "date": "2026-09-24",
+            "followers": 449
+          },
+          {
+            "date": "2026-09-25",
+            "followers": 452
+          },
+          {
+            "date": "2026-09-26",
+            "followers": 455
+          },
+          {
+            "date": "2026-09-27",
+            "followers": 458
+          },
+          {
+            "date": "2026-09-28",
+            "followers": 461
+          },
+          {
+            "date": "2026-09-29",
+            "followers": 464
+          },
+          {
+            "date": "2026-09-30",
+            "followers": 467
+          },
+          {
+            "date": "2026-10-01",
+            "followers": 470
+          },
+          {
+            "date": "2026-10-02",
+            "followers": 473
+          },
+          {
+            "date": "2026-10-03",
+            "followers": 476
+          },
+          {
+            "date": "2026-10-04",
+            "followers": 479
+          },
+          {
+            "date": "2026-10-05",
+            "followers": 482
+          },
+          {
+            "date": "2026-10-06",
+            "followers": 485
+          },
+          {
+            "date": "2026-10-07",
+            "followers": 488
+          },
+          {
+            "date": "2026-10-08",
+            "followers": 491
+          },
+          {
+            "date": "2026-10-09",
+            "followers": 494
+          },
+          {
+            "date": "2026-10-10",
+            "followers": 497
+          },
+          {
+            "date": "2026-10-11",
+            "followers": 500
+          },
+          {
+            "date": "2026-10-12",
+            "followers": 503
+          },
+          {
+            "date": "2026-10-13",
+            "followers": 506
+          },
+          {
+            "date": "2026-10-14",
+            "followers": 509
+          },
+          {
+            "date": "2026-10-15",
+            "followers": 512
+          }
+        ]
+      },
+      "pinterest": {
+        "ok": true,
+        "accountId": "acct_pin_1",
+        "posts": 3,
+        "firstPost": {
+          "postId": "pin_1",
+          "platform": "pinterest",
+          "content": "Pin 1 — design inspiration board",
+          "title": "Pin 1",
+          "publishedAt": "2026-10-15T13:35:16.905Z",
+          "platformPostUrl": "https://pinterest.com/pin/1000",
+          "thumbnailUrl": "https://example.com/pin-1.jpg",
+          "mediaType": "image",
+          "status": "published",
+          "isExternal": false,
+          "syncStatus": "synced",
+          "boardName": "UI Design",
+          "analytics": {
+            "impressions": 0,
+            "clicks": 0,
+            "saves": 0,
+            "views": 0
+          }
+        },
+        "warnings": []
+      },
+      "boards": {
+        "ok": true,
+        "boards": [
+          {
+            "id": "b1",
+            "name": "UI Design",
+            "pinCount": 84,
+            "privacy": "PUBLIC",
+            "url": null
+          },
+          {
+            "id": "b2",
+            "name": "Dev Setup",
+            "pinCount": 51,
+            "privacy": "PUBLIC",
+            "url": null
+          },
+          {
+            "id": "b3",
+            "name": "Inspiration",
+            "pinCount": 207,
+            "privacy": "PUBLIC",
+            "url": null
+          }
+        ]
+      },
+      "pinterest_followers": {
+        "ok": true,
+        "rows": [
+          {
+            "date": "2026-09-16",
+            "followers": 1197
+          },
+          {
+            "date": "2026-09-17",
+            "followers": 1200
+          },
+          {
+            "date": "2026-09-18",
+            "followers": 1203
+          },
+          {
+            "date": "2026-09-19",
+            "followers": 1206
+          },
+          {
+            "date": "2026-09-20",
+            "followers": 1209
+          },
+          {
+            "date": "2026-09-21",
+            "followers": 1212
+          },
+          {
+            "date": "2026-09-22",
+            "followers": 1215
+          },
+          {
+            "date": "2026-09-23",
+            "followers": 1218
+          },
+          {
+            "date": "2026-09-24",
+            "followers": 1221
+          },
+          {
+            "date": "2026-09-25",
+            "followers": 1224
+          },
+          {
+            "date": "2026-09-26",
+            "followers": 1227
+          },
+          {
+            "date": "2026-09-27",
+            "followers": 1230
+          },
+          {
+            "date": "2026-09-28",
+            "followers": 1233
+          },
+          {
+            "date": "2026-09-29",
+            "followers": 1236
+          },
+          {
+            "date": "2026-09-30",
+            "followers": 1239
+          },
+          {
+            "date": "2026-10-01",
+            "followers": 1242
+          },
+          {
+            "date": "2026-10-02",
+            "followers": 1245
+          },
+          {
+            "date": "2026-10-03",
+            "followers": 1248
+          },
+          {
+            "date": "2026-10-04",
+            "followers": 1251
+          },
+          {
+            "date": "2026-10-05",
+            "followers": 1254
+          },
+          {
+            "date": "2026-10-06",
+            "followers": 1257
+          },
+          {
+            "date": "2026-10-07",
+            "followers": 1260
+          },
+          {
+            "date": "2026-10-08",
+            "followers": 1263
+          },
+          {
+            "date": "2026-10-09",
+            "followers": 1266
+          },
+          {
+            "date": "2026-10-10",
+            "followers": 1269
+          },
+          {
+            "date": "2026-10-11",
+            "followers": 1272
+          },
+          {
+            "date": "2026-10-12",
+            "followers": 1275
+          },
+          {
+            "date": "2026-10-13",
+            "followers": 1278
+          },
+          {
+            "date": "2026-10-14",
+            "followers": 1281
+          },
+          {
+            "date": "2026-10-15",
+            "followers": 1284
+          }
+        ]
+      }
+    },
+    "summary": "ALL OK"
+  }
+}

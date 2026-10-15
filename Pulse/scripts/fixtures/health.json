@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "platform": "system",
+  "meta": {
+    "uptime": 1,
+    "checkedInMs": 3,
+    "version": "4.1.0"
+  },
+  "data": {
+    "healthy": true,
+    "platforms": {
+      "facebook": "ACCESS_TOKEN + FACEBOOK_PAGE_ID not set",
+      "instagram": "ACCESS_TOKEN + INSTAGRAM_ID not set",
+      "youtube": "YOUTUBE_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET not set",
+      "searchConsole": "GSC_REFRESH_TOKEN + GSC_CLIENT_ID + GSC_CLIENT_SECRET + GSC_SITE_URL not set",
+      "linkedin": "ok",
+      "pinterest": "ok"
+    },
+    "details": {
+      "facebook": {
+        "platform": "facebook",
+        "source": "graph",
+        "configured": false,
+        "status": "not_configured",
+        "message": "ACCESS_TOKEN + FACEBOOK_PAGE_ID not set",
+        "hint": "Add ACCESS_TOKEN + FACEBOOK_PAGE_ID to .env and restart the API."
+      },
+      "instagram": {
+        "platform": "instagram",
+        "source": "graph",
+        "configured": false,
+        "status": "not_configured",
+        "message": "ACCESS_TOKEN + INSTAGRAM_ID not set",
+        "hint": "Add ACCESS_TOKEN + INSTAGRAM_ID to .env and restart the API."
+      },
+      "youtube": {
+        "platform": "youtube",
+        "source": "google-oauth",
+        "configured": false,
+        "status": "not_configured",
+        "message": "YOUTUBE_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET not set",
+        "hint": "Add YOUTUBE_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET to .env and restart the API."
+      },
+      "searchConsole": {
+        "platform": "searchConsole",
+        "source": "google-oauth",
+        "configured": false,
+        "status": "not_configured",
+        "message": "GSC_REFRESH_TOKEN + GSC_CLIENT_ID + GSC_CLIENT_SECRET + GSC_SITE_URL not set",
+        "hint": "Add GSC_REFRESH_TOKEN + GSC_CLIENT_ID + GSC_CLIENT_SECRET + GSC_SITE_URL to .env and restart the API."
+      },
+      "linkedin": {
+        "platform": "linkedin",
+        "source": "zernio",
+        "configured": true,
+        "checkedAt": "2026-10-15T13:35:15.332Z",
+        "status": "ok",
+        "message": "@kishor-prajapati",
+        "accountId": "acct_li_1",
+        "followers": 512,
+        "hasAnalyticsAccess": true,
+        "hint": null
+      },
+      "pinterest": {
+        "platform": "pinterest",
+        "source": "zernio",
+        "configured": true,
+        "checkedAt": "2026-10-15T13:35:15.333Z",
+        "status": "ok",
+        "message": "@kishor.pins",
+        "accountId": "acct_pin_1",
+        "followers": 1284,
+        "hasAnalyticsAccess": true,
+        "hint": null
+      }
+    },
+    "configured": 2,
+    "ok": 2,
+    "total": 6,
+    "serverTime": "2026-10-15T13:35:15.333Z"
+  }
+}
