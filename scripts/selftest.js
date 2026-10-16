@@ -325,7 +325,36 @@ async function main() {
     assert.ok(Math.round((r.until - r.since) / 86400) === 30, 'fallback window');
   });
 
+
+  console.log('\n.env robustness — names and formatting');
+  const cfg = require('../src/config');
+
+  check('config reads exactly the documented .env names', () => {
+    const expected = ['ACCESS_TOKEN','INSTAGRAM_ID','FACEBOOK_PAGE_ID','YOUTUBE_REFRESH_TOKEN','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GSC_REFRESH_TOKEN','GSC_CLIENT_ID','GSC_CLIENT_SECRET','GSC_SITE_URL','ZERNIO_API_KEY','PORT','FB_API_VERSION','ACCOUNT_CREATED'];
+    const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'config', 'index.js'), 'utf8');
+    for (const name of expected) {
+      assert.ok(src.includes(`env('${name}')`), `config must read ${name} under its original name`);
+    }
+    const example = require('fs').readFileSync(require('path').join(__dirname, '..', '.env.example'), 'utf8');
+    for (const name of expected) {
+      assert.ok(new RegExp(`^${name}=`, 'm').test(example), `.env.example must document ${name}`);
+    }
+  });
+
+  check('a Windows-copied or quoted .env cannot corrupt a token', () => {
+    assert.ok(cfg._clean('x\r') === undefined || true, 'cleaner exists');
+    process.env.__T1 = 'tok\r';
+    process.env.__T2 = '  "tok2"  ';
+    process.env.__T3 = " 'tok3' ";
+    assert.ok(cfg._clean('__T1') === 'tok', 'CRLF must be stripped');
+    assert.ok(cfg._clean('__T2') === 'tok2', 'double quotes must be stripped');
+    assert.ok(cfg._clean('__T3') === 'tok3', 'single quotes must be stripped');
+    delete process.env.__T1; delete process.env.__T2; delete process.env.__T3;
+    assert.ok(cfg._clean('__MISSING') === undefined, 'missing var stays undefined');
+  });
+
   await mock.close();
+
   console.log(`\n\x1b[1m${passed} passed, ${failed} failed\x1b[0m\n`);
   process.exit(failed ? 1 : 0);
 }

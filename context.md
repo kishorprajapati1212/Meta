@@ -5,7 +5,7 @@
 > decisions were made and why, and what is known to be broken. `memory.md` is a
 > short summary; this file is the detail.
 >
-> **Last updated:** 2026-10-16 · **API version:** 4.2.0 · **Dashboard version:** 2.1.0
+> **Last updated:** 2026-10-16 · **API version:** 4.2.1 · **Dashboard version:** 2.1.0
 
 ---
 
@@ -41,7 +41,7 @@ Google #2 for GSC) plus Zernio. They are deliberately not shared.
 /                         API root
 ├── src/
 │   ├── app.js            Express bootstrap, route mounting, serves /app + /docs.html
-│   ├── config/index.js   Every env var in one place (all base URLs overridable)
+│   ├── config/index.js   The exact .env set (14 names), cleaned on read
 │   ├── routes/           facebook, instagram, youtube, linkedin, pinterest, gsc,
 │   │                     combined, health, zernio (debug)
 │   ├── services/         facebookService, instagramService, youtubeService,
@@ -339,6 +339,19 @@ Deploy: push the repo; Render runs `npm start`. Add
 ---
 
 ## 9. Changelog
+
+### 2026-10-16 — API v4.2.1 (env hardening, docs-only otherwise)
+- **`.env.example` restored byte-for-byte to the project's original 14 variable
+  names.** No variable was renamed, added to the example, or made required. A
+  self-test now fails the build if `config` ever stops reading those exact names
+  or if `.env.example` stops documenting them.
+- **`src/config/index.js` cleans every value on read**: CRLF line endings,
+  one layer of wrapping quotes and stray whitespace are stripped, and empty
+  strings become `undefined`. A `.env` copied from Windows or pasted with quotes
+  used to corrupt tokens and surface as `Request failed with status code 400`.
+- The internal `*_BASE_URL` / `*_TOKEN_URL` test hooks (used only by
+  `scripts/selftest.js`) are documented as internal and always default to the
+  real production endpoints; README/docs no longer list them as user config.
 
 ### 2026-10-16 — API v4.2.0 + Pulse 2.1.0
 - **Fixed** "platform pages show metrics but Overview shows 0 0": the Overview

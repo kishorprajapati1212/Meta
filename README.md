@@ -50,9 +50,12 @@ npm start                 # → http://localhost:5000/app
 | `ZERNIO_API_KEY` | LinkedIn + Pinterest | from [zernio.com](https://zernio.com) |
 | `ACCOUNT_CREATED` | — | default `2020-01-01`; start date for lifetime queries |
 
-Every upstream base URL is overridable for testing:
-`GRAPH_BASE_URL`, `YOUTUBE_ANALYTICS_BASE_URL`, `YOUTUBE_BASE_URL`,
-`GSC_BASE_URL`, `GOOGLE_OAUTH_BASE_URL`, `ZERNIO_BASE_URL`.
+That is the complete set — **no other variable is read or required**. A few
+internal `*_BASE_URL` defaults exist in `src/config/index.js` solely so the
+offline test-suite can point services at a local mock; they always fall back to
+the real production endpoints, so never add them to your `.env`.
+Values are cleaned on read (CRLF, surrounding quotes, stray spaces), so a
+`.env` copied from Windows or pasted with quotes cannot corrupt a token.
 
 ---
 

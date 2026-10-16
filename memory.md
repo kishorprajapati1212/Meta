@@ -1,6 +1,6 @@
 # Project Memory — Meta Social & SEO Analytics
 
-> **v4.2.0 API · v2.1.0 dashboard · last updated 2026-10-16**
+> **v4.2.1 API · v2.1.0 dashboard · last updated 2026-10-16**
 > The detailed, living context document is **[`context.md`](./context.md)** —
 > architecture, full response contract, every decision and why, known
 > limitations, changelog. This file is the quick-recall summary. **Update both
@@ -89,6 +89,11 @@ overview entries are normalised).
 - YouTube → analytics work; channel identity is a fallback because the token lacks `youtube.readonly`.
 - GSC → healthy (`https://kishor-prajapti.netlify.app/`, second verified site `https://attendex12345.netlify.app/`).
 - The deployed backend is still v4.0 until redeployed; the new dashboard is backwards compatible with it.
+
+## v4.2.1 — env contract locked (2026-10-16)
+- `.env.example` is byte-for-byte the original 14 names; nothing renamed or added.
+- `config/index.js` cleans values on read (CRLF / quotes / spaces) so a copied
+  `.env` cannot corrupt a token; a self-test enforces both rules.
 
 ## Standing rules
 1. Update `context.md` (and this file) with every change.

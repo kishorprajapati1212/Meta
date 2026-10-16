@@ -16,7 +16,7 @@ app.set('json spaces', 2);
 app.use(cors({ origin: '*', methods: ['GET', 'OPTIONS'] }));
 app.use(express.json());
 
-const VERSION = '4.1.0';
+const VERSION = config.VERSION;
 
 app.get('/api', (_req, res) => {
   res.json({

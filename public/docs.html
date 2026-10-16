@@ -197,25 +197,31 @@ docker compose -f docker-compose.yml \
 <p class="desc">Multi-stage image: builds the dashboard, then serves the API and <code>/app</code> from one container as an unprivileged user with a healthcheck.</p>
 
 <h2>Environment variables</h2>
-<pre><code># META (Facebook + Instagram)
-ACCESS_TOKEN=          FACEBOOK_PAGE_ID=          INSTAGRAM_ID=
-FB_API_VERSION=v19.0   FB_API_BASE=https://graph.facebook.com
+<p class="desc">This is the complete set, exactly as shipped in <code>.env.example</code>. Nothing else is required.</p>
+<pre><code># === META (Facebook + Instagram) ===
+ACCESS_TOKEN=your_facebook_user_access_token
+INSTAGRAM_ID=your_instagram_business_account_id
+FACEBOOK_PAGE_ID=your_facebook_page_id
 
-# YOUTUBE (Google credential set #1)
-YOUTUBE_REFRESH_TOKEN=  GOOGLE_CLIENT_ID=  GOOGLE_CLIENT_SECRET=
-GOOGLE_TOKEN_URL=https://oauth2.googleapis.com/token
-YOUTUBE_ANALYTICS_URL=https://youtubeanalytics.googleapis.com/v2/reports
-YOUTUBE_DATA_API_URL=https://www.googleapis.com/youtube/v3
+# === YOUTUBE (separate Google credentials) ===
+YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token
+GOOGLE_CLIENT_ID=your_youtube_google_client_id
+GOOGLE_CLIENT_SECRET=your_youtube_google_client_secret
 
-# GOOGLE SEARCH CONSOLE (Google credential set #2)
-GSC_REFRESH_TOKEN=  GSC_CLIENT_ID=  GSC_CLIENT_SECRET=  GSC_SITE_URL=
-GSC_API_BASE=https://www.googleapis.com/webmasters/v3
+# === GOOGLE SEARCH CONSOLE (separate Google credentials) ===
+GSC_REFRESH_TOKEN=your_gsc_refresh_token
+GSC_CLIENT_ID=your_gsc_google_client_id
+GSC_CLIENT_SECRET=your_gsc_google_client_secret
+GSC_SITE_URL=https://www.your-website.com/
 
-# ZERNIO (LinkedIn + Pinterest)
-ZERNIO_API_KEY=  ZERNIO_BASE_URL=https://zernio.com/api
+# === ZERNIO (LinkedIn + Pinterest unified API) ===
+ZERNIO_API_KEY=sk_your_zernio_api_key
 
-# SHARED
-PORT=5000   ACCOUNT_CREATED=2020-01-01</code></pre>
+# === OPTIONAL ===
+PORT=5000
+FB_API_VERSION=v19.0
+ACCOUNT_CREATED=2026-07-05</code></pre>
+<div class="note">Values are cleaned on read — CRLF line endings, surrounding quotes and stray spaces are stripped — so a <code>.env</code> copied from Windows or pasted with quotes cannot break authentication.</div>
 
 <h3>Getting Search Console credentials</h3>
 <div class="card">
@@ -255,7 +261,7 @@ PORT=5000   ACCOUNT_CREATED=2020-01-01</code></pre>
 <h2>Project structure</h2>
 <pre><code>src/
 ├── app.js            Express bootstrap · mounts routes · serves /app + /docs.html
-├── config/index.js   Every env var, all base URLs overridable
+├── config/index.js   The exact .env set, cleaned on read
 ├── routes/           facebook instagram youtube linkedin pinterest gsc combined health zernio
 ├── services/         facebook instagram youtube gsc zernio token
 └── utils/            metrics.js (kinds) · transform.js · dateUtils.js · response.js
