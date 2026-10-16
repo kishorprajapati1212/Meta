@@ -218,7 +218,7 @@ r.get('/', async (_req, res) => {
       meta: {
         uptime: Math.round(process.uptime()),
         checkedInMs: Date.now() - started,
-        version: '4.1.0',
+        version: config.VERSION,
       },
       data: {
         healthy,

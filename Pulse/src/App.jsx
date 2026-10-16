@@ -7,6 +7,8 @@ import PlatformPage from './components/panels/PlatformPage'
 import GscPage from './components/panels/GscPage'
 import ConnectionsPage from './components/panels/ConnectionsPage'
 import AudiencePage from './components/panels/AudiencePage'
+import ErrorBoundary from './components/ui/ErrorBoundary'
+import { NoticeBar } from './components/ui/States'
 import { Card } from './components/ui/Card'
 import { ErrorState } from './components/ui/States'
 import { useAnalytics } from './hooks/useAnalytics'
@@ -30,7 +32,7 @@ export default function App() {
   const [mobileNav, setMobileNav] = useState(false)
 
   const {
-    platformData, summary, health, healthDetails, loading, refreshing, error, healthError, lastUpdated, isSample, refetch,
+    platformData, summary, health, healthDetails, loading, refreshing, retrying, stale, error, healthError, lastUpdated, isSample, refetch,
   } = useAnalytics(range, { sample: sampleMode })
 
   useEffect(() => writePref(PREF_KEYS.view, view), [view])
@@ -114,6 +116,21 @@ export default function App() {
         />
 
         <main className="flex-1 px-4 sm:px-6 py-5 pb-16 max-w-[1560px] w-full mx-auto">
+          <div className="flex flex-col gap-3 mb-3 empty:mb-0">
+            {retrying && !error ? (
+              <NoticeBar tone="info">The API is slow to answer (cold starts can take a few seconds) — retrying automatically…</NoticeBar>
+            ) : null}
+            {error && platformData ? (
+              <NoticeBar tone="warn">
+                <b>Showing the last data that loaded.</b> This refresh could not reach the API: {error} Nothing is lost — the next
+                successful refresh replaces it.
+              </NoticeBar>
+            ) : null}
+            {stale && healthError ? (
+              <NoticeBar tone="warn">Connection status is unavailable right now: {healthError}</NoticeBar>
+            ) : null}
+          </div>
+          <ErrorBoundary onRetry={onRefresh}>
           {error && !platformData ? (
             <Card>
               <ErrorState
@@ -187,6 +204,7 @@ export default function App() {
               onRetry={onRefresh}
             />
           )}
+          </ErrorBoundary>
         </main>
 
         <footer className="border-t border-line px-4 sm:px-6 py-4">

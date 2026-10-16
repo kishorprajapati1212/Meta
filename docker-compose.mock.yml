@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: meta-analytics:4.2.1
+    image: meta-analytics:4.2.2
     container_name: meta-mock-zernio
     command: ['node', 'scripts/mockServer.js']
     environment:

@@ -1,7 +1,7 @@
 {
   "name": "pulse-analytics-dashboard",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.1.2",
   "type": "module",
   "description": "Cross-platform social & SEO analytics dashboard for the Meta Analytics API (Facebook, Instagram, YouTube, LinkedIn, Pinterest, Google Search Console)",
   "scripts": {

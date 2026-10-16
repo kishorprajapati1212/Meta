@@ -33,12 +33,14 @@ export function errorText(p) {
 
 /** ok | empty | error | unconfigured */
 export function platformState(platformKey, p, healthDetail) {
-  if (isErrorPayload(p)) {
-    const detail = healthDetail || {}
+  const detail = healthDetail || {}
+  // A missing/null platform block (older or partially-failed /api/combined,
+  // a cold start, a dropped key) is an error state, never a crash.
+  if (!p || isErrorPayload(p)) {
     return {
       state: detail.configured === false ? 'unconfigured' : 'error',
-      message: errorText(p),
-      hint: p.hint || detail.hint || null,
+      message: p ? errorText(p) : detail.message || 'This channel returned no payload for this range.',
+      hint: p?.hint || detail.hint || null,
     }
   }
   const metrics = metricsOf(platformKey, p)
@@ -457,6 +459,26 @@ export function healthDetailsOf(health) {
     }
   }
   return out
+}
+
+
+/**
+ * healthCountsOf — the Connections headline numbers. Modern payloads carry
+ * ok/total/configured; the pre-rebuild API only sent data.healthy plus
+ * data.platforms strings, so derive the counts from the details when the
+ * server did not supply them (otherwise the UI printed "undefined/undefined").
+ */
+export function healthCountsOf(health) {
+  const data = health?.data
+  const details = healthDetailsOf(health)
+  const keys = Object.keys(details)
+  const total = Number.isFinite(data?.total) ? data.total : keys.length || PLATFORM_ORDER.length
+  const ok = Number.isFinite(data?.ok) ? data.ok : keys.filter((k) => details[k]?.status === 'ok').length
+  const configured = Number.isFinite(data?.configured)
+    ? data.configured
+    : keys.filter((k) => details[k]?.configured !== false).length
+  const healthy = typeof data?.healthy === 'boolean' ? data.healthy : ok === total && total > 0
+  return { ok, total, configured, healthy }
 }
 
 // ────────────────────────────────────────────────────────────────────────────

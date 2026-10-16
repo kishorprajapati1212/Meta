@@ -1,5 +1,5 @@
 /**
- * Meta Social & SEO Analytics API — v4.1.0
+ * Meta Social & SEO Analytics API — v4.2.2
  *
  * Serves the JSON API for 6 platforms and (if it has been built) the Pulse
  * dashboard from the same origin, so the frontend can call `/api/...` with no

@@ -154,4 +154,4 @@ root, then re-run this suite.
 
 ## Version
 
-**2.1.0** — see `../context.md` for the changelog and API contract.
+**2.1.2** — see `../context.md` for the changelog and API contract.

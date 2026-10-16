@@ -67,7 +67,7 @@ module.exports = {
 
   // ── OPTIONAL ───────────────────────────────────────────────────
   ACCOUNT_CREATED: env('ACCOUNT_CREATED') || '2026-07-05',
-  VERSION: '4.2.1',
+  VERSION: '4.2.2',
 
   // Exposed only so the self-test can prove .env formatting cannot break auth.
   _clean: env,

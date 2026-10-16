@@ -1,6 +1,6 @@
 # Project Memory — Meta Social & SEO Analytics
 
-> **v4.2.1 API · v2.1.0 dashboard · last updated 2026-10-16**
+> **v4.2.2 API · v2.1.2 dashboard · last updated 2026-10-16**
 > The detailed, living context document is **[`context.md`](./context.md)** —
 > architecture, full response contract, every decision and why, known
 > limitations, changelog. This file is the quick-recall summary. **Update both
@@ -94,6 +94,21 @@ overview entries are normalised).
 - `.env.example` is byte-for-byte the original 14 names; nothing renamed or added.
 - `config/index.js` cleans values on read (CRLF / quotes / spaces) so a copied
   `.env` cannot corrupt a token; a self-test enforces both rules.
+
+## v4.2.2 — crash-proofing (2026-10-16)
+- Never dereference a platform payload before a null-check (`platformState`).
+- `healthDetails` must always be an object; index it via `(x || {})[key]`.
+- Filter `partialErrors` to real objects before mapping.
+- `ErrorBoundary` wraps the page switch; `useAnalytics` retries with backoff and
+  keeps last-good data (stale banner) instead of blanking.
+- Smoke suite includes a hostile-payload matrix; keep it green.
+- Project IDX config lives in `.idx/dev.nix`; `npm run dev:all` runs API + UI.
+- Dev `/api` proxy: local API → `VITE_FALLBACK_API` → JSON 503 with a hint
+  (a Vite middleware, not `server.proxy`).
+- Legacy API payloads (bare-string errors, `meta:{}`, health without ok/total)
+  must render; `healthCountsOf()` derives the counts.
+- Never ship a stale `Pulse/dist` — the self-test fails the build if it is older
+  than `Pulse/src`. Rebuild with `npm run build:ui` before committing.
 
 ## Standing rules
 1. Update `context.md` (and this file) with every change.

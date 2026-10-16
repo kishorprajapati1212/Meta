@@ -5,7 +5,7 @@
 > decisions were made and why, and what is known to be broken. `memory.md` is a
 > short summary; this file is the detail.
 >
-> **Last updated:** 2026-10-16 · **API version:** 4.2.1 · **Dashboard version:** 2.1.0
+> **Last updated:** 2026-10-16 · **API version:** 4.2.2 · **Dashboard version:** 2.1.2
 
 ---
 
@@ -339,6 +339,52 @@ Deploy: push the repo; Render runs `npm start`. Add
 ---
 
 ## 9. Changelog
+
+### 2026-10-16 — API v4.2.2 + Pulse 2.1.2 (crash-proofing + flaky-network resilience)
+- **Fixed the white-screen crash** `TypeError: Cannot read properties of undefined
+  (reading 'hint')`. `platformState()` dereferenced the payload before checking it
+  existed, so any platform block that arrived as `null`/missing (older or
+  partially-failed `/api/combined`, a cold start) took the whole page down.
+- **Fixed the same class everywhere**: `healthDetails` is now always an object
+  (a `null` from an unreachable `/api/health` overrode prop defaults and crashed
+  Overview); `partialErrors` entries that are `null`/`undefined`/strings or a
+  non-array `partialErrors` are filtered instead of throwing; ConnectionsPage
+  coerces a non-string health error to text; `effectiveBase()` no longer touches
+  `window` unguarded.
+- **Added `ErrorBoundary`** around the page switch: an unrecognised payload shape
+  now replaces one panel with an honest retry card instead of unmounting the app.
+- **Flaky-host resilience**: `useAnalytics` retries `/api/combined` and
+  `/api/health` with 1.2s/3.5s backoff (free-tier hosts sleep after inactivity),
+  keeps the last good payload on failure and labels it stale with a banner
+  instead of blanking the dashboard.
+- **Hostile-payload matrix in the smoke suite** (14 new assertions): null blocks,
+  missing blocks, hint-less errors, null meta, garbage `partialErrors`,
+  unreachable health — every page must render.
+- **Project IDX**: added `.idx/dev.nix` (Node 20 + Docker, installs both roots,
+  builds the UI on start, declares dashboard/api/docker-demo web previews; the
+  dashboard preview pins `VITE_PROXY_TARGET=http://127.0.0.1:5000`).
+- **Dev proxy rewritten (`Pulse/vite.config.js`)** — the old config proxied `/api`
+  straight to the deployed Render URL, so a sleeping free-tier host showed up as
+  "API not connected" / "Service not available". Now: local API first
+  (`127.0.0.1:$PORT`), then transparent forward to `VITE_FALLBACK_API`, then a
+  well-formed JSON 503 (`success:false`, message + hint) instead of Vite's bare
+  HTML 500. Implemented as a middleware because Vite's own proxy error handler
+  ends the response before `proxy.on('error')` can write anything.
+- **`npm run dev:all`** (`scripts/devall.js`, no new dependencies) starts the API
+  and the dashboard together with the proxy already pointed at the local API.
+- **Legacy-payload compatibility** (the pre-rebuild backend in the public repo,
+  commit `aec670b`): platform errors as bare strings, `meta: {}`, and
+  `/api/health` without `ok`/`total`. New `healthCountsOf()` derives those counts
+  from `details` — before this, Connections printed "undefined/undefined healthy"
+  and "0 / 6 healthy", which reads as "Instagram not connected".
+- **`describeError()` now appends the server's `hint`**, so a 503 from the dev
+  proxy tells you to run `npm run dev:all` instead of just "HTTP 503".
+- **`/api/health` reports `config.VERSION`** (it was pinned to a `4.1.0` literal).
+- **Deployment-hygiene self-tests** (backend suite 43 → 47): health version is
+  not hardcoded, `package.json` matches `config.VERSION`, `Pulse/dist/index.html`
+  exists and every asset it references is on disk, and **dist is not older than
+  the newest file in `Pulse/src`** — the guard that catches shipping a stale
+  bundle (exactly what produced `index-BBnBtZfG.js` in the reported crash).
 
 ### 2026-10-16 — API v4.2.1 (env hardening, docs-only otherwise)
 - **`.env.example` restored byte-for-byte to the project's original 14 variable

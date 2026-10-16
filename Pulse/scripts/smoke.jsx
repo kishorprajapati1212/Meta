@@ -43,9 +43,11 @@ import GscPage from '../src/components/panels/GscPage.jsx'
 import ConnectionsPage from '../src/components/panels/ConnectionsPage.jsx'
 import AudiencePage from '../src/components/panels/AudiencePage.jsx'
 import MetricTable from '../src/components/metrics/MetricTable.jsx'
-import { metricsOf, healthDetailsOf, deriveSummary, effectiveSummary, activityCalendarOf } from '../src/lib/normalize.js'
+import { metricsOf, healthDetailsOf, healthCountsOf, deriveSummary, effectiveSummary, activityCalendarOf } from '../src/lib/normalize.js'
+import { PLATFORM_ORDER } from '../src/lib/platforms.js'
 import { sampleCombined, sampleHealth } from '../src/lib/sample.js'
 import { formatValue } from '../src/lib/format.js'
+import { describeError } from '../src/lib/api.js'
 
 import pinterestZero from './fixtures/pinterest-zero.json'
 import pinterestRich from './fixtures/pinterest-rich.json'
@@ -495,6 +497,113 @@ check('channels without demographics are locked with a real reason, not blank', 
 check('a channel with no demographics at all renders an explainer, never a crash', () => {
   const html = render(<AudiencePage platformData={{}} range={range} sample={false} onNavigate={() => {}} />)
   includes(html, 'None of the connected channels returned audience composition')
+})
+
+console.log('\nHostile payload matrix — the dashboard must never white-screen')
+const hostile = {
+  'platform blocks are null': Object.fromEntries(PLATFORM_ORDER.map((k) => [k, null])),
+  'platform blocks missing entirely': {},
+  'error payloads without hint/meta': Object.fromEntries(PLATFORM_ORDER.map((k) => [k, { error: 'Request failed with status code 400' }])),
+  'null meta/overview/timeseries': { youtube: { meta: null, overview: null, timeseries: null, metrics: null } },
+  'partialErrors containing null/undefined/string': { youtube: { overview: {}, timeseries: [], metrics: [], partialErrors: [null, undefined, 'str', { optional: true, message: 'x' }, { message: 'real', hint: 'fix' }] } },
+  'partialErrors as an object instead of array': { youtube: { overview: {}, timeseries: [], metrics: [], partialErrors: { a: 1 } } },
+}
+for (const [name, data] of Object.entries(hostile)) {
+  check(`Overview survives: ${name}`, () => {
+    render(<OverviewPage platformData={data} summary={null} healthDetails={{}} range={range} sample={false} onNavigate={() => {}} loading={false} />)
+    render(<OverviewPage platformData={data} summary={null} healthDetails={null} range={range} sample={false} onNavigate={() => {}} loading={false} />)
+  })
+  check(`every platform page survives: ${name}`, () => {
+    for (const k of PLATFORM_ORDER) {
+      render(<PlatformPage platformKey={k} payload={data[k]} healthDetail={undefined} range={range} sample={false} onRetry={() => {}} />)
+    }
+    render(<GscPage payload={data.searchConsole} healthDetail={undefined} range={range} sample={false} onRetry={() => {}} />)
+    render(<AudiencePage platformData={data} range={range} sample={false} onNavigate={() => {}} />)
+  })
+}
+check('a null partialErrors entry still surfaces the real warning', () => {
+  const html = render(
+    <PlatformPage platformKey="youtube" payload={hostile['partialErrors containing null/undefined/string'].youtube} healthDetail={undefined} range={range} sample={false} onRetry={() => {}} />
+  )
+  includes(html, 'real')
+  includes(html, 'fix')
+})
+check('Connections survives an unreachable health endpoint', () => {
+  render(<ConnectionsPage health={null} healthError="Cannot reach the API" sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={null} />)
+  render(<ConnectionsPage health={{ success: false, error: 'boom' }} healthError={null} sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={null} />)
+  render(<ConnectionsPage health={{ success: true, data: { details: { facebook: null, youtube: undefined }, platforms: {} } }} healthError={null} sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={null} />)
+})
+
+console.log('\nLegacy API payload — the pre-rebuild backend still deployed on some hosts')
+// Shape taken from the original repository (commit aec670b): meta is {},
+// platform failures are bare STRINGS, /api/health carries data.platforms
+// strings instead of data.details, and there is no stage/demographics/
+// effectiveSummary enrichment.
+const legacyCombined = {
+  platform: 'combined',
+  meta: {},
+  data: {
+    facebook: { overview: { impressions: 120, reach: 90 }, timeseries: [{ date: '2026-10-14', impressions: 60 }, { date: '2026-10-15', impressions: 60 }] },
+    instagram: { overview: { impressions: 10, reach: 8 }, timeseries: [] },
+    youtube: { error: 'Invalid grant' },
+    linkedin: { error: 'Invalid, revoked or expired API key.' },
+    pinterest: { error: 'Invalid, revoked or expired API key.' },
+    searchConsole: { overview: { clicks: 4, impressions: 300 }, timeseries: [] },
+  },
+}
+const legacyHealth = { success: true, data: { healthy: false, platforms: { facebook: 'ok', instagram: 'ok', youtube: 'Invalid grant', searchConsole: 'not_configured', linkedin: 'no_account', pinterest: 'HTTP 401' } }, meta: { uptime: 12 } }
+
+check('legacy combined — every page renders without crashing', () => {
+  const details = healthDetailsOf(legacyHealth)
+  render(<OverviewPage platformData={legacyCombined.data} summary={null} healthDetails={details} range={range} sample={false} onNavigate={() => {}} loading={false} />)
+  for (const k of PLATFORM_ORDER) {
+    render(<PlatformPage platformKey={k} payload={legacyCombined.data[k]} healthDetail={details[k]} range={range} sample={false} onRetry={() => {}} />)
+  }
+  render(<GscPage payload={legacyCombined.data.searchConsole} healthDetail={details.searchConsole} range={range} sample={false} onRetry={() => {}} />)
+  render(<AudiencePage platformData={legacyCombined.data} range={range} sample={false} onNavigate={() => {}} />)
+  render(<ConnectionsPage health={legacyHealth} healthError={null} sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={null} />)
+})
+
+check('legacy combined — real numbers survive the missing enrichment', () => {
+  const html = render(<OverviewPage platformData={legacyCombined.data} summary={null} healthDetails={healthDetailsOf(legacyHealth)} range={range} sample={false} onNavigate={() => {}} loading={false} />)
+  for (const n of ['120', '90', '10']) includes(html, n, `Overview dropped legacy metric ${n}`)
+  notIncludes(html, 'undefined', 'Overview leaked an undefined')
+})
+
+check('legacy combined — a bare string error is shown as readable text', () => {
+  const html = render(<PlatformPage platformKey="youtube" payload={legacyCombined.data.youtube} healthDetail={undefined} range={range} sample={false} onRetry={() => {}} />)
+  includes(html, 'Invalid grant')
+  notIncludes(html, '[object Object]')
+})
+
+check('legacy health — counts are derived when ok/total are absent', () => {
+  const counts = healthCountsOf(legacyHealth)
+  assert(counts.total === 6, `expected total 6, got ${counts.total}`)
+  assert(counts.ok === 2, `expected 2 healthy channels, got ${counts.ok}`)
+  assert(counts.configured === 5, `expected 5 configured (searchConsole is not), got ${counts.configured}`)
+  const html = render(<ConnectionsPage health={legacyHealth} healthError={null} sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={null} />)
+  notIncludes(html, 'undefined', 'Connections leaked an undefined from a legacy health payload')
+  includes(html, '2', 'healthy count missing')
+})
+
+check('legacy health — modern payload counts still win', () => {
+  const counts = healthCountsOf(healthFixture)
+  assert(Number.isFinite(counts.ok) && Number.isFinite(counts.total) && counts.total > 0, `bad counts ${JSON.stringify(counts)}`)
+})
+
+check('the dev-proxy "API unreachable" envelope is described with its hint', () => {
+  const envelope = {
+    success: false,
+    error: {
+      message: 'The analytics API is not reachable from the dev server.',
+      hint: 'Start the backend (`npm run dev:all` from the repo root, or `npm start` on port 5000), or set VITE_PROXY_TARGET to a running API.',
+    },
+  }
+  const err = { response: { status: 503, data: envelope }, message: 'Request failed with status code 503' }
+  const text = describeError(err)
+  includes(text, 'HTTP 503')
+  includes(text, 'not reachable from the dev server')
+  includes(text, 'dev:all')
 })
 
 console.log('\nMetric table & app shell')

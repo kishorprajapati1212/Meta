@@ -33,7 +33,7 @@ export function setBaseUrl(url) {
 
 export function effectiveBase() {
   const b = getBaseUrl()
-  return b || window.location.origin
+  return b || (typeof window !== 'undefined' ? window.location.origin : '')
 }
 
 function client(timeout = 90000) {
@@ -97,6 +97,8 @@ export function describeError(err) {
   const status = err.response?.status
   const body = err.response?.data
   const msg = body?.error?.message || body?.message || body?.notice || err.message
-  if (!status) return `Cannot reach the API at ${effectiveBase()} — ${msg}`
-  return `HTTP ${status} — ${msg}`
+  const hint = body?.error?.hint || body?.hint
+  const suffix = hint && hint !== msg ? ` — ${hint}` : ''
+  if (!status) return `Cannot reach the API at ${effectiveBase()} — ${msg}${suffix}`
+  return `HTTP ${status} — ${msg}${suffix}`
 }

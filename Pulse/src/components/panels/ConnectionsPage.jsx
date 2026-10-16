@@ -5,7 +5,7 @@ import { StatusPill, Pill, Tag } from '../ui/Pill'
 import BrandIcon from '../ui/BrandIcon'
 import { NoticeBar, EmptyState } from '../ui/States'
 import { fetchZernioDebug, fetchYouTubeDebug, fetchIndex, setBaseUrl, getBaseUrl, effectiveBase, describeError } from '../../lib/api'
-import { healthDetailsOf } from '../../lib/normalize'
+import { healthCountsOf, healthDetailsOf } from '../../lib/normalize'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
 import { relativeTime, dateTime } from '../../lib/format'
 import { cls } from '../../lib/cls'
@@ -18,6 +18,7 @@ import { cls } from '../../lib/cls'
  */
 export default function ConnectionsPage({ health, healthError, sampleMode, onToggleSample, onRefresh, refreshing, lastUpdated }) {
   const details = healthDetailsOf(health)
+  const counts = healthCountsOf(health)
   const meta = health?.meta || {}
   const [url, setUrl] = useState(getBaseUrl())
   const [saved, setSaved] = useState(false)
@@ -50,13 +51,17 @@ export default function ConnectionsPage({ health, healthError, sampleMode, onTog
         </NoticeBar>
       ) : null}
 
-      {healthError ? <NoticeBar tone="error"><b>Health check failed:</b> {healthError}</NoticeBar> : null}
+      {healthError ? (
+        <NoticeBar tone="error">
+          <b>Health check failed:</b> {typeof healthError === 'string' ? healthError : healthError?.message || String(healthError)}
+        </NoticeBar>
+      ) : null}
 
       {/* ── Channel status ───────────────────────────────────── */}
       <Card>
         <CardHeader
           title="Channel connections"
-          sub={`Credential and reachability check · ${health?.data ? `${health.data.ok}/${health.data.total} healthy` : 'no health data yet'}`}
+          sub={`Credential and reachability check · ${health?.data ? `${counts.ok}/${counts.total} healthy` : 'no health data yet'}`}
           icon={<Activity className="w-4 h-4" strokeWidth={2} />}
           right={
             <button className="btn text-[12px]" onClick={onRefresh} disabled={refreshing}>
@@ -197,8 +202,8 @@ export default function ConnectionsPage({ health, healthError, sampleMode, onTog
               <Fact label="Uptime" value={meta.uptime ? `${Math.round(meta.uptime / 60)} min` : '—'} />
               <Fact label="Health check took" value={meta.checkedInMs ? `${meta.checkedInMs} ms` : '—'} />
               <Fact label="Server time" value={health.data?.serverTime ? dateTime(health.data.serverTime) : '—'} />
-              <Fact label="Channels configured" value={`${health.data?.configured ?? 0} / ${health.data?.total ?? 6}`} />
-              <Fact label="Channels healthy" value={`${health.data?.ok ?? 0} / ${health.data?.total ?? 6}`} />
+              <Fact label="Channels configured" value={`${counts.configured} / ${counts.total}`} />
+              <Fact label="Channels healthy" value={`${counts.ok} / ${counts.total}`} />
               <Fact label="Last dashboard sync" value={lastUpdated ? dateTime(lastUpdated.toISOString()) : '—'} />
               <Fact label="Data mode" value={sampleMode ? 'Sample (local)' : 'Live API'} />
             </dl>

@@ -353,6 +353,56 @@ async function main() {
     assert.ok(cfg._clean('__MISSING') === undefined, 'missing var stays undefined');
   });
 
+  console.log('\nDeployment hygiene — the thing that ships must be the thing we fixed');
+  const fs = require('fs');
+  const path = require('path');
+  const root = path.join(__dirname, '..');
+
+  check('the health endpoint reports the real API version', () => {
+    const src = fs.readFileSync(path.join(root, 'src', 'routes', 'health.js'), 'utf8');
+    assert.ok(src.includes('version: config.VERSION'), 'health.js must read config.VERSION, not a hardcoded string');
+    assert.ok(!/version:\s*['"]\d+\./.test(src), 'no hardcoded version literal in health.js');
+  });
+
+  check('package.json version matches config.VERSION', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    assert.strictEqual(pkg.version, cfg.VERSION, `package.json ${pkg.version} vs config ${cfg.VERSION}`);
+  });
+
+  check('the built dashboard exists and its assets resolve', () => {
+    const dist = path.join(root, 'Pulse', 'dist');
+    const html = path.join(dist, 'index.html');
+    assert.ok(fs.existsSync(html), 'Pulse/dist/index.html missing — run `npm run build:ui` before deploying');
+    const doc = fs.readFileSync(html, 'utf8');
+    const refs = [...doc.matchAll(/(?:src|href)="\.?\/?(assets\/[^"]+)"/g)].map((m) => m[1]);
+    assert.ok(refs.length >= 2, `index.html references no assets: ${refs.length}`);
+    for (const ref of refs) {
+      assert.ok(fs.existsSync(path.join(dist, ref)), `index.html points at a missing file: ${ref}`);
+    }
+  });
+
+  check('the built dashboard is not older than the UI source (stale bundle guard)', () => {
+    const builtAt = fs.statSync(path.join(root, 'Pulse', 'dist', 'index.html')).mtimeMs;
+    const srcDir = path.join(root, 'Pulse', 'src');
+    let newest = 0;
+    let newestFile = '';
+    const walk = (dir) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else {
+          const m = fs.statSync(full).mtimeMs;
+          if (m > newest) { newest = m; newestFile = path.relative(root, full); }
+        }
+      }
+    };
+    walk(srcDir);
+    assert.ok(
+      newest <= builtAt + 2000,
+      `Pulse/dist is stale: ${newestFile} changed after the build — run \`npm run build:ui\` and commit the new dist`
+    );
+  });
+
   await mock.close();
 
   console.log(`\n\x1b[1m${passed} passed, ${failed} failed\x1b[0m\n`);

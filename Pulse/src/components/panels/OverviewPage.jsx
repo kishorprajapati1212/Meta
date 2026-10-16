@@ -215,7 +215,7 @@ export default function OverviewPage({
                 const meta = platformMeta(pk)
                 const payload = platformData[pk]
                 const err = isErrorPayload(payload)
-                const detail = healthDetails[pk]
+                const detail = (healthDetails || {})[pk]
                 return (
                   <tr
                     key={pk}
@@ -415,8 +415,8 @@ export default function OverviewPage({
           />
           <CardBody className="flex flex-col gap-2.5">
             {failed.map((f) => {
-              const payload = platformData[f.platform]
-              const detail = healthDetails[f.platform]
+              const payload = platformData?.[f.platform]
+              const detail = (healthDetails || {})[f.platform]
               return (
                 <NoticeBar key={f.platform} tone="error">
                   <b>{platformMeta(f.platform).label}:</b> {errorText(payload)}
@@ -657,9 +657,9 @@ function noticesOf(platformData) {
     const p = platformData?.[pk]
     if (!p || isErrorPayload(p)) continue
     if (p.notice) out.push({ platform: pk, text: p.notice })
-    for (const pe of p.partialErrors || []) {
-      if (pe.optional) continue
-      out.push({ platform: pk, text: pe.message, hint: pe.hint })
+    for (const pe of Array.isArray(p.partialErrors) ? p.partialErrors : []) {
+      if (!pe || typeof pe !== 'object' || pe.optional) continue
+      out.push({ platform: pk, text: pe.message || 'A metric group was unavailable.', hint: pe.hint || null })
     }
   }
   return out

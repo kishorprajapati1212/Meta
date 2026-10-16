@@ -65,8 +65,9 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
   const posts = payload?.posts || payload?.topPosts || []
   const boards = payload?.meta?.boards || []
   const diagnostics = diagnosticsOf(payload)
-  const partialErrors = (payload?.partialErrors || []).filter((e) => !e.optional)
-  const optionalErrors = (payload?.partialErrors || []).filter((e) => e.optional)
+  const safePartial = Array.isArray(payload?.partialErrors) ? payload.partialErrors.filter((e) => e && typeof e === 'object') : []
+  const partialErrors = safePartial.filter((e) => !e.optional)
+  const optionalErrors = safePartial.filter((e) => e.optional)
 
   return (
     <div className="flex flex-col gap-5">

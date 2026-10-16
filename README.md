@@ -174,6 +174,30 @@ brand-accurate platform colours.
 
 ---
 
+## Running it
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev:all` | API on `:5000` **and** dashboard on `:5173`, proxy already wired |
+| `npm start` | API only (serves the built dashboard at `/app`) |
+| `npm run build:ui` | Rebuild `Pulse/dist` — required before committing/deploying |
+| `npm test` / `npm run smoke` | 47 backend checks / 72 dashboard render checks |
+
+In dev the dashboard proxies `/api` to the local API first, then to
+`VITE_FALLBACK_API` (your deployed host), and finally answers with a JSON error
+that names the fix — so a sleeping backend never becomes a blank page.
+
+---
+
+## Project IDX
+
+Open the repo at https://idx.dev and `.idx/dev.nix` sets up Node 20 + Docker,
+installs both dependency trees, builds the dashboard on start, and declares web
+previews for the dashboard (`:5173`), the API (`:5000`, serves `/app`) and the
+credential-free Docker demo.
+
+---
+
 ## Docker
 
 ```bash
@@ -216,4 +240,4 @@ production: all-zero Pinterest analytics (the original bug), rich analytics,
 
 ## Version
 
-API **v4.2.0** · Dashboard **2.1.0** · Node **18+** · Docker `docker compose up`
+API **v4.2.2** · Dashboard **2.1.2** · Node **18+** · Docker `docker compose up` · Project IDX ready
