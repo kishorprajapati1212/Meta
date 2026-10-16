@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: meta-analytics:4.2.3
+    image: meta-analytics:4.2.4
     container_name: meta-mock-zernio
     command: ['node', 'scripts/mockServer.js']
     environment:
@@ -29,7 +29,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: meta-analytics:4.2.3
+    image: meta-analytics:4.2.4
     container_name: meta-mock-upstream
     command: ['node', 'scripts/mockUpstreamServer.js']
     environment:

@@ -127,18 +127,90 @@ function declaredNames(src) {
   return names;
 }
 
+/**
+ * stripNonCode — a small scanner rather than chained regexes.
+ *
+ * Regex stripping cannot survive apostrophes inside double-quoted strings
+ * (`networkHint("Google's YouTube Analytics API")`) or quotes inside comments:
+ * it swallows real code and then reports declared variables as "undeclared".
+ * This walks the source once, dropping comments and string/template text while
+ * KEEPING the code inside `${…}` interpolations, which is what we want to audit.
+ */
+function stripNonCode(src) {
+  let out = '';
+  let i = 0;
+  const n = src.length;
+
+  const skipString = (quote) => {
+    i += 1;
+    while (i < n && src[i] !== quote) {
+      if (src[i] === '\\') i += 1;
+      i += 1;
+    }
+    i += 1;
+    out += '""';
+  };
+
+  while (i < n) {
+    const c = src[i];
+    const d = src[i + 1];
+
+    if (c === '/' && d === '/') {
+      while (i < n && src[i] !== '\n') i += 1;
+      continue;
+    }
+    if (c === '/' && d === '*') {
+      i += 2;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) i += 1;
+      i += 2;
+      out += ' ';
+      continue;
+    }
+    if (c === "'" || c === '"') {
+      skipString(c);
+      continue;
+    }
+    if (c === '`') {
+      i += 1;
+      let depth = 0;
+      // Dropped literal text must still leave a word boundary, otherwise
+      // `${name}|${parts}` collapses into the identifier "nameparts".
+      let pendingSpace = false;
+      while (i < n) {
+        const ch = src[i];
+        if (ch === '\\') { i += 2; pendingSpace = true; continue; }
+        if (depth === 0 && ch === '`') { i += 1; break; }
+        if (depth === 0 && ch === '$' && src[i + 1] === '{') {
+          if (pendingSpace) { out += ' '; pendingSpace = false; }
+          depth = 1;
+          i += 2;
+          continue;
+        }
+        if (depth > 0) {
+          if (ch === '{') { depth += 1; i += 1; continue; }
+          if (ch === '}') { depth -= 1; i += 1; pendingSpace = true; continue; }
+          if (ch === "'" || ch === '"' || ch === '`') { skipString(ch); pendingSpace = false; continue; }
+          out += ch;
+          i += 1;
+          continue;
+        }
+        i += 1; // literal template text — dropped
+        pendingSpace = true;
+      }
+      out += '`` ';
+      continue;
+    }
+    out += c;
+    i += 1;
+  }
+  return out;
+}
+
 function auditFile(file) {
-  let src = fs.readFileSync(file, 'utf8');
-  // Strip comments and string/template literals so only code is scanned.
-  src = src
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/(^|[^:'"`\\])\/\/[^\n]*/g, '$1 ')
-    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
-    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
-    .replace(/`(?:[^`\\]|\\.)*`/g, '``')
-    // regex literals: /…/flags followed by a member access (`/x/i.test(…)`)
-    .replace(/\/(?:[^\/\\\n]|\\.)+\/[gimsuy]*(?=\s*\.)/g, 'null')
-    .replace(/(^|[^\w$)\]])\/(?:[^\/\\\n]|\\.)+\/[gimsuy]*/g, '$1 null');
+  let src = stripNonCode(fs.readFileSync(file, 'utf8'));
+  // A regex literal followed by a member access (`/x/i.test(…)`) would otherwise
+  // read as the identifier `i`.
+  src = src.replace(/\/(?:[^\/\\\n]|\\.)+\/[gimsuy]*(?=\s*\.)/g, 'null');
 
   const declared = declaredNames(src);
   const problems = new Set();
@@ -156,9 +228,9 @@ function auditFile(file) {
   for (const m of src.matchAll(/(^|[^\w$.?])([A-Za-z_$][\w$]*)\s*\(/g)) {
     const name = m[2];
     if (KEYWORDS.has(name) || GLOBALS.has(name) || declared.has(name)) continue;
-    const before = src.slice(Math.max(0, m.index - 2), m.index + 1 + name.length);
-    if (/[{,]\s*$/.test(src.slice(0, m.index + 1).trimEnd()) && /\)\s*\{/.test(src.slice(m.index + name.length + 1, m.index + name.length + 200))) continue;
-    void before;
+    const head = src.slice(0, m.index + 1).trimEnd();
+    const tail = src.slice(m.index + name.length + 1, m.index + name.length + 200);
+    if (/[{,]$/.test(head) && /^\s*[^)]*\)\s*\{/.test(tail)) continue; // method definition
     problems.add(name);
   }
   return [...problems];
@@ -422,6 +494,133 @@ async function main() {
     assert.ok(!/params:\s*\{\s*\.\.\.g/.test(src), 'instagramService still spreads the group object into params');
   });
 
+
+
+  // ── 7. Meta's 30-day window limit (the reported Instagram failure) ──
+  console.log('\nMeta Graph windows — "(#100) There cannot be more than 30 days"');
+
+  const { graphHint, insightWindows } = require('../src/utils/graphInsights');
+
+  await check('insightWindows splits a long range into Graph-legal chunks', () => {
+    const day = 86400;
+    const plan = insightWindows(1000 * day, 1120 * day); // 120 days
+    assert.ok(plan.windows.length >= 4, `expected >=4 windows for 120 days, got ${plan.windows.length}`);
+    for (const w of plan.windows) {
+      assert.ok(w.until - w.since <= 29 * day, `window is ${w.until - w.since}s, over Meta's 2592000s limit`);
+    }
+    assert.strictEqual(plan.windows[0].since, 1000 * day, 'first window must start at `since`');
+    assert.strictEqual(plan.windows[plan.windows.length - 1].until, 1120 * day, 'last window must end at `until`');
+    assert.strictEqual(plan.clamped, false, 'a 120-day range must not be clamped');
+  });
+
+  await check('an absurd range is clamped to the most recent windows, not dropped', () => {
+    const day = 86400;
+    const plan = insightWindows(0, 1120 * day); // ~3 years
+    assert.ok(plan.windows.length <= 8, `expected at most 8 windows, got ${plan.windows.length}`);
+    assert.strictEqual(plan.clamped, true, 'should report that it clamped');
+    assert.strictEqual(plan.windows[plan.windows.length - 1].until, 1120 * day, 'must keep the MOST RECENT data');
+  });
+
+  await check('Instagram returns data for a 120-day range (was: whole platform failed)', async () => {
+    up.reset();
+    const res = await instagram.fetchInsights({ date_preset: 'last_120d' });
+    const igCalls = up.calls('/insights').filter((c) => c.path.includes('17841432245164684'));
+    assert.ok(igCalls.length >= 4, `expected windowed calls, saw ${igCalls.length}`);
+    const windowed = igCalls.filter((c) => c.query.since && c.query.until);
+    assert.ok(windowed.length >= 4, `expected >=4 windowed calls, saw ${windowed.length}`);
+    for (const call of windowed) {
+      const span = Number(call.query.until) - Number(call.query.since);
+      assert.ok(span <= 2592000, `sent a ${span}s window to Graph — Meta rejects anything over 2592000s`);
+    }
+    assert.ok((res.metrics || []).length > 0, 'no metrics came back for 120 days');
+    assert.ok((res.timeseries || []).length > 60, `timeseries covers only ${(res.timeseries || []).length} days of a 120-day range`);
+    assert.ok(res.meta.windows >= 4, `meta.windows should record the chunking, got ${res.meta.windows}`);
+  });
+
+  await check('Facebook returns data for a 120-day range too', async () => {
+    up.reset();
+    const res = await facebook.fetchInsights({ date_preset: 'last_120d' });
+    for (const call of up.calls('/insights').filter((c) => c.query.since && c.query.until)) {
+      const span = Number(call.query.until) - Number(call.query.since);
+      assert.ok(span <= 2592000, `sent a ${span}s window to Graph`);
+    }
+    assert.ok((res.metrics || []).length > 0, 'no Facebook metrics for 120 days');
+  });
+
+  await check('an all-time range degrades to the most recent windows with a notice', async () => {
+    const res = await instagram.fetchInsights({ date_preset: 'all_time' });
+    assert.ok((res.metrics || []).length > 0, 'all_time returned no metrics');
+    assert.strictEqual(res.meta.clampedToRecent, true, 'all_time should report that it clamped');
+    assert.ok(/30 days at a time/.test(res.notice || ''), `notice should explain the clamp, got: ${res.notice}`);
+  });
+
+  // ── 8. "(#100) Invalid parameter" — one retired metric must not kill a group ──
+  console.log('\nMeta Graph "(#100) Invalid parameter" — per-metric recovery');
+
+  await check('Instagram keeps the metrics Meta still serves and skips the retired one', async () => {
+    process.env.MOCK_UPSTREAM_REJECT_METRICS = 'shares';
+    try {
+      up.reset();
+      const res = await instagram.fetchInsights({ date_preset: 'last_7d' });
+      const ids = (res.metrics || []).map((m) => m.id);
+      assert.ok(!ids.includes('shares'), `the rejected metric should be gone, got ${ids.join(', ')}`);
+      for (const kept of ['profile_views', 'likes', 'comments', 'total_interactions']) {
+        assert.ok(ids.includes(kept), `${kept} was lost along with the rejected metric`);
+      }
+      const recovered = (res.partialErrors || []).filter((e) => e.recovered);
+      assert.ok(recovered.length >= 1, 'the skipped metric was not reported');
+      assert.ok(/no longer serves/.test(recovered[0].message), `unhelpful message: ${recovered[0].message}`);
+      assert.strictEqual(recovered[0].optional, true, 'a skipped metric must never be a hard failure');
+    } finally {
+      delete process.env.MOCK_UPSTREAM_REJECT_METRICS;
+    }
+  });
+
+  await check('Facebook recovers the same way', async () => {
+    process.env.MOCK_UPSTREAM_REJECT_METRICS = 'page_media_view';
+    try {
+      const res = await facebook.fetchInsights({ date_preset: 'last_7d' });
+      const ids = (res.metrics || []).map((m) => m.id);
+      assert.ok(!ids.includes('page_media_view'), 'the rejected metric should be gone');
+      assert.ok(ids.length > 0, 'Facebook lost every metric because one was rejected');
+      assert.ok((res.partialErrors || []).some((e) => e.recovered), 'no recovered note');
+    } finally {
+      delete process.env.MOCK_UPSTREAM_REJECT_METRICS;
+    }
+  });
+
+  await check('with EVERY metric rejected, Facebook degrades to profile + demographics instead of erroring', async () => {
+    process.env.MOCK_UPSTREAM_REJECT_METRICS = [
+      'page_views_total', 'page_follows', 'page_post_engagements', 'page_media_view',
+      'page_total_media_view_unique', 'page_daily_follows', 'page_daily_follows_unique',
+      'page_daily_unfollows_unique', 'page_fans', 'page_impressions',
+      'page_impressions_unique', 'page_video_views',
+    ].join(',');
+    try {
+      const res = await facebook.fetchInsights({ date_preset: 'last_7d' });
+      assert.ok(res, 'no payload — the service threw instead of degrading');
+      assert.ok(res.overview.account, 'the page profile should still be shown');
+      assert.ok(res.demographics, 'demographics should still be shown');
+      assert.ok(/unavailable|No Page insights/.test(res.notice || ''), `notice should say what happened, got: ${res.notice}`);
+    } finally {
+      delete process.env.MOCK_UPSTREAM_REJECT_METRICS;
+    }
+  });
+
+  await check('hints describe the real problem, not a permission the user already has', () => {
+    const parameterError = { response: { status: 400, data: { error: { message: '(#100) Invalid parameter', code: 100 } } } };
+    const expired = { response: { status: 400, data: { error: { message: 'Error validating access token: Session has expired', code: 190 } } } };
+    const permission = { response: { status: 403, data: { error: { message: '(#10) This endpoint requires the pages_read_engagement permission', code: 10 } } } };
+    const rateLimit = { response: { status: 400, data: { error: { message: '(#17) User request limit reached', code: 17 } } } };
+
+    const paramHint = graphHint(parameterError, 'this Facebook Page');
+    assert.ok(paramHint && /parameter|skipped|windows/i.test(paramHint), `bad hint: ${paramHint}`);
+    assert.ok(!/pages_read_engagement/.test(paramHint), `a parameter error must not blame permissions: ${paramHint}`);
+
+    assert.ok(/expired/i.test(graphHint(expired) || ''), 'an expired token must say so');
+    assert.ok(/pages_read_engagement/.test(graphHint(permission) || ''), 'a real permission error should name the permission');
+    assert.ok(/rate limit/i.test(graphHint(rateLimit) || ''), 'a rate limit must say so');
+  });
 
   // ── 6. The HTTP envelope must not drop service fields ─────────────
   console.log('\nResponse envelope — single-platform routes must not strip data');

@@ -120,7 +120,12 @@ function buildAccount(a) {
     displayName: a.displayName || a.name || a.username || '',
     profilePicture: a.profilePicture || a.avatar || a.profileImage || null,
     profileUrl: a.profileUrl || a.accountUrl || null,
-    followers: pick(a.currentFollowers, a.followersCount, stats.followers, a.followers) || 0,
+    followers:
+      pick(
+        a.currentFollowers, a.followersCount, a.followerCount, a.totalFollowers, a.numFollowers,
+        stats.followers, stats.followerCount, stats.totalFollowers, stats.currentFollowers,
+        a.followers
+      ) || 0,
     following: pick(a.followingCount, stats.following, a.following),
     pinCount: pick(stats.pinCount, a.pinCount, stats.pins),
     boardCount: pick(stats.boardCount, a.boardCount, stats.boards),
@@ -161,7 +166,7 @@ async function getFollowerStats(platform, accountId) {
         .filter((r) => r && r.date)
         .map((r) => ({
           date: String(r.date).slice(0, 10),
-          followers: pick(r.followers, r.followerCount, r.count) || 0,
+          followers: pick(r.followers, r.followerCount, r.currentFollowers, r.totalFollowers, r.count) || 0,
         }))
         .sort((a, b) => a.date.localeCompare(b.date)),
     };

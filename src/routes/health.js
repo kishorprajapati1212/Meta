@@ -11,6 +11,7 @@ const { Router } = require('express');
 const { success } = require('../utils/response');
 const axios = require('axios');
 const config = require('../config');
+const { cacheStats } = require('../utils/resilience');
 
 const r = Router();
 
@@ -228,6 +229,7 @@ r.get('/', async (_req, res) => {
         ok: Object.values(details).filter((d) => d.status === 'ok').length,
         total: Object.keys(details).length,
         serverTime: new Date().toISOString(),
+        cache: cacheStats(),
       },
     })
   );

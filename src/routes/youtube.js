@@ -1,11 +1,12 @@
 const { Router } = require('express');
 const { fetchInsights } = require('../services/youtubeService');
 const { platformEnvelope, errorResponse } = require('../utils/response');
+const { fetchWithFallback } = require('../utils/resilience');
 const config = require('../config');
 const axios = require('axios');
 const r = Router();
 r.get('/', async (req, res) => {
-  try { const d = await fetchInsights(req.query); res.json(platformEnvelope('youtube', d)); }
+  try { const { value: d } = await fetchWithFallback('youtube', () => fetchInsights(req.query), req.query); res.json(platformEnvelope('youtube', d)); }
   catch (e) { const er = errorResponse(e); res.status(er.httpStatus).json(er.body); }
 });
 r.get('/debug', async (req, res) => {

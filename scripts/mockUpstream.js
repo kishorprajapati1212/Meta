@@ -59,14 +59,73 @@ function valueFor(metric, dayIndex) {
   return base + dayIndex * 7;
 }
 
+/**
+ * Meta's real rejections, reproduced so the suite can prove the client survives
+ * them:
+ *   • "(#100) There cannot be more than 30 days (2592000 s) between since and
+ *     until." — Instagram and several Page metrics refuse longer windows.
+ *   • "(#100) Invalid parameter" — a retired/unsupported metric in the list.
+ * Set MOCK_UPSTREAM_REJECT_METRICS=shares,page_media_view to exercise the second.
+ */
+function graphInsightsError(query) {
+  const since = Number(query.since);
+  const until = Number(query.until);
+  if (Number.isFinite(since) && Number.isFinite(until) && until - since > 2592000) {
+    return {
+      status: 400,
+      body: {
+        error: {
+          message: '(#100) There cannot be more than 30 days (2592000 s) between since and until.',
+          type: 'OAuthException',
+          code: 100,
+          fbtrace_id: 'mock_trace_window',
+        },
+      },
+    };
+  }
+  const rejected = String(process.env.MOCK_UPSTREAM_REJECT_METRICS || '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  const asked = String(query.metric || '').split(',').map((m) => m.trim());
+  const hit = asked.filter((m) => rejected.includes(m));
+  if (hit.length) {
+    return {
+      status: 400,
+      body: {
+        error: {
+          message: `(#100) Invalid parameter — metric ${hit.join(', ')} is not supported for this account`,
+          type: 'OAuthException',
+          code: 100,
+          fbtrace_id: 'mock_trace_metric',
+        },
+      },
+    };
+  }
+  return null;
+}
+
 function graphInsightsBody(query) {
   const metrics = String(query.metric || '').split(',').map((m) => m.trim()).filter(Boolean);
   const period = query.period || 'day';
-  const days = period === 'lifetime' ? 1 : 2;
+
+  // Real Graph returns one value per day INSIDE the requested window, so a
+  // client that splits a 120-day range into 30-day windows must merge them back
+  // into a 120-point series. Emitting a fixed 2 days relative to "today" would
+  // hide exactly that bug.
+  const since = Number(query.since);
+  const until = Number(query.until);
+  const windowDays = Number.isFinite(since) && Number.isFinite(until) && until > since
+    ? Math.min(31, Math.max(1, Math.round((until - since) / 86400)))
+    : 2;
+  const days = period === 'lifetime' ? 1 : windowDays;
+  const anchor = Number.isFinite(until) ? until : Math.floor(Date.now() / 1000);
+
   const data = metrics.map((metric) => {
     const values = [];
     for (let i = 0; i < days; i += 1) {
-      const end_time = `${isoDay(i - days + 1)}T00:00:00+0000`;
+      const dayTs = anchor - (days - 1 - i) * 86400;
+      const end_time = `${new Date(dayTs * 1000).toISOString().slice(0, 10)}T00:00:00+0000`;
       if (MAP_METRICS[metric]) {
         values.push({ value: { ...MAP_METRICS[metric] }, end_time });
       } else if (TOTAL_VALUE_METRICS.has(metric) || query.metric_type === 'total_value') {
@@ -244,6 +303,8 @@ function createMockUpstream({ port = 4988 } = {}) {
 
     if (node && node.endsWith('/insights')) {
       requests.push(record);
+      const rejection = graphInsightsError(query);
+      if (rejection) return send(res, rejection.status, rejection.body);
       return send(res, 200, graphInsightsBody(query));
     }
 

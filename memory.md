@@ -1,6 +1,6 @@
 # Project Memory — Meta Social & SEO Analytics
 
-> **v4.2.3 API · v2.1.2 dashboard · last updated 2026-10-16**
+> **v4.2.4 API · v2.1.3 dashboard · last updated 2026-10-16**
 > The detailed, living context document is **[`context.md`](./context.md)** —
 > architecture, full response contract, every decision and why, known
 > limitations, changelog. This file is the quick-recall summary. **Update both
@@ -94,6 +94,20 @@ overview entries are normalised).
 - `.env.example` is byte-for-byte the original 14 names; nothing renamed or added.
 - `config/index.js` cleans values on read (CRLF / quotes / spaces) so a copied
   `.env` cannot corrupt a token; a self-test enforces both rules.
+
+## v4.2.4 — long ranges, red dots, and hosts that sleep (2026-10-16)
+- Meta insights windows are ≤30 days: always fetch through
+  `utils/graphInsights.js` (chunk → merge → dedupe by end_time), never with the
+  raw preset range.
+- A `(#100) Invalid parameter` means a retired metric: retry the group metric by
+  metric, keep the survivors, drop the rest as OPTIONAL notes.
+- Prefer degrading (payload + notice) over throwing when any data survived.
+- Every upstream call goes through `fetchWithFallback` (timeout + last-good
+  cache); `isNetworkError()` keeps network failures from being reported as
+  credential problems.
+- Status indicators ask the PAYLOAD first (`hasUsableData`), health second.
+- Render `<App />` for every view in smoke tests — prop-name typos in one branch
+  (e.g. `sample` vs `isSample`) are invisible otherwise.
 
 ## v4.2.3 — wire-level data bugs (2026-10-16)
 - NEVER spread an internal group object into an outbound query. Graph answers

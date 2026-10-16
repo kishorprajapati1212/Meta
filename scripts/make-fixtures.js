@@ -57,7 +57,7 @@ function write(name, data) {
 
 async function main() {
   console.log('\nGenerating frontend fixtures from the real API code path…\n');
-  const mock = createMock({ port: 4988, mode: 'zero-analytics' });
+  const mock = createMock({ port: Number(process.env.MOCK_ZERNIO_PORT || 0), mode: 'zero-analytics' });
   await mock.ready();
   require('../src/app');
   await waitForServer();

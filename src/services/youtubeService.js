@@ -10,6 +10,7 @@ const axios = require('axios');
 const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { transformMetrics, buildOverview } = require('../utils/transform');
+const { isNetworkError, networkHint } = require('../utils/upstreamErrors');
 const { round, summarize, pctChange } = require('../utils/metrics');
 const demo = require('../utils/demographics');
 
@@ -175,7 +176,12 @@ async function fetchAnalytics(query) {
           ok: false,
           message: ae ? `${ae.message} (${ae.status || ae.code})` : e.message,
           status: e.response?.status || null,
-          hint: ae?.status === 403 ? 'Enable "YouTube Analytics API" for this Google Cloud project.' : null,
+          network: isNetworkError(e),
+          hint: isNetworkError(e)
+            ? networkHint("Google's YouTube Analytics API")
+            : ae?.status === 403
+            ? 'Enable "YouTube Analytics API" for this Google Cloud project.'
+            : null,
         };
       });
 
@@ -184,7 +190,7 @@ async function fetchAnalytics(query) {
   const errors = [];
   for (const r of results) {
     if (r.ok) raw.push(...r.raw);
-    else errors.push({ group: r.group.id, metrics: r.group.metrics, optional: Boolean(r.group.optional), message: r.message, hint: r.hint, status: r.status });
+    else errors.push({ group: r.group.id, metrics: r.group.metrics, optional: Boolean(r.group.optional), message: r.message, hint: r.hint, status: r.status, network: Boolean(r.network) });
   }
 
   const hardFailures = errors.filter((e) => !e.optional);
@@ -193,7 +199,11 @@ async function fetchAnalytics(query) {
     throw Object.assign(new Error(first?.message || 'No YouTube analytics returned'), {
       code: 'YT_ANALYTICS_FAILED',
       httpStatus: first?.status || 403,
-      hint: first?.hint || 'The channel must have at least one public video and analytics enabled.',
+      hint:
+        first?.hint ||
+        (first?.network
+          ? networkHint("Google's YouTube Analytics API")
+          : 'The channel must have at least one public video and analytics enabled.'),
       details: errors,
     });
   }

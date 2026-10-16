@@ -17,6 +17,7 @@ const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { summarize, round, pctChange } = require('../utils/metrics');
 const demo = require('../utils/demographics');
+const { isNetworkError, networkHint } = require('../utils/upstreamErrors');
 
 let gscCache = null;
 let gscExpiry = 0;
@@ -101,12 +102,13 @@ async function querySearchAnalytics(siteUrl, { dimensions, startDate, endDate, r
     throw Object.assign(new Error('Search Console query failed: ' + detail), {
       code: 'GSC_QUERY_FAILED',
       httpStatus: e.response?.status || 502,
-      hint:
-        e.response?.status === 403
-          ? 'The Google account behind GSC_REFRESH_TOKEN is not a verified user of this property.'
-          : e.response?.status === 404
-          ? 'GSC_SITE_URL must exactly match a verified property (including the trailing slash / sc-domain: prefix).'
-          : null,
+      hint: isNetworkError(e)
+        ? networkHint('the Google Search Console API')
+        : e.response?.status === 403
+        ? 'The Google account behind GSC_REFRESH_TOKEN is not a verified user of this property.'
+        : e.response?.status === 404
+        ? 'GSC_SITE_URL must exactly match a verified property (including the trailing slash / sc-domain: prefix).'
+        : null,
       details: e.response?.data || null,
     });
   }

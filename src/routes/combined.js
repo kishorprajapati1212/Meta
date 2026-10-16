@@ -10,32 +10,24 @@
 const { Router } = require('express');
 const { success, errorResponse } = require('../utils/response');
 const { round } = require('../utils/metrics');
+const { fetchWithFallback, cacheStats } = require('../utils/resilience');
 
 const r = Router();
 
 const KEYS_META = ['facebook', 'instagram', 'youtube', 'linkedin', 'pinterest', 'searchConsole'];
 
-/** Everything a single-platform service returns, minus the wrapper. */
+/**
+ * Everything a single-platform service returns, minus the platform name.
+ *
+ * This used to hand-pick fields, which is how `stage`, `boards`, `level` and
+ * `account` silently disappeared from /api/combined while the single-platform
+ * endpoints had them. Pass the payload through; only guarantee the two keys the
+ * dashboard always reads.
+ */
 function passthrough(v) {
-  if (!v || v._err) return null;
-  const out = {
-    meta: v.meta || {},
-    overview: v.overview || {},
-    timeseries: v.timeseries || [],
-  };
-  if (v.metrics) out.metrics = v.metrics;
-  if (v.topItems) out.topItems = v.topItems;
-  // Zernio (LinkedIn / Pinterest) extras
-  if (v.posts) out.posts = v.posts;
-  if (v.topPosts) out.topPosts = v.topPosts;
-  if (v.totals) out.totals = v.totals;
-  if (v.avgEngagementRate !== undefined) out.avgEngagementRate = v.avgEngagementRate;
-  if (v.platformBreakdown) out.platformBreakdown = v.platformBreakdown;
-  if (v.followerTimeseries) out.followerTimeseries = v.followerTimeseries;
-  if (v.demographics) out.demographics = v.demographics;
-  if (v.notice) out.notice = v.notice;
-  if (v.partialErrors) out.partialErrors = v.partialErrors;
-  return out;
+  if (!v) return null;
+  const { platform: _platform, ...rest } = v;
+  return { overview: {}, timeseries: [], ...rest };
 }
 
 function num(v) {
@@ -114,21 +106,28 @@ function buildSummary(data) {
 r.get('/', async (req, res) => {
   try {
     const q = req.query;
-    const jobs = {
-      facebook: require('../services/facebookService').fetchInsights(q).catch((e) => ({ _err: e })),
-      instagram: require('../services/instagramService').fetchInsights(q).catch((e) => ({ _err: e })),
-      youtube: require('../services/youtubeService').fetchInsights(q).catch((e) => ({ _err: e })),
-      linkedin: require('../services/zernioService').fetchLinkedIn(q).catch((e) => ({ _err: e })),
-      pinterest: require('../services/zernioService').fetchPinterest(q).catch((e) => ({ _err: e })),
-      searchConsole: require('../services/gscService').fetchInsights(q).catch((e) => ({ _err: e })),
+
+    // Every platform runs behind a timeout and a last-good cache, so one slow or
+    // failing upstream can no longer turn the whole response into the host's
+    // "Service not available" page.
+    const runners = {
+      facebook: (qq) => require('../services/facebookService').fetchInsights(qq),
+      instagram: (qq) => require('../services/instagramService').fetchInsights(qq),
+      youtube: (qq) => require('../services/youtubeService').fetchInsights(qq),
+      linkedin: (qq) => require('../services/zernioService').fetchLinkedIn(qq),
+      pinterest: (qq) => require('../services/zernioService').fetchPinterest(qq),
+      searchConsole: (qq) => require('../services/gscService').fetchInsights(qq),
     };
-    const settled = await Promise.all(Object.values(jobs));
-    const keys = Object.keys(jobs);
+    const keys = Object.keys(runners);
+    const jobs = keys.map((k) => fetchWithFallback(k, () => runners[k](q), q).catch((e) => ({ _err: e })));
+    const settled = await Promise.all(jobs);
+
     const data = {};
+    const stalePlatforms = [];
     keys.forEach((k, i) => {
-      const v = settled[i];
-      if (v && v._err) {
-        const e = v._err;
+      const r = settled[i];
+      if (r && r._err) {
+        const e = r._err;
         data[k] = {
           error: e.hint ? `${e.message} — ${e.hint}` : e.message,
           errorCode: e.code || (e.response?.status ? 'HTTP_' + e.response.status : 'UNKNOWN'),
@@ -137,9 +136,10 @@ r.get('/', async (req, res) => {
           overview: {},
           timeseries: [],
         };
-      } else {
-        data[k] = passthrough(v) || { error: 'No data returned', overview: {}, timeseries: [] };
+        return;
       }
+      data[k] = passthrough(r.value) || { error: 'No data returned', overview: {}, timeseries: [] };
+      if (r.fromCache) stalePlatforms.push(k);
     });
 
     res.json(
@@ -149,6 +149,9 @@ r.get('/', async (req, res) => {
           generatedAt: new Date().toISOString(),
           dateRange: data.facebook?.meta?.dateRange || data.youtube?.meta?.dateRange || data.searchConsole?.meta?.dateRange || null,
           query: q,
+          // Channels serving the last good numbers because the live call failed.
+          stalePlatforms,
+          cache: cacheStats(),
         },
         data: { ...data, summary: buildSummary(data) },
       })

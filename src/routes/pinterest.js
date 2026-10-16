@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { fetchPinterest } = require('../services/zernioService');
 const { platformEnvelope, errorResponse } = require('../utils/response');
+const { fetchWithFallback } = require('../utils/resilience');
 const r = Router();
 
 /**
@@ -10,7 +11,7 @@ const r = Router();
  */
 r.get('/', async (req, res) => {
   try {
-    const d = await fetchPinterest(req.query);
+    const { value: d } = await fetchWithFallback('pinterest', () => fetchPinterest(req.query), req.query);
     res.json(platformEnvelope('pinterest', d, { boards: (d.meta && d.meta.boards) || [] }));
   } catch (e) {
     const er = errorResponse(e);

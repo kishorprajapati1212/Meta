@@ -463,6 +463,31 @@ export function healthDetailsOf(health) {
 
 
 /**
+ * hasUsableData — does this payload actually carry numbers a page can show?
+ * Health can lag, warn or be unreachable while data flows perfectly, so status
+ * indicators must ask the payload first (this is why a channel used to show a
+ * red dot while its numbers were on screen).
+ */
+export function hasUsableData(platformKey, p) {
+  if (!p || isErrorPayload(p)) return false
+  if ((p.timeseries || []).length) return true
+  if ((p.posts || []).length || (p.topItems || []).length || (p.topPosts || []).length) return true
+  if ((p.boards || []).length) return true
+  const metrics = metricsOf(platformKey, p)
+  if (metrics.some((m) => m.hasData)) return true
+  // Zernio-style payloads keep their numbers in totals/overview only.
+  if (p.totals && Object.values(p.totals).some((v) => Number(v) > 0)) return true
+  return false
+}
+
+/** True when the payload arrived but admits it lost something. */
+export function payloadHasWarnings(p) {
+  if (!p || isErrorPayload(p)) return false
+  const partial = Array.isArray(p.partialErrors) ? p.partialErrors.filter((e) => e && typeof e === 'object') : []
+  return Boolean(partial.length || p.notice)
+}
+
+/**
  * healthCountsOf — the Connections headline numbers. Modern payloads carry
  * ok/total/configured; the pre-rebuild API only sent data.healthy plus
  * data.platforms strings, so derive the counts from the details when the

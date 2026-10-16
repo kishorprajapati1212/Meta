@@ -16,13 +16,15 @@
  * Run: node scripts/selftest.js
  */
 process.env.ZERNIO_API_KEY = 'sk_selftest_key';
-process.env.ZERNIO_BASE_URL = 'http://127.0.0.1:4987/api';
 process.env.ACCOUNT_CREATED = '2020-01-01';
+// ZERNIO_BASE_URL is set inside main() once the mock has bound a FREE port, so
+// this suite can run next to a live stack (docker compose mocks use 4987).
 
 const assert = require('assert');
 
 let passed = 0;
 let failed = 0;
+const failures = [];
 function check(name, fn) {
   try {
     fn();
@@ -40,9 +42,10 @@ const { createMock } = require('./mockZernio');
 
 // ── Run ─────────────────────────────────────────────────────────
 async function main() {
-  const mock = createMock({ port: 4987, mode: 'zero-analytics' });
+  const mock = createMock({ port: Number(process.env.MOCK_ZERNIO_PORT || 0), mode: 'zero-analytics' });
   await mock.ready();
-  console.log('\n\x1b[1mMeta Analytics API — self-test\x1b[0m (mock Zernio on :4987)\n');
+  process.env.ZERNIO_BASE_URL = mock.url;
+  console.log(`\n\x1b[1mMeta Analytics API — self-test\x1b[0m (mock Zernio on :${mock.port})\n`);
 
   const zernio = require('../src/services/zernioService');
   const { summarize } = require('../src/utils/metrics');
@@ -403,9 +406,69 @@ async function main() {
     );
   });
 
+  console.log('\nResilience — timeouts, cache and stale-while-revalidate');
+  const { fetchWithFallback, withTimeout, cacheKey, cacheStats, clearCache } = require('../src/utils/resilience');
+
+  await (async () => {
+    clearCache();
+    let ok = true;
+    try {
+      const first = await fetchWithFallback('resilienceDemo', async () => ({ overview: { reach: { total: 10 } } }), { date_preset: 'last_7d' });
+      assert.strictEqual(first.fromCache, false, 'a fresh fetch must not be marked fromCache');
+      assert.strictEqual(first.value.overview.reach.total, 10);
+
+      // the same range now fails → the previous numbers come back, labelled stale
+      const second = await fetchWithFallback('resilienceDemo', async () => { throw new Error('upstream 503'); }, { date_preset: 'last_7d' });
+      assert.strictEqual(second.fromCache, true, 'a failed refresh must fall back to the cache');
+      assert.strictEqual(second.value.stale, true, 'the stale payload must be labelled');
+      assert.ok(/last successful load/.test(second.value.notice || ''), `notice should explain the fallback: ${second.value.notice}`);
+      assert.strictEqual(second.value.overview.reach.total, 10, 'the cached numbers were lost');
+      assert.ok(Array.isArray(second.value.partialErrors) && second.value.partialErrors.length >= 1, 'the fallback must be reported in partialErrors');
+
+      // a different range is a different cache entry → it must fail honestly
+      let threw = false;
+      try {
+        await fetchWithFallback('resilienceDemo', async () => { throw new Error('upstream 503'); }, { date_preset: 'last_90d' });
+      } catch (e) { threw = true; assert.strictEqual(e.message, 'upstream 503'); }
+      assert.ok(threw, 'with nothing cached for this range the error must surface, not a stale guess');
+
+      assert.notStrictEqual(cacheKey('x', { date_preset: 'last_7d' }), cacheKey('x', { date_preset: 'last_90d' }), 'cache keys must separate ranges');
+      const stats = cacheStats();
+      assert.ok(stats.entries >= 1, 'cacheStats should report the stored payload');
+
+      // a hanging upstream is cut off instead of holding the response hostage
+      const t0 = Date.now();
+      let timedOut = false;
+      try {
+        await withTimeout(new Promise(() => {}), 120, 'slowPlatform');
+      } catch (e) {
+        timedOut = true;
+        assert.strictEqual(e.code, 'UPSTREAM_TIMEOUT');
+        assert.ok(/slowPlatform/.test(e.message), `timeout should name the platform: ${e.message}`);
+      }
+      assert.ok(timedOut, 'a hanging upstream was never cut off');
+      assert.ok(Date.now() - t0 < 3000, 'the timeout took too long to fire');
+    } catch (e) {
+      ok = false;
+      failed += 1;
+      failures.push(`resilience layer: ${e.message}`);
+      console.log(`  \x1b[31m✗\x1b[0m resilience layer\n      ${e.message}`);
+    }
+    if (ok) {
+      passed += 1;
+      console.log('  \x1b[32m✓\x1b[0m a failed refresh serves the last good numbers, a hang is cut off, and an uncached range still errors');
+    }
+    clearCache();
+  })();
+
   await mock.close();
 
   console.log(`\n\x1b[1m${passed} passed, ${failed} failed\x1b[0m\n`);
+  if (failures.length) {
+    console.log('Failures:');
+    failures.forEach((f) => console.log(`  - ${f}`));
+    console.log('');
+  }
   process.exit(failed ? 1 : 0);
 }
 

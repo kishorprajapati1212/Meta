@@ -5,7 +5,7 @@
 > decisions were made and why, and what is known to be broken. `memory.md` is a
 > short summary; this file is the detail.
 >
-> **Last updated:** 2026-10-16 · **API version:** 4.2.3 · **Dashboard version:** 2.1.2
+> **Last updated:** 2026-10-16 · **API version:** 4.2.4 · **Dashboard version:** 2.1.3
 
 ---
 
@@ -339,6 +339,72 @@ Deploy: push the repo; Render runs `npm start`. Add
 ---
 
 ## 9. Changelog
+
+### 2026-10-16 — API v4.2.4 + Pulse 2.1.3 (the "works, then stops working" release)
+Reported symptoms: `ReferenceError: sample is not defined` when clicking around,
+"Service not available" appearing over time, a red dot on channels that were
+clearly returning data, and Facebook/Instagram failing with `Invalid parameter`
+and `There cannot be more than 30 days (2592000 s) between since and until` even
+though Connections said every channel was Connected.
+
+**Dashboard (Pulse 2.1.3)**
+- `App.jsx` passed `sample={sample}` to the Audience branch; the variable is
+  `isSample`. Clicking **Audience** threw `ReferenceError: sample is not defined`
+  and the ErrorBoundary replaced the page. Fixed, and the smoke suite now renders
+  `<App />` for EVERY view (overview, all six channels, audience, connections,
+  searchConsole) in normal, sample and collapsed-sidebar modes — 15 new checks,
+  73 → 88. Verified with a negative control that reproduces the exact error.
+- **Status dots are data-first now.** `hasUsableData()` / `payloadHasWarnings()`
+  decide: green when numbers arrived, **amber** when they arrived but part of the
+  range/metric set was unavailable, red only when nothing came back, grey when
+  unconfigured. Before, anything `/api/health` disliked painted the channel red
+  even while its numbers were on screen.
+
+**Meta Graph (the Facebook + Instagram failures)**
+- New `src/utils/graphInsights.js`. Meta rejects any insights window longer than
+  30 days, so the 90/120-day and all-time presets added in v4.2 failed the whole
+  platform. Requests are now split into ≤29-day windows (max 8, keeping the MOST
+  RECENT data when the range is longer) and merged back into one series, deduped
+  by `end_time`. 120 days → 5 windows → 120 timeseries rows; all_time → 8 windows
+  → 232 rows plus a notice explaining the clamp.
+- `(#100) Invalid parameter` (a retired metric) used to kill the entire group.
+  The group is now retried metric by metric: whatever Meta still serves is kept,
+  retired metrics are dropped as an OPTIONAL note ("Meta no longer serves X —
+  skipped"), never as a hard failure.
+- **Degrade instead of failing.** If metrics are gone but the page/IG profile or
+  demographics arrived, the service returns that payload with a notice instead of
+  throwing — so the UI shows the numbers it has rather than an error card.
+- Hints are chosen from Meta's own error code: 190 → expired token, 10/200/283 →
+  permission, 100 → parameters/retired metric (explicitly NOT a permission
+  problem), 4/17/613 → rate limit, 104/803 → wrong id.
+
+**"Service not available" over time**
+- New `src/utils/resilience.js`: every platform fetch (in `/api/combined` and in
+  all six single-platform routes) runs behind a 50 s timeout and a last-good
+  cache (fresh 5 min, servable 1 h). A failed refresh now returns the previous
+  numbers with `stale: true`, an age and a one-line notice, and
+  `meta.stalePlatforms` lists them. Verified live: with Meta and Google
+  completely unreachable, Facebook/Instagram/YouTube/Search Console kept 120 days
+  of data while LinkedIn/Pinterest stayed live.
+- Nothing cached for that exact range → an honest error, never a stale guess.
+- `src/utils/upstreamErrors.js` separates "the internet hiccuped" from "your .env
+  is wrong": a connection failure no longer advises "The channel must have at
+  least one public video" or "Check ACCESS_TOKEN scopes".
+- Boot warms the cache once (`/api/combined?date_preset=last_30d`) and a
+  keep-alive ping runs every 10 min against `RENDER_EXTERNAL_URL` when the host
+  provides it, because free-tier hosts sleep and the first request after sleep is
+  what users saw as "Service not available".
+- `/api/health` and `/api/combined` now report cache stats; `/api/combined` passes
+  platform payloads through without whitelisting (it was dropping fields too).
+- Zernio follower parsing accepts more field spellings, so "0 followers" means
+  zero rather than a missed key.
+
+**Tests** — selftest 48 (resilience unit checks + free-port mocks), upstream 37
+(mock now ENFORCES Meta's 30-day rule and rejects configured metrics, ephemeral
+ports so it can run beside a live stack), dashboard smoke 88, live check 25. The
+static undeclared-identifier audit was rewritten as a real scanner: chained regex
+stripping mis-handled apostrophes in double-quoted strings and lost word
+boundaries inside `${…}` templates, which produced false positives.
 
 ### 2026-10-16 — API v4.2.3 (data-loss bugs reported from the Docker stack)
 Four real bugs, all of which made the rebuilt API return *less* data than the

@@ -256,4 +256,4 @@ production: all-zero Pinterest analytics (the original bug), rich analytics,
 
 ## Version
 
-API **v4.2.3** · Dashboard **2.1.2** · Node **18+** · Docker `docker compose up` · Project IDX ready
+API **v4.2.4** · Dashboard **2.1.3** · Node **18+** · Docker `docker compose up` · Project IDX ready

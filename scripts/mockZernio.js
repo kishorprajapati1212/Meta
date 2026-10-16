@@ -131,14 +131,18 @@ function createMock({ port = 4987, mode = 'zero-analytics' } = {}) {
   app.post('/api/v1/analytics/sync-external-posts', (_req, res) => res.json({ ok: true }));
 
   const server = app.listen(port, '127.0.0.1');
-  return {
+  const api = {
     server,
-    url: `http://127.0.0.1:${port}/api`,
+    // port 0 → the OS picks a free one; resolve it after listening so callers
+    // never collide with a mock that is already running (e.g. docker compose).
+    get port() { const a = server.address(); return a ? a.port : port; },
+    get url() { return `http://127.0.0.1:${api.port}/api`; },
     setMode(m) { MODE = m; },
     getMode() { return MODE; },
     close: () => new Promise((resolve) => server.close(resolve)),
-    ready: () => new Promise((resolve) => server.once('listening', resolve)),
+    ready: () => new Promise((resolve) => (server.listening ? resolve() : server.once('listening', resolve))),
   };
+  return api;
 }
 
 module.exports = { createMock, ACCOUNTS, BOARDS };

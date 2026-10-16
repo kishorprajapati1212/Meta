@@ -11,6 +11,7 @@ const { getPageAccessToken, getAccountDetails } = require('./tokenService');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const demo = require('../utils/demographics');
 const { transformMetrics, buildOverview } = require('../utils/transform');
+const { fetchMetricGroup, insightWindows } = require('../utils/graphInsights');
 const { round } = require('../utils/metrics');
 
 const GROUPS = [
@@ -30,36 +31,80 @@ async function fetchInsights(query) {
   const [accountInfo, demographics, ...results] = await Promise.all([
     getAccountDetails().then((d) => d.facebook).catch((e) => ({ error: e.message })),
     fetchDemographics().catch((e) => ({ ...demo.empty('Meta Graph API · page_fans demographics', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices']), unit: 'count' })),
+    // Each group is requested in ≤30-day windows (Meta rejects longer ranges)
+    // and, if Meta rejects the parameter set, metric by metric so one retired
+    // metric cannot take the whole group down.
     ...GROUPS.map((g) =>
-      axios
-        .get(url, {
-          params: { metric: g.metric, period: g.period, since, until, access_token: pt },
-          timeout: 30000,
-        })
-        .then((r) => ({ ok: true, group: g, raw: r.data.data || [] }))
-        .catch((e) => ({
-          ok: false,
-          group: g,
-          message: e.response?.data?.error?.message || e.message,
-          hint: e.response?.data?.error?.code === 190 ? 'Token expired — regenerate ACCESS_TOKEN.' : null,
-          status: e.response?.status || null,
-        }))
+      fetchMetricGroup({
+        metric: g.metric,
+        since,
+        until,
+        platformLabel: 'this Facebook Page',
+        requestOne: (metric, winSince, winUntil) =>
+          axios
+            .get(url, {
+              params: { metric, period: g.period, since: winSince, until: winUntil, access_token: pt },
+              timeout: 30000,
+            })
+            .then((r) => r.data.data || []),
+      }).then((r) => ({ ...r, group: g }))
     ),
   ]);
 
   const raw = [];
   const errors = [];
+  let windowsUsed = 1;
+  let clamped = false;
+  let recovered = 0;
   results.forEach((r) => {
-    if (r.ok) raw.push(...r.raw);
-    else errors.push({ group: r.group.id, metrics: r.group.metric, optional: Boolean(r.group.optional), message: r.message, hint: r.hint, status: r.status });
+    windowsUsed = Math.max(windowsUsed, r.windows || 1);
+    clamped = clamped || Boolean(r.clamped);
+    if (r.ok) {
+      raw.push(...r.raw);
+      if (r.recovered) recovered += 1;
+      for (const d of r.dropped || []) {
+        errors.push({
+          group: r.group.id,
+          metrics: d.metric,
+          optional: true,
+          recovered: true,
+          message: `Meta no longer serves "${d.metric}" for this Page — skipped.`,
+          detail: d.message,
+          code: d.code,
+          hint: null,
+          status: null,
+        });
+      }
+    } else {
+      errors.push({
+        group: r.group.id,
+        metrics: r.group.metric,
+        optional: Boolean(r.group.optional),
+        message: r.message,
+        code: r.code,
+        hint: r.hint,
+        status: r.status,
+      });
+    }
   });
 
   const hardFailures = errors.filter((e) => !e.optional);
-  if (!raw.length) {
+  const pageProfile = accountInfo && !accountInfo.error ? accountInfo : null;
+  const haveAnything = raw.length > 0 || Boolean(pageProfile) || demographics?.available === true;
+
+  // Degrade, don't fail: as long as SOMETHING came back (metrics, the page
+  // profile or demographics) the client gets a payload with a notice instead of
+  // an error card that hides the numbers it does have.
+  if (!haveAnything) {
     const first = errors[0];
     throw Object.assign(
       new Error(first?.message || 'All Facebook metric groups failed'),
-      { code: 'FB_ALL_FAILED', httpStatus: first?.status || 400, hint: first?.hint || 'Check ACCESS_TOKEN, FACEBOOK_PAGE_ID and the pages_read_engagement permission.', details: errors }
+      {
+        code: 'FB_ALL_FAILED',
+        httpStatus: first?.status || 400,
+        hint: first?.hint || 'Check ACCESS_TOKEN and FACEBOOK_PAGE_ID in .env.',
+        details: errors,
+      }
     );
   }
 
@@ -103,6 +148,23 @@ async function fetchInsights(query) {
     };
   }
 
+  const noticeParts = [];
+  if (hardFailures.length) {
+    noticeParts.push(
+      raw.length
+        ? `${hardFailures.length} metric group(s) unavailable for this range: ${hardFailures.map((e) => e.metrics).join(' · ')}`
+        : `No Page insights for this range (${hardFailures.map((e) => e.message).join(' · ')})`
+    );
+  }
+  if (recovered) noticeParts.push(`${recovered} group(s) were retried metric by metric; retired metrics were skipped.`);
+  if (clamped) {
+    const days = Math.round((until - (insightWindows(since, until).clampedSince || since)) / 86400);
+    noticeParts.push(`Meta serves Page insights 30 days at a time, so the most recent ${days} days of this range are shown.`);
+  } else if (windowsUsed > 1) {
+    noticeParts.push(`Range was fetched in ${windowsUsed} × ≤30-day windows (Meta's per-request limit).`);
+  }
+  const notice = noticeParts.join(' ');
+
   return {
     platform: 'facebook',
     meta: {
@@ -112,13 +174,16 @@ async function fetchInsights(query) {
       dataPoints: metrics.reduce((s, m) => s + m.values.length, 0),
       account: overview.account || null,
       requestedGroups: GROUPS.map((g) => g.metric),
+      windows: windowsUsed,
+      clampedToRecent: clamped,
+      recoveredGroups: recovered,
     },
     overview,
     timeseries,
     metrics,
     demographics,
     ...(errors.length ? { partialErrors: errors } : {}),
-    ...(hardFailures.length ? { notice: `${hardFailures.length} metric group(s) unavailable: ${hardFailures.map((e) => e.metrics).join(' · ')}` } : {}),
+    ...(notice ? { notice } : {}),
   };
 }
 

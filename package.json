@@ -1,6 +1,6 @@
 {
   "name": "meta-social-analytics-api",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "description": "Facebook + Instagram + YouTube + LinkedIn + Pinterest + Google Search Console analytics API",
   "main": "src/app.js",
   "scripts": {

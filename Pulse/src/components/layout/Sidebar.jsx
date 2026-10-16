@@ -2,7 +2,7 @@ import { LayoutGrid, Activity, X, ExternalLink, FlaskConical , Globe2} from 'luc
 import { cls } from '../../lib/cls'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
 import BrandIcon from '../ui/BrandIcon'
-import { isErrorPayload } from '../../lib/normalize'
+import { hasUsableData, isErrorPayload, payloadHasWarnings } from '../../lib/normalize'
 
 /**
  * Sidebar — primary navigation. Each platform row carries a live status dot
@@ -28,16 +28,23 @@ export default function Sidebar({
     { key: 'connections', label: 'Connections', Icon: Activity, color: '#6B7A90' },
   ]
 
+  /**
+   * Status dot, data first: if the payload carries numbers the channel is
+   * working, whatever /api/health said a minute ago. Amber means "data arrived
+   * but part of it was unavailable"; red is reserved for "nothing came back".
+   */
   function statusOf(key) {
-    if (key === 'overview' || key === 'connections') return null
+    if (key === 'overview' || key === 'connections' || key === 'audience') return null
     const detail = healthDetails[key]
     const payload = platformData[key]
-    if (detail && detail.status && detail.status !== 'ok') {
-      return detail.configured === false ? 'off' : detail.status === 'no_account' ? 'off' : 'bad'
-    }
+
+    if (hasUsableData(key, payload)) return payloadHasWarnings(payload) ? 'warn' : 'good'
+
+    if (detail?.configured === false || detail?.status === 'not_configured') return 'off'
+    if (detail?.status === 'no_account') return 'off'
     if (payload && isErrorPayload(payload)) return 'bad'
-    if (detail?.status === 'ok') return 'good'
-    return payload ? 'good' : 'idle'
+    if (detail && detail.status && detail.status !== 'ok') return 'bad'
+    return 'idle'
   }
 
   const nav = (
@@ -73,12 +80,21 @@ export default function Sidebar({
                     className={cls(
                       'w-1.5 h-1.5 rounded-full',
                       status === 'good' && 'bg-pos',
+                      status === 'warn' && 'bg-warn',
                       status === 'bad' && 'bg-neg',
                       status === 'off' && 'bg-faint/60',
                       status === 'idle' && 'bg-line2'
                     )}
                     title={
-                      status === 'good' ? 'Connected' : status === 'bad' ? 'Error — see Connections' : status === 'off' ? 'Not configured' : 'Unknown'
+                      status === 'good'
+                        ? 'Connected — data loaded'
+                        : status === 'warn'
+                        ? 'Connected — some metrics unavailable for this range'
+                        : status === 'bad'
+                        ? 'No data — see Connections'
+                        : status === 'off'
+                        ? 'Not configured'
+                        : 'Waiting for the first load'
                     }
                   />
                 )}
@@ -89,6 +105,7 @@ export default function Sidebar({
                 className={cls(
                   'absolute right-1.5 top-1.5 w-1.5 h-1.5 rounded-full',
                   status === 'good' && 'bg-pos',
+                  status === 'warn' && 'bg-warn',
                   status === 'bad' && 'bg-neg',
                   status === 'off' && 'bg-faint/60',
                   status === 'idle' && 'bg-line2'

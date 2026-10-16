@@ -37,6 +37,7 @@ globalThis.document = globalThis.document || {
 }
 
 import App from '../src/App.jsx'
+import Sidebar from '../src/components/layout/Sidebar.jsx'
 import OverviewPage from '../src/components/panels/OverviewPage.jsx'
 import PlatformPage from '../src/components/panels/PlatformPage.jsx'
 import GscPage from '../src/components/panels/GscPage.jsx'
@@ -614,6 +615,77 @@ check('Connections survives lastUpdated as a Date, a string, a number or junk', 
     assert(html.length > 400, `Connections rendered nothing for lastUpdated=${String(stamp)}`)
     notIncludes(html, 'Invalid Date')
   }
+})
+
+console.log('\nApp shell — every view must render (regression: "sample is not defined")')
+const VIEWS = ['overview', ...PLATFORM_ORDER, 'audience', 'connections', 'searchConsole']
+for (const view of VIEWS) {
+  check(`App renders the "${view}" view without a ReferenceError`, () => {
+    store.set('pulse.activeView', JSON.stringify(view))
+    const html = render(<App />)
+    assert(html.length > 500, `view "${view}" rendered only ${html.length} chars`)
+    notIncludes(html, 'is not defined')
+    notIncludes(html, 'Unexpected')
+  })
+}
+check('App renders every view in sample mode too', () => {
+  store.set('pulse.sampleMode', 'true')
+  for (const view of VIEWS) {
+    store.set('pulse.activeView', JSON.stringify(view))
+    const html = render(<App />)
+    assert(html.length > 500, `sample view "${view}" rendered only ${html.length} chars`)
+    notIncludes(html, 'is not defined')
+  }
+  store.delete('pulse.sampleMode')
+})
+check('App renders every view with a collapsed sidebar and a mobile nav open', () => {
+  store.set('pulse.sidebarCollapsed', 'true')
+  for (const view of VIEWS) {
+    store.set('pulse.activeView', JSON.stringify(view))
+    render(<App />)
+  }
+  store.delete('pulse.sidebarCollapsed')
+  store.delete('pulse.activeView')
+})
+
+check('the sidebar dot is green when data arrives even if health is unhappy', () => {
+  const html = render(
+    <Sidebar
+      active="pinterest"
+      onChange={() => {}}
+      healthDetails={{ pinterest: { status: 'error', message: 'health probe failed', configured: true } }}
+      platformData={{ pinterest: unwrap(pinterestRich) }}
+    />
+  )
+  includes(html, 'bg-pos', 'a channel with data must not show a red dot')
+  notIncludes(html, 'bg-neg')
+})
+
+check('the sidebar dot is amber when data arrived but part of it is missing', () => {
+  const payload = unwrap(pinterestRich)
+  const html = render(
+    <Sidebar
+      active="pinterest"
+      onChange={() => {}}
+      healthDetails={{ pinterest: { status: 'ok', configured: true } }}
+      platformData={{ pinterest: { ...payload, partialErrors: [{ group: 'g3', optional: true, message: 'skipped' }] } }}
+    />
+  )
+  includes(html, 'bg-warn')
+  includes(html, 'some metrics unavailable')
+})
+
+check('the sidebar dot is red only when nothing came back', () => {
+  const html = render(
+    <Sidebar
+      active="instagram"
+      onChange={() => {}}
+      healthDetails={{ instagram: { status: 'ok', configured: true } }}
+      platformData={{ instagram: { error: { message: 'boom' } } }}
+    />
+  )
+  includes(html, 'bg-neg')
+  includes(html, 'No data')
 })
 
 console.log('\nMetric table & app shell')

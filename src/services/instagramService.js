@@ -9,6 +9,7 @@ const config = require('../config');
 const { getAccountDetails } = require('./tokenService');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { transformMetrics, buildOverview, scalarOf } = require('../utils/transform');
+const { fetchMetricGroup, insightWindows } = require('../utils/graphInsights');
 const demo = require('../utils/demographics');
 const { round } = require('../utils/metrics');
 
@@ -38,9 +39,9 @@ const GROUPS = [
  * (working) implementation had no `id` key in GROUPS at all; this keeps the
  * key for diagnostics while building the request explicitly.
  */
-function groupParams(g, since, until) {
+function groupParams(g, since, until, metricOverride) {
   const p = {
-    metric: g.metric,
+    metric: metricOverride || g.metric,
     period: g.period,
     since,
     until,
@@ -65,46 +66,77 @@ async function fetchInsights(query) {
   const [accountInfo, demographics, ...results] = await Promise.all([
     getAccountDetails().then((d) => d.instagram).catch((e) => ({ error: e.message })),
     fetchDemographics().catch((e) => ({ ...demo.empty('Instagram Graph API · audience insights', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices']), unit: 'count' })),
+    // Meta rejects any Instagram insights window longer than 30 days
+    // ("(#100) There cannot be more than 30 days (2592000 s) between since and
+    // until"), so each group is fetched in ≤30-day windows and merged. If Meta
+    // rejects the parameter set, the group is retried metric by metric and only
+    // the retired metrics are dropped.
     ...GROUPS.map((g) =>
-      axios
-        .get(url, {
-          params: groupParams(g, since, until),
-          timeout: 30000,
-        })
-        .then((r) => ({ ok: true, group: g, raw: (r.data.data || []).map(normalise) }))
-        .catch((e) => {
-          const fbErr = e.response?.data?.error;
-          return {
-            ok: false,
-            group: g,
-            message: fbErr?.message || e.message,
-            code: fbErr?.code || null,
-            status: e.response?.status || null,
-            hint:
-              fbErr?.code === 190 || String(fbErr?.message || '').toLowerCase().includes('expired')
-                ? 'ACCESS_TOKEN expired — regenerate it and restart the API.'
-                : fbErr?.code === 10 || String(fbErr?.message || '').toLowerCase().includes('permission')
-                ? 'Token needs instagram_basic + instagram_manage_insights, and INSTAGRAM_ID must be a Business/Creator account linked to the Page.'
-                : null,
-          };
-        })
+      fetchMetricGroup({
+        metric: g.metric,
+        since,
+        until,
+        platformLabel: 'this Instagram Business account',
+        requestOne: (metric, winSince, winUntil) =>
+          axios
+            .get(url, {
+              params: groupParams(g, winSince, winUntil, metric),
+              timeout: 30000,
+            })
+            .then((r) => r.data.data || []),
+      }).then((r) => ({ ...r, group: g }))
     ),
   ]);
 
   const raw = [];
   const errors = [];
+  let windowsUsed = 1;
+  let clamped = false;
+  let recovered = 0;
   results.forEach((r) => {
-    if (r.ok) raw.push(...r.raw);
-    else errors.push({ group: r.group.id, metrics: r.group.metric, optional: Boolean(r.group.optional), message: r.message, code: r.code, hint: r.hint, status: r.status });
+    windowsUsed = Math.max(windowsUsed, r.windows || 1);
+    clamped = clamped || Boolean(r.clamped);
+    if (r.ok) {
+      raw.push(...(r.raw || []).map(normalise));
+      if (r.recovered) recovered += 1;
+      for (const d of r.dropped || []) {
+        errors.push({
+          group: r.group.id,
+          metrics: d.metric,
+          optional: true,
+          recovered: true,
+          message: `Meta no longer serves "${d.metric}" for this account — skipped.`,
+          detail: d.message,
+          code: d.code,
+          hint: null,
+          status: null,
+        });
+      }
+    } else {
+      errors.push({
+        group: r.group.id,
+        metrics: r.group.metric,
+        optional: Boolean(r.group.optional),
+        message: r.message,
+        code: r.code,
+        hint: r.hint,
+        status: r.status,
+      });
+    }
   });
 
   const hardFailures = errors.filter((e) => !e.optional);
-  if (!raw.length) {
+  const igProfile = accountInfo && !accountInfo.error ? accountInfo : null;
+  const haveAnything = raw.length > 0 || Boolean(igProfile) || demographics?.available === true;
+
+  // Degrade, don't fail: with a profile or demographics in hand the client still
+  // gets a useful payload plus a notice, instead of an error card.
+  if (!haveAnything) {
     const first = errors[0];
     throw Object.assign(new Error(first?.message || 'All Instagram metric groups failed'), {
       code: 'IG_ALL_FAILED',
       httpStatus: first?.status || 400,
-      hint: first?.hint || 'Check ACCESS_TOKEN scopes and that INSTAGRAM_ID is a Business account.',
+      hint: first?.hint || 'Check ACCESS_TOKEN and INSTAGRAM_ID in .env.',
       details: errors,
     });
   }
@@ -146,6 +178,23 @@ async function fetchInsights(query) {
     };
   }
 
+  const noticeParts = [];
+  if (hardFailures.length) {
+    noticeParts.push(
+      raw.length
+        ? `${hardFailures.length} metric group(s) unavailable for this range: ${hardFailures.map((e) => e.metrics).join(' · ')}`
+        : `No Instagram insights for this range (${hardFailures.map((e) => e.message).join(' · ')})`
+    );
+  }
+  if (recovered) noticeParts.push(`${recovered} group(s) were retried metric by metric; retired metrics were skipped.`);
+  if (clamped) {
+    const days = Math.round((until - (insightWindows(since, until).clampedSince || since)) / 86400);
+    noticeParts.push(`Meta serves Instagram insights 30 days at a time, so the most recent ${days} days of this range are shown.`);
+  } else if (windowsUsed > 1) {
+    noticeParts.push(`Range was fetched in ${windowsUsed} × ≤30-day windows (Meta's per-request limit).`);
+  }
+  const notice = noticeParts.join(' ');
+
   return {
     platform: 'instagram',
     meta: {
@@ -155,15 +204,16 @@ async function fetchInsights(query) {
       dataPoints: metrics.reduce((s, m) => s + m.values.length, 0),
       account: overview.account || null,
       requestedGroups: GROUPS.map((g) => g.metric),
+      windows: windowsUsed,
+      clampedToRecent: clamped,
+      recoveredGroups: recovered,
     },
     overview,
     timeseries,
     metrics,
     demographics,
     ...(errors.length ? { partialErrors: errors } : {}),
-    ...(hardFailures.length
-      ? { notice: `${hardFailures.length} metric group(s) unavailable: ${hardFailures.map((e) => e.metrics).join(' · ')}` }
-      : {}),
+    ...(notice ? { notice } : {}),
   };
 }
 

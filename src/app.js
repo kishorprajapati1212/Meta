@@ -1,5 +1,5 @@
 /**
- * Meta Social & SEO Analytics API — v4.2.3
+ * Meta Social & SEO Analytics API — v4.2.4
  *
  * Serves the JSON API for 6 platforms and (if it has been built) the Pulse
  * dashboard from the same origin, so the frontend can call `/api/...` with no
@@ -94,5 +94,29 @@ app.listen(config.PORT, '0.0.0.0', () => {
   console.log('  6 platforms: facebook | instagram | youtube | linkedin | pinterest | searchConsole');
   console.log(`  Docs:      http://localhost:${config.PORT}/docs.html`);
   console.log(`  Dashboard: http://localhost:${config.PORT}/app ${fs.existsSync(path.join(DIST, 'index.html')) ? '' : '(run: cd Pulse && npm run build)'}`);
-  console.log(`  Health:    http://localhost:${config.PORT}/api/health\n`);
+  console.log(`  Health:    http://localhost:${config.PORT}/api/health`);
+
+  // Free-tier hosts (Render, Railway, Fly) sleep after ~15 idle minutes. The
+  // first request after that is a cold start which routinely outlasts the
+  // browser/proxy timeout and surfaces as "Service not available" — the exact
+  // symptom that made this dashboard look broken "over time". Pinging our own
+  // health endpoint keeps the process warm. Render injects RENDER_EXTERNAL_URL;
+  // without it we ping localhost, which still keeps a local proxy warm.
+  if (typeof fetch === 'function') {
+    const publicUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL || `http://127.0.0.1:${config.PORT}`;
+    const ping = () => {
+      fetch(`${publicUrl}/api/health`, { signal: AbortSignal.timeout(20000) }).catch(() => {});
+    };
+    // Warm the last-good cache once at boot: the first visitor gets numbers
+    // immediately, and there is a fallback ready if an upstream flakes later.
+    const warm = setTimeout(() => {
+      fetch(`${publicUrl}/api/combined?date_preset=last_30d&compact=true`, { signal: AbortSignal.timeout(120000) }).catch(() => {});
+    }, 2500);
+    if (typeof warm.unref === 'function') warm.unref();
+
+    const timer = setInterval(ping, 10 * 60 * 1000);
+    if (typeof timer.unref === 'function') timer.unref();
+    console.log(`  Keep-alive: GET ${publicUrl}/api/health every 10 min (keeps free-tier hosts awake)`);
+  }
+  console.log('');
 });

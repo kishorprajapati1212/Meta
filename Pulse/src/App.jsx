@@ -155,7 +155,7 @@ export default function App() {
             <AudiencePage
               platformData={platformData}
               range={effectiveRange}
-              sample={sample}
+              sample={isSample}
               initialChannel={audienceChannel}
               onChannelChange={setAudienceChannel}
               onNavigate={(v) => {
