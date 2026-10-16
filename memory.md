@@ -1,6 +1,6 @@
 # Project Memory — Meta Social & SEO Analytics
 
-> **v4.2.2 API · v2.1.2 dashboard · last updated 2026-10-16**
+> **v4.2.3 API · v2.1.2 dashboard · last updated 2026-10-16**
 > The detailed, living context document is **[`context.md`](./context.md)** —
 > architecture, full response contract, every decision and why, known
 > limitations, changelog. This file is the quick-recall summary. **Update both
@@ -94,6 +94,25 @@ overview entries are normalised).
 - `.env.example` is byte-for-byte the original 14 names; nothing renamed or added.
 - `config/index.js` cleans values on read (CRLF / quotes / spaces) so a copied
   `.env` cannot corrupt a token; a self-test enforces both rules.
+
+## v4.2.3 — wire-level data bugs (2026-10-16)
+- NEVER spread an internal group object into an outbound query. Graph answers
+  `(#100) … An ID has already been specified.` if it sees `?id=…` next to an id
+  in the path. Build params explicitly.
+- Meta breakdown metrics (`audience_*`, `page_fans_*`) return ONE value object
+  keyed by segment; total_value metrics return `{metricName: N}`. Parse with
+  `demo.expandGraphValues()` / `transform.scalarOf()`, never `Number(v.value)`.
+- A `.catch()` that swallows a ReferenceError looks like "no data available".
+  `scripts/upstreamtest.js` audits every src module for undeclared identifiers.
+- Routes must use `platformEnvelope()` — never hand-pick `overview/timeseries/
+  metrics`, or new service fields silently vanish from single-platform calls.
+- `errorResponse()` must keep `err.hint`; the client prints it.
+- `npm test` = selftest (47) + upstreamtest (28). Mock Graph/Google lives in
+  `scripts/mockUpstream.js` (records every request) and runs standalone via
+  `scripts/mockUpstreamServer.js`.
+- `Pulse npm run smoke:live [-- --api URL]` renders every page against a live API
+  and reports which metrics actually carry data. Run it after any deploy.
+- `ConnectionsPage` accepts `lastUpdated` as Date | ISO string | epoch | junk.
 
 ## v4.2.2 — crash-proofing (2026-10-16)
 - Never dereference a platform payload before a null-check (`platformState`).

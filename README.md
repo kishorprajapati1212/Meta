@@ -181,7 +181,9 @@ brand-accurate platform colours.
 | `npm run dev:all` | API on `:5000` **and** dashboard on `:5173`, proxy already wired |
 | `npm start` | API only (serves the built dashboard at `/app`) |
 | `npm run build:ui` | Rebuild `Pulse/dist` — required before committing/deploying |
-| `npm test` / `npm run smoke` | 47 backend checks / 72 dashboard render checks |
+| `npm test` | 47 offline checks + 28 upstream wire checks (mock Graph/Google) |
+| `npm run smoke` (in `Pulse/`) | 73 dashboard render checks |
+| `npm run smoke:live` (in `Pulse/`) | renders every page against a **live** API and reports which metrics carry data |
 
 In dev the dashboard proxies `/api` to the local API first, then to
 `VITE_FALLBACK_API` (your deployed host), and finally answers with a JSON error
@@ -195,6 +197,20 @@ Open the repo at https://idx.dev and `.idx/dev.nix` sets up Node 20 + Docker,
 installs both dependency trees, builds the dashboard on start, and declares web
 previews for the dashboard (`:5173`), the API (`:5000`, serves `/app`) and the
 credential-free Docker demo.
+
+---
+
+## Is my deployment actually returning data?
+
+```bash
+cd Pulse
+npm run smoke:live -- --api https://meta-ptze.onrender.com
+```
+
+It fetches `/api/health`, `/api/combined` and every channel endpoint, renders
+Overview / each channel / Audience / Connections with those real payloads, prints
+a per-channel table (metrics, how many carry data, demographics yes/no) and exits
+non-zero if a page crashes or a "healthy" channel comes back empty.
 
 ---
 
@@ -240,4 +256,4 @@ production: all-zero Pinterest analytics (the original bug), rich analytics,
 
 ## Version
 
-API **v4.2.2** · Dashboard **2.1.2** · Node **18+** · Docker `docker compose up` · Project IDX ready
+API **v4.2.3** · Dashboard **2.1.2** · Node **18+** · Docker `docker compose up` · Project IDX ready

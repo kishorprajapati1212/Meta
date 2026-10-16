@@ -606,6 +606,16 @@ check('the dev-proxy "API unreachable" envelope is described with its hint', () 
   includes(text, 'dev:all')
 })
 
+check('Connections survives lastUpdated as a Date, a string, a number or junk', () => {
+  for (const stamp of [new Date(), '2026-10-16T05:00:00.000Z', Date.now(), 'not-a-date', null, undefined, {}]) {
+    const html = render(
+      <ConnectionsPage health={healthFixture} healthError={null} sampleMode={false} onToggleSample={() => {}} onRefresh={() => {}} refreshing={false} lastUpdated={stamp} />
+    )
+    assert(html.length > 400, `Connections rendered nothing for lastUpdated=${String(stamp)}`)
+    notIncludes(html, 'Invalid Date')
+  }
+})
+
 console.log('\nMetric table & app shell')
 check('MetricTable lists every metric including zeros, with aggregation kinds', () => {
   const html = render(<MetricTable metrics={metricsOf('pinterest', pinData)} platformKey="pinterest" color="#E60023" />)

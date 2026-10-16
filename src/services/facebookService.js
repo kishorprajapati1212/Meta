@@ -139,17 +139,17 @@ async function fetchDemographics() {
     return blank('Page token unavailable: ' + (e.message || e));
   }
   const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.FACEBOOK_PAGE_ID}/insights`;
-  const get = (metric) =>
+  const get = (metric, dimensionKey) =>
     axios
       .get(url, { params: { metric, period: 'lifetime', access_token: pt }, timeout: 25000 })
-      .then((r) => (r.data.data || []).flatMap((d) => (d.values || []).map((v) => ({ value: Number(v.value ?? 0) || 0, ...v }))))
+      .then((r) => (r.data.data || []).flatMap((d) => demo.expandGraphValues(d.values, dimensionKey)))
       .catch(() => []);
 
-  const [countryRows, gaRows] = await Promise.all([get('page_fans_country'), get('page_fans_gender_age')]);
+  const [countryRows, gaRows] = await Promise.all([get('page_fans_country', 'country'), get('page_fans_gender_age', 'gender')]);
   const countries = demo.withShare(
-    countryRows.filter((r) => r.country).map((r) => ({ code: String(r.country).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
+    countryRows.map((r) => ({ code: String(r.key).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
   );
-  const ga = demo.splitAgeGender(gaRows.filter((r) => r.gender || r.age).map((r) => ({ segment: `${r.gender || ''}.${r.age || ''}`, value: r.value })));
+  const ga = demo.splitAgeGender(gaRows.map((r) => ({ segment: String(r.key), value: r.value })));
   const available = Boolean(countries.length || ga.age || ga.gender);
   const gaps = [...(ga.age || ga.gender ? [] : ['age', 'gender']), ...(countries.length ? [] : ['countries'])];
   return {

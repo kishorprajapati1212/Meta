@@ -7,8 +7,8 @@
 const axios = require('axios');
 const config = require('../config');
 const { getAccountDetails } = require('./tokenService');
-const { parseDateRange, dateRangeMeta } = require('../utils/dateUtils');
-const { transformMetrics, buildOverview } = require('../utils/transform');
+const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
+const { transformMetrics, buildOverview, scalarOf } = require('../utils/transform');
 const demo = require('../utils/demographics');
 const { round } = require('../utils/metrics');
 
@@ -24,6 +24,31 @@ const GROUPS = [
   // the platform when they 400.
   { id: 'g3', metric: 'website_clicks,email_clicks,get_direction_clicks,calls_clicks,text_message_clicks', metric_type: 'total_value', period: 'day', optional: true },
 ];
+
+/**
+ * Wire parameters for one metric group.
+ *
+ * `id` and `optional` are internal bookkeeping for error reporting and must
+ * NEVER be sent to Graph. An extra `id` query parameter on
+ * `/{INSTAGRAM_ID}/insights` makes Graph answer:
+ *
+ *   (#100) Invalid token: "17841432245164684". An ID has already been specified.
+ *
+ * …which failed every group and surfaced as IG_ALL_FAILED. The original
+ * (working) implementation had no `id` key in GROUPS at all; this keeps the
+ * key for diagnostics while building the request explicitly.
+ */
+function groupParams(g, since, until) {
+  const p = {
+    metric: g.metric,
+    period: g.period,
+    since,
+    until,
+    access_token: config.USER_ACCESS_TOKEN,
+  };
+  if (g.metric_type) p.metric_type = g.metric_type;
+  return p;
+}
 
 async function fetchInsights(query) {
   if (!config.INSTAGRAM_ID) {
@@ -43,7 +68,7 @@ async function fetchInsights(query) {
     ...GROUPS.map((g) =>
       axios
         .get(url, {
-          params: { ...g, since, until, access_token: config.USER_ACCESS_TOKEN },
+          params: groupParams(g, since, until),
           timeout: 30000,
         })
         .then((r) => ({ ok: true, group: g, raw: (r.data.data || []).map(normalise) }))
@@ -146,10 +171,7 @@ async function fetchInsights(query) {
  * IG total_value metrics return values as [{value}] instead of a scalar.
  */
 function normalise(m) {
-  const values = (m.values || []).map((v) => ({
-    end_time: v.end_time,
-    value: typeof v.value === 'object' && v.value !== null ? Number(v.value.value ?? 0) : Number(v.value ?? 0),
-  }));
+  const values = (m.values || []).map((v) => ({ end_time: v.end_time, value: scalarOf(m.name, v) }));
   return { ...m, values };
 }
 
@@ -166,25 +188,25 @@ async function fetchDemographics() {
     return blank('Instagram credentials are not configured.');
   }
   const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.INSTAGRAM_ID}/insights`;
-  const get = (metric) =>
+  const get = (metric, dimensionKey) =>
     axios
       .get(url, { params: { metric, period: 'lifetime', access_token: config.USER_ACCESS_TOKEN }, timeout: 25000 })
-      .then((r) => (r.data.data || []).flatMap((d) => (d.values || []).map((v) => ({ value: Number(v.value ?? v.count ?? 0) || 0, ...v }))))
+      .then((r) => (r.data.data || []).flatMap((d) => demo.expandGraphValues(d.values, dimensionKey)))
       .catch(() => []);
 
   const [countryRows, cityRows, gaRows] = await Promise.all([
-    get('audience_country'),
-    get('audience_city'),
-    get('audience_gender_age'),
+    get('audience_country', 'country'),
+    get('audience_city', 'city'),
+    get('audience_gender_age', 'gender'),
   ]);
 
   const countries = demo.withShare(
-    countryRows.filter((r) => r.country).map((r) => ({ code: String(r.country).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
+    countryRows.map((r) => ({ code: String(r.key).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
   );
   const cities = demo.withShare(
-    cityRows.filter((r) => r.city).map((r) => ({ name: String(r.city), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 20)
+    cityRows.map((r) => ({ name: String(r.key), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 20)
   );
-  const ga = demo.splitAgeGender(gaRows.filter((r) => r.gender || r.age).map((r) => ({ segment: `${r.gender || ''}.${r.age || ''}`, value: r.value })));
+  const ga = demo.splitAgeGender(gaRows.map((r) => ({ segment: String(r.key), value: r.value })));
 
   const available = Boolean(countries.length || cities.length || ga.age || ga.gender);
   return {

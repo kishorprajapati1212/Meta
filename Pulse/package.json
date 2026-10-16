@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx",
-    "smoke": "vite build --ssr scripts/smoke.jsx --outDir .smoke --logLevel warn && node .smoke/smoke.js"
+    "smoke": "vite build --ssr scripts/smoke.jsx --outDir .smoke --logLevel warn && node .smoke/smoke.js",
+    "smoke:live": "vite build --ssr scripts/livecheck.jsx --outDir .livecheck --logLevel error && node .livecheck/livecheck.js"
   },
   "dependencies": {
     "axios": "^1.7.9",

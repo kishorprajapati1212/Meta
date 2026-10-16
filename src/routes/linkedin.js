@@ -1,29 +1,12 @@
 const { Router } = require('express');
 const { fetchLinkedIn } = require('../services/zernioService');
-const { success, errorResponse } = require('../utils/response');
+const { platformEnvelope, errorResponse } = require('../utils/response');
 const r = Router();
 
 r.get('/', async (req, res) => {
   try {
     const d = await fetchLinkedIn(req.query);
-    res.json(
-      success({
-        platform: 'linkedin',
-        meta: d.meta,
-        data: {
-          overview: d.overview,
-          timeseries: d.timeseries,
-          topPosts: d.topPosts,
-          posts: d.posts,
-          totals: d.totals,
-          avgEngagementRate: d.avgEngagementRate,
-          platformBreakdown: d.platformBreakdown,
-          followerTimeseries: d.followerTimeseries,
-          demographics: d.demographics,
-        },
-        notice: d.notice || undefined,
-      })
-    );
+    res.json(platformEnvelope('linkedin', d));
   } catch (e) {
     const er = errorResponse(e);
     res.status(er.httpStatus).json(er.body);

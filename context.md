@@ -5,7 +5,7 @@
 > decisions were made and why, and what is known to be broken. `memory.md` is a
 > short summary; this file is the detail.
 >
-> **Last updated:** 2026-10-16 · **API version:** 4.2.2 · **Dashboard version:** 2.1.2
+> **Last updated:** 2026-10-16 · **API version:** 4.2.3 · **Dashboard version:** 2.1.2
 
 ---
 
@@ -339,6 +339,66 @@ Deploy: push the repo; Render runs `npm start`. Add
 ---
 
 ## 9. Changelog
+
+### 2026-10-16 — API v4.2.3 (data-loss bugs reported from the Docker stack)
+Four real bugs, all of which made the rebuilt API return *less* data than the
+original one. Reported as:
+`[ERROR] IG_ALL_FAILED Invalid token: "17841432245164684". An ID has already been specified.`
+and `[ERROR] UNKNOWN demo is not defined`.
+
+1. **Instagram sent internal keys to Graph.** `GROUPS` entries carry `id: 'g1'`
+   and `optional: true` for diagnostics, and the request spread the whole group
+   into the query string: `/{IG_ID}/insights?id=g1&optional=true&…`. Graph
+   refuses an `id` parameter next to an id in the path and answers
+   `(#100) Invalid token: "<ig-id>". An ID has already been specified.` → every
+   group failed → `IG_ALL_FAILED`, no Instagram data. The original implementation
+   had no `id` key at all. Now `groupParams()` builds the request explicitly
+   (`metric`, `period`, `since`, `until`, `access_token`, plus `metric_type` only
+   for total_value groups) and the internal keys stay server-side.
+2. **`gscService.js` used the shared demographics helper without requiring it** →
+   `ReferenceError: demo is not defined`, surfaced to the client as
+   `[ERROR] UNKNOWN demo is not defined`. Import added.
+3. **`instagramService.js` used `toDateStr()` without importing it** → every
+   Instagram demographics call died inside a `.catch()` and reported
+   "Demographics unavailable: toDateStr is not defined". Import added.
+4. **Meta's map-shaped values were parsed as scalars.** `audience_country`,
+   `audience_city`, `audience_gender_age`, `page_fans_country` and
+   `page_fans_gender_age` return ONE value object keyed by segment
+   (`{"US":42,"IN":18}`, `{"male.18-24":3}`), and `metric_type=total_value`
+   metrics return `{profile_views:64}`. The parsers expected a scalar plus a
+   sibling `country`/`city`/`gender` field, so `Number({...})` → NaN → 0 and the
+   rows were filtered out: **Facebook and Instagram demographics were always
+   empty and every total_value metric (profile views, likes, comments, shares,
+   saves, interactions, website clicks) always read 0.** Fixed with
+   `demographics.expandGraphValues()` (handles map / row / array shapes) and
+   `transform.scalarOf()` (handles `{metric:N}`, `{value:N}` and scalars).
+
+5. **Single-platform routes stripped the payload.** `/api/facebook`,
+   `/api/instagram`, `/api/youtube`, `/api/gsc`, `/api/linkedin` and
+   `/api/pinterest` each hand-picked `overview/timeseries/metrics` (Zernio's two
+   picked a longer but still fixed list), so `demographics`, `stage`, `account`,
+   `partialErrors`, `totals`, `level` and `boards` only ever reached a client
+   through `/api/combined`. Any per-channel refresh therefore returned *less*
+   than the combined call — the Audience page went empty. All six routes now use
+   `platformEnvelope(platform, result, extra?)` from `src/utils/response.js`,
+   which hoists `platform`/`meta`/`notice` and passes everything else through.
+6. **`errorResponse()` dropped the `hint`** every service attaches, so the
+   dashboard could show `IG_ALL_FAILED` with no way to act on it. The hint is now
+   in the error body (`error.hint`) and in the server log line — which is what
+   `describeError()` on the client already prints.
+
+**New test layer — `scripts/upstreamtest.js` (28 checks) + `scripts/mockUpstream.js`.**
+An offline mock of Meta Graph, Google OAuth, YouTube Analytics/Data and Search
+Console that RECORDS every outgoing request, so the suite asserts on the wire,
+not just on parsed responses: no internal keys leave the process, `access_token`
+is never an id, page insights use the exchanged page token, `metric_type` only
+appears on total_value groups, and Facebook/Instagram/GSC/YouTube each return
+non-zero data end to end. It also asserts the envelope keeps every field, that no route whitelists payload
+keys, and that an error hint survives to the response body. It runs a **static
+audit of every `src/` module**:
+any identifier used but never declared (the general form of bugs 2 and 3,
+covering both `x.y` member access and bare `x()` calls) fails the build. Verified
+with a negative control. `npm test` now runs both suites.
 
 ### 2026-10-16 — API v4.2.2 + Pulse 2.1.2 (crash-proofing + flaky-network resilience)
 - **Fixed the white-screen crash** `TypeError: Cannot read properties of undefined

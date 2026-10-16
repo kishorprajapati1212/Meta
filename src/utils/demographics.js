@@ -143,8 +143,61 @@ function deviceLabel(code) {
   return DEVICE_LABELS[code] || String(code).replace(/[_-]/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 }
 
+/**
+ * expandGraphValues — flatten a Meta Graph `values[]` array into rows.
+ *
+ * Meta serves audience/fan breakdowns in more than one shape, and which one you
+ * get depends on the metric and the Graph version:
+ *
+ *   A) ONE value object keyed by segment (the common case):
+ *        values: [{ value: { US: 42, IN: 18 }, end_time: "..." }]
+ *        values: [{ value: { "male.18-24": 3, "female.25-34": 9 } }]
+ *        values: [{ value: { "Ahmedabad, Gujarat": 5 } }]
+ *   B) one row per segment with the dimension as a sibling field:
+ *        values: [{ value: 42, country: "US", end_time: "..." }]
+ *   C) an array of {value, ...} objects
+ *
+ * Parsing only shape (B) is what made Facebook and Instagram demographics come
+ * back permanently empty: `Number({...})` is NaN, and there is no `.country`
+ * field to filter on, so every row was dropped.
+ *
+ * @param {Array} values   the metric's `values` array
+ * @param {string} dimensionKey  sibling field name for shape (B): country|city|gender|age
+ * @returns {Array<{key:string,value:number,end_time:string|null}>}
+ */
+function expandGraphValues(values, dimensionKey) {
+  const out = [];
+  for (const v of Array.isArray(values) ? values : []) {
+    if (!v || typeof v !== 'object') continue;
+    const raw = v.value !== undefined ? v.value : v.count;
+    const endTime = v.end_time || v.end_date || null;
+
+    if (Array.isArray(raw)) {
+      for (const item of raw) {
+        if (!item || typeof item !== 'object') continue;
+        const key = item[dimensionKey] ?? item.key ?? item.name ?? item.value;
+        out.push({ key: String(key ?? ''), value: Number(item.value ?? item.count ?? 0) || 0, end_time: endTime });
+      }
+      continue;
+    }
+
+    if (raw && typeof raw === 'object') {
+      for (const [key, n] of Object.entries(raw)) {
+        out.push({ key: String(key), value: Number(n) || 0, end_time: endTime });
+      }
+      continue;
+    }
+
+    // scalar — the dimension, if any, rides along as a sibling field
+    const key = dimensionKey ? v[dimensionKey] : undefined;
+    out.push({ key: key === undefined || key === null ? '' : String(key), value: Number(raw ?? 0) || 0, end_time: endTime });
+  }
+  return out.filter((r) => r.key !== '');
+}
+
 module.exports = {
   empty,
+  expandGraphValues,
   withShare,
   asShareRows,
   splitAgeGender,

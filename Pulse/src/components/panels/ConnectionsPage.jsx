@@ -17,6 +17,9 @@ import { cls } from '../../lib/cls'
  * one-click diagnostic runs against the Zernio and YouTube debug endpoints.
  */
 export default function ConnectionsPage({ health, healthError, sampleMode, onToggleSample, onRefresh, refreshing, lastUpdated }) {
+  // App passes a Date, but an ISO string / epoch number must not crash the page.
+  const syncStamp = lastUpdated instanceof Date ? lastUpdated : lastUpdated ? new Date(lastUpdated) : null
+  const syncLabel = syncStamp && !Number.isNaN(syncStamp.getTime()) ? dateTime(syncStamp.toISOString()) : '—'
   const details = healthDetailsOf(health)
   const counts = healthCountsOf(health)
   const meta = health?.meta || {}
@@ -204,7 +207,7 @@ export default function ConnectionsPage({ health, healthError, sampleMode, onTog
               <Fact label="Server time" value={health.data?.serverTime ? dateTime(health.data.serverTime) : '—'} />
               <Fact label="Channels configured" value={`${counts.configured} / ${counts.total}`} />
               <Fact label="Channels healthy" value={`${counts.ok} / ${counts.total}`} />
-              <Fact label="Last dashboard sync" value={lastUpdated ? dateTime(lastUpdated.toISOString()) : '—'} />
+              <Fact label="Last dashboard sync" value={syncLabel} />
               <Fact label="Data mode" value={sampleMode ? 'Sample (local)' : 'Live API'} />
             </dl>
           ) : (

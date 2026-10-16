@@ -1,5 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  Credential-free overlay: runs a local mock Zernio and points the API at it.
+#  Credential-free overlay: runs local mocks for EVERY upstream (Zernio, Meta
+#  Graph, Google OAuth, YouTube, Search Console) and points the API at them, so
+#  all six platforms return real-shaped data with no credentials at all.
 #
 #      docker compose -f docker-compose.yml -f docker-compose.mock.yml up --build
 #
@@ -13,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: meta-analytics:4.2.2
+    image: meta-analytics:4.2.3
     container_name: meta-mock-zernio
     command: ['node', 'scripts/mockServer.js']
     environment:
@@ -22,10 +24,46 @@ services:
       MOCK_MODE: rich
     restart: unless-stopped
 
+  # Meta Graph + Google (OAuth, YouTube Analytics/Data, Search Console).
+  mock-upstream:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: meta-analytics:4.2.3
+    container_name: meta-mock-upstream
+    command: ['node', 'scripts/mockUpstreamServer.js']
+    environment:
+      MOCK_UPSTREAM_PORT: 4988
+      # must match the api's FACEBOOK_PAGE_ID so the page-token lookup succeeds
+      FACEBOOK_PAGE_ID: '123456789012345'
+      # MOCK_UPSTREAM_LOG: 'true'
+    restart: unless-stopped
+
   api:
     depends_on:
       - mock-zernio
+      - mock-upstream
     environment:
+      ACCOUNT_CREATED: '2020-01-01'
+      # ── LinkedIn + Pinterest (Zernio) ──
       ZERNIO_BASE_URL: http://mock-zernio:4987/api
       ZERNIO_API_KEY: sk_demo_key
-      ACCOUNT_CREATED: '2020-01-01'
+      # ── Facebook + Instagram (Meta Graph) ──
+      ACCESS_TOKEN: demo-user-token
+      FACEBOOK_PAGE_ID: '123456789012345'
+      INSTAGRAM_ID: '17841432245164684'
+      FB_API_VERSION: v19.0
+      FB_API_BASE: http://mock-upstream:4988/graph
+      # ── YouTube ──
+      YOUTUBE_REFRESH_TOKEN: demo-youtube-refresh-token
+      GOOGLE_CLIENT_ID: demo-google-client-id
+      GOOGLE_CLIENT_SECRET: demo-google-client-secret
+      GOOGLE_TOKEN_URL: http://mock-upstream:4988/token
+      YOUTUBE_ANALYTICS_URL: http://mock-upstream:4988/yt/v2/reports
+      YOUTUBE_DATA_API_URL: http://mock-upstream:4988/youtube/v3
+      # ── Google Search Console ──
+      GSC_REFRESH_TOKEN: demo-gsc-refresh-token
+      GSC_CLIENT_ID: demo-gsc-client-id
+      GSC_CLIENT_SECRET: demo-gsc-client-secret
+      GSC_SITE_URL: https://example.com/
+      GSC_API_BASE: http://mock-upstream:4988/webmasters/v3

@@ -16,6 +16,7 @@ const axios = require('axios');
 const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { summarize, round, pctChange } = require('../utils/metrics');
+const demo = require('../utils/demographics');
 
 let gscCache = null;
 let gscExpiry = 0;

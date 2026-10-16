@@ -16,9 +16,37 @@ function success({ platform, meta = {}, data, notice }) {
   if (notice) body.notice = notice;
   return body;
 }
+/**
+ * platformEnvelope — wrap a service result in the HTTP envelope WITHOUT dropping
+ * fields.
+ *
+ * The single-platform routes used to whitelist `overview/timeseries/metrics`, so
+ * everything the services produce beyond those three (demographics, stage,
+ * account, partialErrors, boards, level, totals…) only ever reached a client
+ * through /api/combined. A per-channel refresh therefore returned LESS data than
+ * the combined call: the Audience page went empty and partialErrors vanished.
+ *
+ * `extra` adds route-specific keys (Pinterest exposes meta.boards at top level).
+ */
+function platformEnvelope(platform, result, extra) {
+  const { platform: _ignored, meta, notice, ...data } = result || {};
+  return success({
+    platform,
+    meta: meta || {},
+    data: extra ? { ...data, ...extra } : data,
+    notice: notice || undefined,
+  });
+}
+
 function errorResponse(err) {
   const p = parseError(err);
-  console.error('[ERROR]', p.code, p.message);
-  return { httpStatus: p.httpStatus, body: { success: false, error: { code: p.code, message: p.message, details: p.details } } };
+  // Services attach an actionable `hint`; it used to be dropped here, so the
+  // dashboard could only show "IG_ALL_FAILED" with no way to fix it.
+  const hint = err?.hint || p.details?.hint || null;
+  console.error('[ERROR]', p.code, p.message, hint ? `| hint: ${hint}` : '');
+  return {
+    httpStatus: p.httpStatus,
+    body: { success: false, error: { code: p.code, message: p.message, hint, details: p.details } },
+  };
 }
-module.exports = { success, errorResponse };
+module.exports = { success, platformEnvelope, errorResponse };

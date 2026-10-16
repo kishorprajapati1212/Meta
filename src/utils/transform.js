@@ -19,12 +19,34 @@ const { summarize, labelOf, kindOf, unitOf, round, pctChange, sum, mean } = requ
 /** metric ids that describe a level, not a flow */
 const GAUGE_IDS = ['follower_count', 'page_fans'];
 
+/**
+ * scalarOf — Meta returns `values[].value` as a plain number for most metrics,
+ * but as an OBJECT for metric_type=total_value, keyed by the metric name:
+ *
+ *   { name: "profile_views", values: [{ value: { profile_views: 64 } }] }
+ *
+ * `Number({...})` is NaN, so every total_value metric (profile views, likes,
+ * comments, shares, saves, interactions, website clicks…) used to read as 0.
+ * Accept the object shape, the `{value:N}` shape and the scalar shape.
+ */
+function scalarOf(id, v) {
+  const raw = v && v.value !== undefined ? v.value : v && v.count;
+  if (raw === null || raw === undefined) return 0;
+  if (typeof raw === 'number') return raw;
+  if (typeof raw === 'string') return Number(raw) || 0;
+  if (typeof raw === 'object') {
+    const picked = raw[id] !== undefined ? raw[id] : raw.value !== undefined ? raw.value : Object.values(raw).find((n) => typeof n === 'number');
+    return Number(picked) || 0;
+  }
+  return 0;
+}
+
 function transformMetric(raw) {
   const id = raw.name;
   const values = (raw.values || [])
     .map((v) => ({
       date: new Date(v.end_time).toISOString().slice(0, 10),
-      value: Number(v.value) || 0,
+      value: scalarOf(id, v),
     }))
     .filter((v) => v.value !== null && !Number.isNaN(v.value))
     .sort((a, b) => a.date.localeCompare(b.date));
@@ -175,4 +197,4 @@ function buildOverview(metrics) {
   return o;
 }
 
-module.exports = { transformMetrics, buildOverview, buildTimeseries, GAUGE_IDS, sum, mean };
+module.exports = { transformMetrics, buildOverview, buildTimeseries, scalarOf, GAUGE_IDS, sum, mean };
