@@ -15,7 +15,10 @@ import { EmptyState, NoticeBar, KpiSkeleton } from '../ui/States'
 import { usePlatformDetail } from '../../hooks/usePlatformDetail'
 import {
   channelDaily, activeChannels, isErrorPayload, errorText, topContent, accountOf, timelineOf,
+  effectiveSummary, activityCalendarOf, daysSinceLastPost, stageOf, nextMilestone,
 } from '../../lib/normalize'
+import { StageHero, ActivityHeat, InsightsPanel, GeoTeaser, buildInsights, computeStreaks } from './OverviewExtras'
+import { codeOf } from '../../lib/countries'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
 import { compact, formatValue, dateLong, dateShort, truncate, percent } from '../../lib/format'
 import { cls } from '../../lib/cls'
@@ -87,8 +90,40 @@ export default function OverviewPage({
   loading = false,
   onRetry,
 }) {
-  const kpis = useMemo(() => buildKpis(summary, platformData), [summary, platformData])
-  const rows = summary?.platforms || []
+  // The server's summary is preferred, but a missing or all-zero summary is
+  // rebuilt from the platform payloads. That is exactly the v4.0 shape, and it
+  // is why platform pages used to show numbers while the Overview showed 0 0.
+  const summaryEff = useMemo(() => effectiveSummary(platformData, summary), [platformData, summary])
+  const calendar = useMemo(() => activityCalendarOf(platformData, 120), [platformData])
+  const lastPostDays = useMemo(() => daysSinceLastPost(platformData), [platformData])
+  const stage = useMemo(
+    () => ({ ...stageOf(platformData, summaryEff, calendar), milestone: nextMilestone(summaryEff?.totals?.audience || 0) }),
+    [platformData, summaryEff, calendar]
+  )
+  const streaks = useMemo(() => computeStreaks(calendar), [calendar])
+  const insights = useMemo(
+    () => buildInsights({ stage, lastPostDays, summary: summaryEff, platformData, healthDetails }),
+    [stage, lastPostDays, summaryEff, platformData, healthDetails]
+  )
+  const geoCountries = useMemo(() => {
+    const counts = new Map()
+    for (const k of PLATFORM_ORDER) {
+      const d = platformData?.[k]?.demographics
+      if (!d?.countries?.length) continue
+      for (const c of d.countries) {
+        const code = codeOf(c.code || c.name)
+        if (!code) continue
+        const cur = counts.get(code) || { code, name: c.name, channels: 0, value: 0 }
+        cur.channels += 1
+        cur.value += Number(c.value) || 0
+        counts.set(code, cur)
+      }
+    }
+    return [...counts.values()].sort((a, b) => b.channels - a.channels || b.value - a.value)
+  }, [platformData])
+
+  const kpis = useMemo(() => buildKpis(summaryEff, platformData), [summaryEff, platformData])
+  const rows = summaryEff?.platforms || []
   const connected = rows.filter((r) => r.ok).length
   const failed = rows.filter((r) => !r.ok)
   const content = useMemo(() => topContent(platformData, 8), [platformData])
@@ -129,6 +164,9 @@ export default function OverviewPage({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* ── Stage hero: numbers that are real even at zero engagement ── */}
+      <StageHero stage={stage} summary={summaryEff} calendar={calendar} lastPostDays={lastPostDays} onNavigate={onNavigate} />
+
       {/* ── Headline KPIs ─────────────────────────────────────── */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {kpis.map((k) => (
@@ -136,11 +174,19 @@ export default function OverviewPage({
         ))}
       </section>
 
+      {/* ── Consistency + geography ───────────────────────────── */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.55fr_1fr]">
+        <ActivityHeat calendar={calendar} streaks={streaks} />
+        <GeoTeaser countries={geoCountries} onNavigate={onNavigate} />
+      </div>
+
+      <InsightsPanel insights={insights} onNavigate={onNavigate} />
+
       {/* ── Channel performance ───────────────────────────────── */}
       <Card>
         <CardHeader
           title="Channel performance"
-          sub={`${connected} of ${rows.length} channels answered · ${dateLong(summary?.generatedAt ? null : null) || rangeLabel(platformData)}`}
+          sub={`${connected} of ${rows.length} channels answered · ${rangeLabel(platformData)}`}
           icon={<Gauge className="w-4 h-4" strokeWidth={2} />}
           right={
             <div className="flex items-center gap-2">
@@ -489,8 +535,12 @@ function KpiTile({ label, value, kind = 'sum', unit = '', sub, trend = null, bre
   const up = trend !== null && trend > 0
   const down = trend !== null && trend < 0
   const max = Math.max(...breakdown.map((b) => b.value || 0), 1)
+  const zero = Number(value) === 0 && !(extra && extra.length)
   return (
-    <div className="card p-4 flex flex-col gap-2.5 card-hover">
+    <div
+      className={cls('card p-4 flex flex-col gap-2.5 card-hover', zero && 'bg-sunken/60 border-dashed')}
+      title={zero ? 'Nothing recorded in this range yet — normal for a young channel. The stage panel above tracks what is moving.' : undefined}
+    >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[11.5px] font-medium text-muted leading-tight">{label}</p>
         {trend !== null && trend !== undefined ? (
@@ -505,7 +555,14 @@ function KpiTile({ label, value, kind = 'sum', unit = '', sub, trend = null, bre
           </span>
         ) : null}
       </div>
-      <p className="font-display text-[24px] leading-7 font-bold text-ink num">{formatValue(value, { kind, unit })}</p>
+      <p className={cls('font-display text-[24px] leading-7 font-bold num', zero ? 'text-faint' : 'text-ink')}>
+        {formatValue(value, { kind, unit })}
+      </p>
+      {zero ? (
+        <span className="-mt-1 inline-flex w-fit items-center rounded border border-dashed border-line px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-faint">
+          not earned yet
+        </span>
+      ) : null}
       {extra.length ? (
         <div className="flex flex-wrap gap-x-3 gap-y-0.5">
           {extra.map((e) => (

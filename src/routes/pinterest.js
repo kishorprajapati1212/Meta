@@ -25,6 +25,7 @@ r.get('/', async (req, res) => {
           platformBreakdown: d.platformBreakdown,
           followerTimeseries: d.followerTimeseries,
           boards: d.meta.boards || [],
+          demographics: d.demographics,
         },
         notice: d.notice || undefined,
       })

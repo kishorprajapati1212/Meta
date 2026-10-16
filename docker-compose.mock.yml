@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Credential-free overlay: runs a local mock Zernio and points the API at it.
+#
+#      docker compose -f docker-compose.yml -f docker-compose.mock.yml up --build
+#
+#  The mock reproduces every upstream behaviour the real Zernio API has shown
+#  in production (see scripts/mockZernio.js): zero analytics, rich analytics,
+#  /v1/accounts returning 500, boards 404, and hasAnalyticsAccess=false.
+#  Change MOCK_MODE to switch between them without rebuilding.
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  mock-zernio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: meta-analytics:4.2.0
+    container_name: meta-mock-zernio
+    command: ['node', 'scripts/mockServer.js']
+    environment:
+      MOCK_PORT: 4987
+      # zero-analytics | rich | accounts-500 | boards-404 | no-analytics-access
+      MOCK_MODE: rich
+    restart: unless-stopped
+
+  api:
+    depends_on:
+      - mock-zernio
+    environment:
+      ZERNIO_BASE_URL: http://mock-zernio:4987/api
+      ZERNIO_API_KEY: sk_demo_key
+      ACCOUNT_CREATED: '2020-01-01'

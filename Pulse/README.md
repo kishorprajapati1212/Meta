@@ -44,6 +44,22 @@ rebuilding.
 
 ---
 
+## The Overview for a young channel
+
+A channel in the awareness stage legitimately has zero engagement, so the
+Overview leads with what *is* real: a growth-stage hero (Awareness →
+Consideration → Conversion), publishing-day count against a sustainable
+cadence, days since last post, audience/content/channel headline numbers and
+the next audience milestone with a progress bar. Below that: the six KPI tiles
+(zero ones styled dormant and tagged "not earned yet" — the number is still
+shown), a 120-day publishing heatmap with streaks, a geography teaser, and a
+rule-based "what to do next" list whose advice quotes the account's own numbers.
+
+The Overview roll-up is also **self-healing**: `effectiveSummary()` rebuilds the
+cross-channel totals from the platform payloads whenever the server's
+`data.summary` is missing or all-zero, which is exactly what an older backend
+returns — so the Overview can never show `0 0` while platform pages show data.
+
 ## Design system
 
 Light SaaS: canvas `#F5F7FA`, white cards, hairline borders `#E7EAF0`,
@@ -138,4 +154,4 @@ root, then re-run this suite.
 
 ## Version
 
-**2.0.0** — see `../context.md` for the changelog and API contract.
+**2.1.0** — see `../context.md` for the changelog and API contract.

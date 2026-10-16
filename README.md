@@ -71,11 +71,18 @@ Every upstream base URL is overridable for testing:
 | `GET /api/health` | Per-platform `{status, message, hint, configured, source}` — says exactly what to fix |
 | `GET /api/zernio/debug` | Zernio connectivity, scopes, account list, analytics access |
 
+Every platform payload may also carry **`data.demographics`** — audience
+composition (age, gender, countries, cities, devices) with an explicit
+`missing` list and `available:false` when the upstream simply does not publish
+it. YouTube reports viewer *shares*, Instagram/Facebook follower *counts*,
+Search Console clicks by country/device, and Zernio (LinkedIn/Pinterest)
+nothing at all — the API says so instead of inventing numbers.
+
 ### Parameters
 
 | Param | Values |
 |---|---|
-| `date_preset` | `today`, `yesterday`, `last_7d`, `last_14d`, `last_30d`, `last_90d`, `last_365d` |
+| `date_preset` | `today`, `yesterday`, `last_7d`, `last_14d`, `last_30d`, `last_60d`, `last_90d`, `last_120d`, `last_180d`, `last_365d`, `all_time` |
 | `since` / `until` | `YYYY-MM-DD` (overrides the preset) |
 | `compact` | `true` → drop all-zero days from `timeseries` (Meta/YouTube/GSC) |
 | `dimensions` | GSC only: `date`, `query`, `page`, `country`, `device` |
@@ -148,6 +155,14 @@ brand-accurate platform colours.
 - **Search Console** — dimension switcher (timeline / keywords / pages /
   countries / devices), ranked bar lists, "quick wins" (high impressions, low
   CTR), verified properties.
+- **Audience** — a real choropleth world map (generated from Natural Earth
+  boundaries), age×gender pyramid, gender bar, device donut and top cities, per
+  channel, plus an all-channel presence map. Channels whose upstream publishes
+  no demographics show a locked card explaining why.
+- **Overview stage layer** — growth-stage hero (awareness → consideration →
+  conversion), 120-day publishing calendar heatmap, streaks, next-milestone
+  progress and rule-based next actions, so a young channel with zero engagement
+  still reads as a business instead of a wall of zeros.
 - **Connections** — per-channel credential state with the exact upstream message
   and the fix, Zernio/YouTube diagnostic runners, API base URL override.
 - **Sample data mode** (flask icon) — renders the full dashboard from generated
@@ -156,12 +171,26 @@ brand-accurate platform colours.
 
 ---
 
+## Docker
+
+```bash
+docker compose up --build                                # real credentials from .env
+docker compose -f docker-compose.yml \
+               -f docker-compose.mock.yml up --build     # zero credentials: mock Zernio
+```
+
+The image is multi-stage: it builds the dashboard, then serves the API **and**
+the dashboard at `/app` from one container, as an unprivileged user, with a
+healthcheck on `/api/health`.
+
+---
+
 ## Testing
 
 ```bash
-npm test               # 33 backend assertions against a local mock Zernio — no network
+npm test               # 41 backend assertions against a local mock Zernio — no network
 npm run fixtures       # record real API payloads into Pulse/scripts/fixtures/
-cd Pulse && npm run smoke   # 43 render assertions (SSR) against those fixtures
+cd Pulse && npm run smoke   # 52 render assertions (SSR) against those fixtures
 ```
 
 `scripts/mockZernio.js` reproduces every Zernio failure mode we hit in
@@ -184,4 +213,4 @@ production: all-zero Pinterest analytics (the original bug), rich analytics,
 
 ## Version
 
-API **v4.1.0** · Dashboard **2.0.0** · Node **18+**
+API **v4.2.0** · Dashboard **2.1.0** · Node **18+** · Docker `docker compose up`

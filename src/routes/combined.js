@@ -32,6 +32,7 @@ function passthrough(v) {
   if (v.avgEngagementRate !== undefined) out.avgEngagementRate = v.avgEngagementRate;
   if (v.platformBreakdown) out.platformBreakdown = v.platformBreakdown;
   if (v.followerTimeseries) out.followerTimeseries = v.followerTimeseries;
+  if (v.demographics) out.demographics = v.demographics;
   if (v.notice) out.notice = v.notice;
   if (v.partialErrors) out.partialErrors = v.partialErrors;
   return out;

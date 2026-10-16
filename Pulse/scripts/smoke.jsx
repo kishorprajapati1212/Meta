@@ -41,8 +41,9 @@ import OverviewPage from '../src/components/panels/OverviewPage.jsx'
 import PlatformPage from '../src/components/panels/PlatformPage.jsx'
 import GscPage from '../src/components/panels/GscPage.jsx'
 import ConnectionsPage from '../src/components/panels/ConnectionsPage.jsx'
+import AudiencePage from '../src/components/panels/AudiencePage.jsx'
 import MetricTable from '../src/components/metrics/MetricTable.jsx'
-import { metricsOf, healthDetailsOf } from '../src/lib/normalize.js'
+import { metricsOf, healthDetailsOf, deriveSummary, effectiveSummary, activityCalendarOf } from '../src/lib/normalize.js'
 import { sampleCombined, sampleHealth } from '../src/lib/sample.js'
 import { formatValue } from '../src/lib/format.js'
 
@@ -426,6 +427,74 @@ check('v4.0 overview entries without labels get proper words and kinds', () => {
     assert(watch.unit === 'min', `watchTime unit was "${watch.unit}"`)
   }
   assert(!ms.some((m) => m.key === 'channel'), 'the channel object must not become a metric card')
+})
+
+console.log('\nOverview v4.2 — the zero-summary fix and the stage layer')
+check('Overview no longer shows all-zero when the server summary is missing (v4.0 shape)', () => {
+  const derived = deriveSummary(combinedLegacy.data)
+  assert(derived.totals.impressions > 0, `expected the legacy youtube payload to yield impressions, got ${derived.totals.impressions}`)
+  const html = render(
+    <OverviewPage platformData={combinedLegacy.data} summary={undefined} healthDetails={{}} range={range} sample={false} onNavigate={() => {}} loading={false} />
+  )
+  // The impressions tile must carry the derived number, not 0.
+  includes(html, formatValue(derived.totals.impressions, { kind: 'sum' }), 'derived impressions missing from the Overview')
+  // Zero-valued KPIs are labelled as dormant rather than shown as bare zeros.
+  includes(html, 'not earned yet')
+})
+check('an all-zero server summary is replaced by the client roll-up', () => {
+  const zeroSummary = { totals: { audience: 0, impressions: 0, engagement: 0, posts: 0, searchClicks: 0 }, platforms: [] }
+  const eff = effectiveSummary(combinedLegacy.data, zeroSummary)
+  assert(eff.derived === true, 'expected the derived roll-up to win over an all-zero server summary')
+  assert(eff.totals.impressions > 0, 'derived impressions should be non-zero')
+})
+check('a healthy server summary is kept untouched', () => {
+  const good = { totals: { audience: 1284, impressions: 23700, engagement: 612, posts: 3, searchClicks: 1 }, platforms: [{ platform: 'pinterest', ok: true }] }
+  const eff = effectiveSummary(combinedRich.data, good)
+  assert(eff.totals.impressions === 23700, 'server summary must win when it has real numbers')
+})
+check('the stage hero, publishing calendar and insights render for a young channel', () => {
+  const html = render(
+    <OverviewPage platformData={combinedLegacy.data} summary={undefined} healthDetails={{}} range={range} sample={false} onNavigate={() => {}} loading={false} />
+  )
+  includes(html, 'Growth stage')
+  includes(html, 'Awareness')
+  includes(html, 'Publishing calendar')
+  includes(html, 'Showing up')
+  includes(html, 'What you have built')
+})
+check('the publishing calendar counts real publish days', () => {
+  const cal = activityCalendarOf({ youtube: { posts: [{ publishedAt: '2026-10-10T09:00:00Z' }, { publishedAt: '2026-10-10T12:00:00Z' }] } }, 30)
+  assert(cal.length === 30, 'calendar must cover the whole window')
+  assert(cal.find((d) => d.date === '2026-10-10')?.count === 2, 'two posts on one day must count as two')
+})
+
+console.log('\nAudience page — demographics, map and honest gaps')
+const sampleData = sampleCombined(range).data
+check('Audience renders the world map from real country geometry', () => {
+  const html = render(<AudiencePage platformData={sampleData} range={range} sample onNavigate={() => {}} />)
+  const pathCount = (html.match(/<path/g) || []).length
+  assert(pathCount > 100, `expected a full country map, got ${pathCount} paths`)
+  includes(html, 'Where your audience lives')
+})
+check('Audience shows age, gender, countries, cities and devices from sample data', () => {
+  const all = render(<AudiencePage platformData={sampleData} range={range} sample onNavigate={() => {}} />)
+  includes(all, 'India')
+  includes(all, 'Strongest age group')
+  const yt = render(<AudiencePage platformData={sampleData} range={range} sample onNavigate={() => {}} initialChannel="youtube" />)
+  includes(yt, 'where the audience is')
+  includes(yt, 'Top countries')
+  includes(yt, 'Mobile phone')
+  const ig = render(<AudiencePage platformData={sampleData} range={range} sample onNavigate={() => {}} initialChannel="instagram" />)
+  includes(ig, 'Ahmedabad')
+  includes(ig, 'Top cities')
+})
+check('channels without demographics are locked with a real reason, not blank', () => {
+  const html = render(<AudiencePage platformData={sampleData} range={range} sample onNavigate={() => {}} />)
+  includes(html, 'does not expose audience demographics')
+})
+check('a channel with no demographics at all renders an explainer, never a crash', () => {
+  const html = render(<AudiencePage platformData={{}} range={range} sample={false} onNavigate={() => {}} />)
+  includes(html, 'None of the connected channels returned audience composition')
 })
 
 console.log('\nMetric table & app shell')

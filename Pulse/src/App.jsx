@@ -6,6 +6,7 @@ import OverviewPage from './components/panels/OverviewPage'
 import PlatformPage from './components/panels/PlatformPage'
 import GscPage from './components/panels/GscPage'
 import ConnectionsPage from './components/panels/ConnectionsPage'
+import AudiencePage from './components/panels/AudiencePage'
 import { Card } from './components/ui/Card'
 import { ErrorState } from './components/ui/States'
 import { useAnalytics } from './hooks/useAnalytics'
@@ -16,11 +17,13 @@ import { dateLong, relativeTime } from './lib/format'
 
 const TITLES = {
   overview: { title: 'Overview', sub: 'All six channels in one view' },
+  audience: { title: 'Audience', sub: 'Age, gender, geography and devices — per platform' },
   connections: { title: 'Connections', sub: 'Credentials, health and API diagnostics' },
 }
 
 export default function App() {
   const [view, setView] = useState(() => readPref(PREF_KEYS.view, 'overview'))
+  const [audienceChannel, setAudienceChannel] = useState('all')
   const [range, setRange] = useState(() => readPref(PREF_KEYS.range, { preset: 'last_30d' }))
   const [sampleMode, setSampleMode] = useState(() => readPref(PREF_KEYS.sample, false))
   const [collapsed, setCollapsed] = useState(() => readPref(PREF_KEYS.sidebar, false))
@@ -131,6 +134,22 @@ export default function App() {
               loading={loading}
               onRetry={onRefresh}
             />
+          ) : view === 'audience' ? (
+            <AudiencePage
+              platformData={platformData}
+              range={effectiveRange}
+              sample={sample}
+              initialChannel={audienceChannel}
+              onChannelChange={setAudienceChannel}
+              onNavigate={(v) => {
+                const target = String(v)
+                if (target.startsWith('audience:')) {
+                  setAudienceChannel(target.slice('audience:'.length))
+                  return
+                }
+                setView(target)
+              }}
+            />
           ) : view === 'connections' ? (
             <ConnectionsPage
               health={health}
@@ -152,6 +171,15 @@ export default function App() {
           ) : (
             <PlatformPage
               platformKey={view}
+              onNavigate={(v) => {
+                const target = String(v)
+                if (target.startsWith('audience:')) {
+                  setAudienceChannel(target.slice('audience:'.length))
+                  setView('audience')
+                  return
+                }
+                setView(target)
+              }}
               payload={payload}
               healthDetail={healthDetails?.[view]}
               range={range}

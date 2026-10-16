@@ -8,7 +8,8 @@
 const axios = require('axios');
 const config = require('../config');
 const { getPageAccessToken, getAccountDetails } = require('./tokenService');
-const { parseDateRange, dateRangeMeta } = require('../utils/dateUtils');
+const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
+const demo = require('../utils/demographics');
 const { transformMetrics, buildOverview } = require('../utils/transform');
 const { round } = require('../utils/metrics');
 
@@ -26,8 +27,9 @@ async function fetchInsights(query) {
   const { since, until } = parseDateRange(query);
   const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.FACEBOOK_PAGE_ID}/insights`;
 
-  const [accountInfo, ...results] = await Promise.all([
+  const [accountInfo, demographics, ...results] = await Promise.all([
     getAccountDetails().then((d) => d.facebook).catch((e) => ({ error: e.message })),
+    fetchDemographics().catch((e) => ({ ...demo.empty('Meta Graph API · page_fans demographics', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices']), unit: 'count' })),
     ...GROUPS.map((g) =>
       axios
         .get(url, {
@@ -114,9 +116,57 @@ async function fetchInsights(query) {
     overview,
     timeseries,
     metrics,
+    demographics,
     ...(errors.length ? { partialErrors: errors } : {}),
     ...(hardFailures.length ? { notice: `${hardFailures.length} metric group(s) unavailable: ${hardFailures.map((e) => e.metrics).join(' · ')}` } : {}),
   };
 }
 
-module.exports = { fetchInsights, GROUPS };
+/**
+ * fetchDemographics — Page fan composition (counts). Meta has deprecated much
+ * of the fan-demographics surface across Graph versions, so every call here is
+ * optional: whatever survives comes back, the rest is reported in `missing`.
+ */
+async function fetchDemographics() {
+  const source = 'Meta Graph API · page_fans demographics';
+  const missing = ['devices', 'cities'];
+  const blank = (note, extra = []) => ({ ...demo.empty(source, note, [...missing, ...extra]), unit: 'count' });
+  if (!config.FACEBOOK_PAGE_ID) return blank('FACEBOOK_PAGE_ID is not set.');
+  let pt;
+  try {
+    pt = await getPageAccessToken();
+  } catch (e) {
+    return blank('Page token unavailable: ' + (e.message || e));
+  }
+  const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.FACEBOOK_PAGE_ID}/insights`;
+  const get = (metric) =>
+    axios
+      .get(url, { params: { metric, period: 'lifetime', access_token: pt }, timeout: 25000 })
+      .then((r) => (r.data.data || []).flatMap((d) => (d.values || []).map((v) => ({ value: Number(v.value ?? 0) || 0, ...v }))))
+      .catch(() => []);
+
+  const [countryRows, gaRows] = await Promise.all([get('page_fans_country'), get('page_fans_gender_age')]);
+  const countries = demo.withShare(
+    countryRows.filter((r) => r.country).map((r) => ({ code: String(r.country).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
+  );
+  const ga = demo.splitAgeGender(gaRows.filter((r) => r.gender || r.age).map((r) => ({ segment: `${r.gender || ''}.${r.age || ''}`, value: r.value })));
+  const available = Boolean(countries.length || ga.age || ga.gender);
+  const gaps = [...(ga.age || ga.gender ? [] : ['age', 'gender']), ...(countries.length ? [] : ['countries'])];
+  return {
+    available,
+    source,
+    unit: 'count',
+    asOf: toDateStr(Math.floor(Date.now() / 1000)),
+    note: available
+      ? 'Facebook reports the composition of current Page fans. Meta has retired parts of this surface on newer Graph versions, so some dimensions may be absent.'
+      : 'Meta no longer returns Page fan demographics for this Graph version or token scope.',
+    gender: ga.gender,
+    age: ga.age,
+    countries: countries.length ? countries : null,
+    cities: null,
+    devices: null,
+    missing: [...missing, ...gaps],
+  };
+}
+
+module.exports = { fetchInsights, fetchDemographics, GROUPS };

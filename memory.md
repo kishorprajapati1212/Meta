@@ -1,6 +1,6 @@
 # Project Memory — Meta Social & SEO Analytics
 
-> **v4.1.0 API · v2.0.0 dashboard · last updated 2026-10-15**
+> **v4.2.0 API · v2.1.0 dashboard · last updated 2026-10-16**
 > The detailed, living context document is **[`context.md`](./context.md)** —
 > architecture, full response contract, every decision and why, known
 > limitations, changelog. This file is the quick-recall summary. **Update both
@@ -60,10 +60,28 @@ metric is missing on screen, the bug is here**), `lib/format.js`,
 and off by default. Runs against a v4.0 backend too (legacy health + untyped
 overview entries are normalised).
 
+## v4.2 additions (2026-10-16)
+- **Overview zeros fixed**: `effectiveSummary()` in `normalize.js` rebuilds the
+  cross-channel roll-up client-side when the server `summary` is missing or
+  all-zero (the deployed v4.0 shape). Platform pages and Overview now agree.
+- **Stage layer for young channels**: growth-stage hero (awareness →
+  consideration → conversion), 120-day publishing heatmap, streaks, next-milestone
+  bar, rule-based insights citing the account's own numbers, dormant styling for
+  genuinely-zero KPIs (values never hidden).
+- **Demographics contract** `data.demographics` (see context.md §3.4): YouTube
+  viewer shares, Instagram/Facebook follower counts, GSC clicks by country/device,
+  Zernio honestly `available:false`. New **Audience** page with a generated
+  Natural Earth choropleth (`scripts/build-worldmap.mjs`), age×gender pyramid,
+  devices, cities; per-platform strip on each platform page.
+- **Ranges**: `last_60d/120d/180d/all_time` added; quick buttons 30/90/120/All.
+- **Docker**: `Dockerfile` (multi-stage, non-root, healthcheck),
+  `docker-compose.yml`, `docker-compose.mock.yml` (credential-free demo via
+  `scripts/mockServer.js`).
+
 ## Testing
-- `npm test` — 33 backend assertions vs `scripts/mockZernio.js` (no network; modes: `zero-analytics`, `rich`, `accounts-500`, `boards-404`, `no-analytics-access`)
+- `npm test` — 41 backend assertions vs `scripts/mockZernio.js` (no network; modes: `zero-analytics`, `rich`, `accounts-500`, `boards-404`, `no-analytics-access`)
 - `npm run fixtures` — records real API output into `Pulse/scripts/fixtures/`
-- `cd Pulse && npm run smoke` — 43 SSR render assertions against those fixtures, incl. v4.0 legacy payloads
+- `cd Pulse && npm run smoke` — 52 SSR render assertions against those fixtures, incl. v4.0 legacy payloads
 
 ## Known state of the live deployment (2026-10-15)
 - Facebook + Instagram → HTTP 400: expired `ACCESS_TOKEN`. Needs a new long-lived Page token in Render.

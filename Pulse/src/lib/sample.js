@@ -476,6 +476,117 @@ export function sampleTopItems(dim) {
   return []
 }
 
+/**
+ * sampleDemographics — the exact v4.2 demographics contract, per platform,
+ * including the honest "not available" shape Zernio produces.
+ */
+export function sampleDemographics(key) {
+  if (key === 'youtube') {
+    return {
+      available: true, source: 'YouTube Analytics API · viewerPercentage', unit: 'share', asOf: '2026-10-15', note: null,
+      gender: { male: 61.4, female: 36.2, unknown: 2.4 },
+      age: [
+        { bucket: '13-17', male: 2.1, female: 1.4, total: 3.5 },
+        { bucket: '18-24', male: 18.6, female: 10.2, total: 28.8 },
+        { bucket: '25-34', male: 24.4, female: 13.9, total: 38.3 },
+        { bucket: '35-44', male: 9.8, female: 6.4, total: 16.2 },
+        { bucket: '45-54', male: 4.1, female: 2.6, total: 6.7 },
+        { bucket: '55-64', male: 1.7, female: 1.2, total: 2.9 },
+        { bucket: '65+', male: 0.7, female: 0.5, total: 1.2 },
+      ],
+      countries: [
+        { code: 'IN', value: 41.2, share: 41.2 }, { code: 'US', value: 13.8, share: 13.8 },
+        { code: 'PK', value: 6.4, share: 6.4 }, { code: 'GB', value: 5.1, share: 5.1 },
+        { code: 'BD', value: 4.3, share: 4.3 }, { code: 'CA', value: 3.0, share: 3.0 },
+        { code: 'AE', value: 2.6, share: 2.6 }, { code: 'AU', value: 2.2, share: 2.2 },
+        { code: 'DE', value: 1.9, share: 1.9 }, { code: 'NP', value: 1.6, share: 1.6 },
+      ],
+      cities: null,
+      devices: [
+        { label: 'Mobile phone', value: 68.4, share: 68.4 }, { label: 'Desktop', value: 21.2, share: 21.2 },
+        { label: 'Tablet', value: 6.1, share: 6.1 }, { label: 'TV', value: 4.3, share: 4.3 },
+      ],
+      missing: ['cities'],
+    }
+  }
+  if (key === 'instagram') {
+    return {
+      available: true, source: 'Instagram Graph API · audience insights', unit: 'count', asOf: '2026-10-15',
+      note: 'Instagram reports the composition of your current followers, not of the people reached in the selected range.',
+      gender: { male: 54.8, female: 44.1, unknown: 1.1 },
+      age: [
+        { bucket: '18-24', male: 210, female: 168, total: 378 },
+        { bucket: '25-34', male: 342, female: 288, total: 630 },
+        { bucket: '35-44', male: 121, female: 96, total: 217 },
+        { bucket: '45-54', male: 44, female: 31, total: 75 },
+        { bucket: '55-64', male: 12, female: 9, total: 21 },
+        { bucket: '65+', male: 4, female: 3, total: 7 },
+      ],
+      countries: [
+        { code: 'IN', value: 742, share: 57.8 }, { code: 'US', value: 168, share: 13.1 },
+        { code: 'GB', value: 92, share: 7.2 }, { code: 'CA', value: 61, share: 4.8 },
+        { code: 'AU', value: 48, share: 3.7 }, { code: 'AE', value: 41, share: 3.2 },
+      ],
+      cities: [
+        { name: 'Ahmedabad', value: 214, share: 16.7 }, { name: 'Mumbai', value: 168, share: 13.1 },
+        { name: 'London', value: 84, share: 6.5 }, { name: 'New York', value: 61, share: 4.8 },
+        { name: 'Toronto', value: 44, share: 3.4 },
+      ],
+      devices: null,
+      missing: ['devices'],
+    }
+  }
+  if (key === 'facebook') {
+    return {
+      available: true, source: 'Meta Graph API · page_fans demographics', unit: 'count', asOf: '2026-10-15',
+      note: 'Facebook reports the composition of current Page fans. Meta has retired parts of this surface on newer Graph versions, so some dimensions may be absent.',
+      gender: { male: 58.2, female: 40.6, unknown: 1.2 },
+      age: [
+        { bucket: '18-24', male: 148, female: 102, total: 250 },
+        { bucket: '25-34', male: 296, female: 214, total: 510 },
+        { bucket: '35-44', male: 132, female: 88, total: 220 },
+        { bucket: '45-54', male: 51, female: 29, total: 80 },
+        { bucket: '55-64', male: 18, female: 11, total: 29 },
+        { bucket: '65+', male: 7, female: 4, total: 11 },
+      ],
+      countries: [
+        { code: 'IN', value: 688, share: 62.4 }, { code: 'US', value: 142, share: 12.9 },
+        { code: 'GB', value: 71, share: 6.4 }, { code: 'CA', value: 52, share: 4.7 },
+        { code: 'AU', value: 38, share: 3.4 },
+      ],
+      cities: null, devices: null,
+      missing: ['devices', 'cities'],
+    }
+  }
+  if (key === 'searchConsole') {
+    return {
+      available: true, source: 'Google Search Console · searchAnalytics', unit: 'count', asOf: '2026-10-12',
+      note: 'Search Console reports where searchers are, not who they are — age and gender do not exist in this dataset.',
+      gender: null, age: null,
+      countries: [
+        { name: 'India', value: 18, share: 60.0, impressions: 21 },
+        { name: 'United States', value: 6, share: 20.0, impressions: 5 },
+        { name: 'United Kingdom', value: 3, share: 10.0, impressions: 2 },
+        { name: 'Canada', value: 2, share: 6.7, impressions: 1 },
+        { name: 'Germany', value: 1, share: 3.3, impressions: 1 },
+      ],
+      cities: null,
+      devices: [
+        { label: 'Mobile phone', value: 19, share: 63.3, impressions: 22 },
+        { label: 'Desktop', value: 10, share: 33.3, impressions: 7 },
+        { label: 'Tablet', value: 1, share: 3.3, impressions: 1 },
+      ],
+      missing: ['age', 'gender', 'cities'],
+    }
+  }
+  return {
+    available: false, source: 'Zernio', unit: 'share', asOf: null,
+    note: `Zernio’s public API does not expose audience demographics (age, gender, location) for ${key === 'pinterest' ? 'Pinterest' : 'LinkedIn'}. The audience section below therefore only shows what the platform itself publishes.`,
+    gender: null, age: null, countries: null, cities: null, devices: null,
+    missing: ['age', 'gender', 'countries', 'cities', 'devices'],
+  }
+}
+
 export function sampleCombined(range) {
   const dates = rangeDates(range)
   const rand = rng(20261015)
@@ -487,6 +598,8 @@ export function sampleCombined(range) {
     pinterest: zernio('pinterest', dates, rand),
     searchConsole: gsc(dates, rand),
   }
+
+  for (const key of PLATFORM_ORDER) data[key].demographics = sampleDemographics(key)
 
   const platforms = PLATFORM_ORDER.map((key) => {
     const p = data[key]
@@ -570,5 +683,5 @@ export function samplePlatform(key, range, extra = {}) {
     return { success: true, platform: 'gsc', meta: { ...base.meta, dimensions: [extra.dimensions] }, data: { overview: base.overview, timeseries: base.timeseries, metrics: base.metrics, topItems: sampleTopItems(extra.dimensions) }, sample: true }
   }
   const p = payload.data[key === 'searchConsole' ? 'searchConsole' : key]
-  return { success: true, platform: key, meta: p.meta, data: p, sample: true }
+  return { success: true, platform: key, meta: p.meta, data: { ...p, demographics: p.demographics || sampleDemographics(key) }, sample: true }
 }

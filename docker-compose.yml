@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Meta Social & SEO Analytics — compose stack.
+#
+#  Real credentials:
+#      cp .env.example .env   # fill in what you have
+#      docker compose up --build
+#      → API + dashboard on http://localhost:5000  (dashboard at /app)
+#
+#  No credentials at all (demo / design review):
+#      docker compose -f docker-compose.yml -f docker-compose.mock.yml up --build
+#      → same URL, fed by a local mock Zernio with realistic numbers
+#
+#  Every credential is optional: platforms without one report a clear
+#  "not configured" state in /api/health and on the Connections page.
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: meta-analytics:4.2.0
+    container_name: meta-analytics
+    ports:
+      - '5000:5000'
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: 5000
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:5000/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

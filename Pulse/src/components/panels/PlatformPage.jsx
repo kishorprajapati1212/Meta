@@ -7,6 +7,7 @@ import Segmented from '../ui/Segmented'
 import PageHeader from '../platform/PageHeader'
 import PostGrid from '../platform/PostGrid'
 import BoardList from '../platform/BoardList'
+import DemographicsStrip from '../platform/DemographicsStrip'
 import KpiCard from '../metrics/KpiCard'
 import MetricTable from '../metrics/MetricTable'
 import DataTable from '../ui/DataTable'
@@ -28,7 +29,7 @@ const KPI_LIMIT = 8
  *   header → notices → KPI grid → main chart → daily breakdown table →
  *   full metric table → platform-specific panels (posts / boards / audience)
  */
-export default function PlatformPage({ platformKey, payload, healthDetail, range, sample, onRetry }) {
+export default function PlatformPage({ platformKey, payload, healthDetail, range, sample, onRetry, onNavigate }) {
   const meta = platformMeta(platformKey)
   const [selected, setSelected] = useState(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
@@ -287,6 +288,11 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
             <BoardList boards={boards} account={payload?.meta?.account} color={meta.color} />
           ) : null}
         </>
+      ) : null}
+
+      {/* ── Audience composition (only what this platform reports) ── */}
+      {payload && !isErrorPayload(payload) ? (
+        <DemographicsStrip demo={payload.demographics || null} color={meta.color} onNavigate={undefined} onOpen={onNavigate ? () => onNavigate(`audience:${platformKey}`) : null} />
       ) : null}
 
       {/* ── Diagnostics ──────────────────────────────────────── */}

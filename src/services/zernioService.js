@@ -28,6 +28,7 @@ const axios = require('axios');
 const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { summarize, pctChange, round, sum, labelOf } = require('../utils/metrics');
+const demo = require('../utils/demographics');
 
 const ZB = config.ZERNIO_BASE_URL;
 const TIMEOUT = 30000;
@@ -654,6 +655,11 @@ function emptyPayload(platform, since, until, notice, diagnostics) {
     avgEngagementRate: 0,
     platformBreakdown: {},
     followerTimeseries: [],
+    demographics: demo.empty(
+      'Zernio',
+      `Zernio\u2019s public API does not expose audience demographics (age, gender, location) for ${platform === 'pinterest' ? 'Pinterest' : 'LinkedIn'}. The audience section below therefore only shows what the platform itself publishes.`,
+      ['age', 'gender', 'countries', 'cities', 'devices']
+    ),
     notice,
   };
 }
@@ -807,6 +813,11 @@ async function fetchPlatform(platform, query) {
     avgEngagementRate,
     platformBreakdown,
     followerTimeseries,
+    demographics: demo.empty(
+      'Zernio',
+      `Zernio\u2019s public API does not expose audience demographics (age, gender, location) for ${platform === 'pinterest' ? 'Pinterest' : 'LinkedIn'}. The audience section below therefore only shows what the platform itself publishes.`,
+      ['age', 'gender', 'countries', 'cities', 'devices']
+    ),
     notice: notices.length ? notices.join(' ') : undefined,
   };
 }

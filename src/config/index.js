@@ -33,5 +33,5 @@ module.exports = {
 
   // ── Shared ─────────────────────────────────────────────────────
   ACCOUNT_CREATED: process.env.ACCOUNT_CREATED || '2026-07-05',
-  VERSION: '4.1.0',
+  VERSION: '4.2.0',
 };

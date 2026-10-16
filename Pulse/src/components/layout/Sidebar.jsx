@@ -1,4 +1,4 @@
-import { LayoutGrid, Activity, X, ExternalLink, FlaskConical } from 'lucide-react'
+import { LayoutGrid, Activity, X, ExternalLink, FlaskConical , Globe2} from 'lucide-react'
 import { cls } from '../../lib/cls'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
 import BrandIcon from '../ui/BrandIcon'
@@ -24,6 +24,7 @@ export default function Sidebar({
   const items = [
     { key: 'overview', label: 'Overview', Icon: LayoutGrid, color: '#2F6BFF' },
     ...PLATFORM_ORDER.map((key) => ({ key, label: platformMeta(key).label, Brand: key, color: platformMeta(key).color })),
+    { key: 'audience', label: 'Audience', Icon: Globe2, color: '#7C3AED' },
     { key: 'connections', label: 'Connections', Icon: Activity, color: '#6B7A90' },
   ]
 

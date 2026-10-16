@@ -72,7 +72,7 @@ export default function DateRangePicker({ range, onChange, className = '', effec
     <div className={cls('relative', className)} ref={boxRef}>
       <div className="flex items-center gap-1">
         <div className="hidden sm:inline-flex items-center gap-0.5 rounded-xl border border-line bg-sunken p-0.5">
-          {DATE_PRESETS.slice(0, 4).map((p) => (
+          {[DATE_PRESETS.find((p) => p.key === 'last_30d'), DATE_PRESETS.find((p) => p.key === 'last_90d'), DATE_PRESETS.find((p) => p.key === 'last_120d'), DATE_PRESETS.find((p) => p.key === 'all_time')].map((p) => (
             <button
               key={p.key}
               onClick={() => onChange({ preset: p.key })}
@@ -83,7 +83,7 @@ export default function DateRangePicker({ range, onChange, className = '', effec
                   : 'text-muted border border-transparent hover:text-ink'
               )}
             >
-              {p.label.replace(' days', 'D').replace('12 months', '12M')}
+              {p.key === 'all_time' ? 'All' : p.label.replace(' days', 'D').replace('12 months', '12M')}
             </button>
           ))}
         </div>
@@ -113,6 +113,24 @@ export default function DateRangePicker({ range, onChange, className = '', effec
           onSubmit={apply}
           className="absolute right-0 mt-2 w-[290px] rounded-xl border border-line bg-surface p-4 shadow-pop z-40 animate-rise"
         >
+          <p className="eyebrow mb-2">Presets</p>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {DATE_PRESETS.map((p) => (
+              <button
+                type="button"
+                key={p.key}
+                onClick={() => { onChange({ preset: p.key }); setOpen(false) }}
+                className={cls(
+                  'rounded-full border px-2.5 py-1 text-[11px] font-semibold num transition-colors',
+                  !isCustom && range?.preset === p.key
+                    ? 'border-brand bg-brand-soft text-brand-ink'
+                    : 'border-line text-muted hover:border-brand-line hover:text-brand-ink'
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
           <p className="eyebrow mb-3">Custom range</p>
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-1">

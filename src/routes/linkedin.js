@@ -19,6 +19,7 @@ r.get('/', async (req, res) => {
           avgEngagementRate: d.avgEngagementRate,
           platformBreakdown: d.platformBreakdown,
           followerTimeseries: d.followerTimeseries,
+          demographics: d.demographics,
         },
         notice: d.notice || undefined,
       })

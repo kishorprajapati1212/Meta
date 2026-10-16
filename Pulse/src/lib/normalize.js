@@ -14,7 +14,7 @@
  *   • nothing is ever filtered out for being zero — zero is a real number and
  *     is rendered as 0 with a "no data yet" affordance instead
  */
-import { METRIC_ORDER, ID_TO_KEY, SERIES_KEY, PLATFORMS, KEY_LABELS } from './platforms'
+import { METRIC_ORDER, ID_TO_KEY, SERIES_KEY, PLATFORMS, KEY_LABELS, PLATFORM_ORDER } from './platforms'
 import { isNum } from './format'
 
 const NON_METRIC_KEYS = new Set(['account', 'channel', 'lifetime'])
@@ -457,4 +457,203 @@ export function healthDetailsOf(health) {
     }
   }
   return out
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Client-side roll-up — the fix for "platform pages show numbers, Overview
+// shows 0 0". The Overview used to trust `data.summary` alone; older API
+// versions (and any partially-failing combined call) omit or zero it while the
+// per-platform payloads are perfectly good. So we rebuild the same roll-up
+// here from whatever the platform payloads contain, and merge it with the
+// server's summary when the server provides one.
+// ────────────────────────────────────────────────────────────────────────────
+const OVERVIEW_TOTAL = (p, key) => {
+  const v = p?.overview?.[key]?.total
+  return Number.isFinite(Number(v)) ? Number(v) : 0
+}
+
+/** Per-channel row, identical maths to the backend buildSummary(). */
+export function channelRow(platformKey, p) {
+  if (!p || isErrorPayload(p)) {
+    return { platform: platformKey, ok: false, error: p?.error || 'No data', audience: 0, impressions: 0, reach: 0, views: 0, engagement: 0, clicks: 0, posts: 0, engagementRate: 0, trend: 0, lifetime: null, account: null, hasData: false }
+  }
+  const o = p.overview || {}
+  const audience = OVERVIEW_TOTAL(p, 'followers') || Number(o?.channel?.lifetime?.subscribers) || 0
+  const impressions = OVERVIEW_TOTAL(p, 'impressions')
+  const reach = OVERVIEW_TOTAL(p, 'reach')
+  const views = OVERVIEW_TOTAL(p, 'views') || OVERVIEW_TOTAL(p, 'contentViews') || OVERVIEW_TOTAL(p, 'pageViews')
+  const engagement =
+    OVERVIEW_TOTAL(p, 'engagement') || OVERVIEW_TOTAL(p, 'interactions') ||
+    OVERVIEW_TOTAL(p, 'likes') + OVERVIEW_TOTAL(p, 'comments') + OVERVIEW_TOTAL(p, 'shares') + OVERVIEW_TOTAL(p, 'saves')
+  return {
+    platform: platformKey,
+    ok: true,
+    error: null,
+    audience,
+    impressions,
+    reach,
+    views,
+    engagement,
+    clicks: OVERVIEW_TOTAL(p, 'clicks'),
+    posts: Number(p?.meta?.postCount) || OVERVIEW_TOTAL(p, 'posts') || 0,
+    engagementRate: OVERVIEW_TOTAL(p, 'engagementRate'),
+    trend: OVERVIEW_TOTAL(p, 'followers') ? Number(o.followers.trend) || 0 : 0,
+    lifetime: o?.channel?.lifetime || null,
+    account: p?.meta?.account || null,
+    dateRange: p?.meta?.dateRange || null,
+    hasData: Object.values(o).some((v) => v && v.hasData),
+  }
+}
+
+/** Full summary object built purely from the platform payloads. */
+export function deriveSummary(platformData, platformKeys = PLATFORM_ORDER) {
+  const rows = platformKeys.map((k) => channelRow(k, platformData?.[k]))
+  const live = rows.filter((r) => r.ok)
+  const agg = (fn) => live.reduce((s, x) => s + fn(x), 0)
+  const gsc = platformData?.searchConsole || {}
+  const totalImpressions = agg((x) => Math.max(x.impressions, x.reach))
+  const totalEngagement = agg((x) => x.engagement)
+  return {
+    generatedAt: new Date().toISOString(),
+    derived: true,
+    platforms: rows,
+    totals: {
+      audience: agg((x) => x.audience),
+      impressions: totalImpressions,
+      engagement: totalEngagement,
+      clicks: agg((x) => x.clicks) + OVERVIEW_TOTAL(gsc, 'clicks'),
+      posts: agg((x) => x.posts),
+      engagementRate: totalImpressions > 0 ? Math.round((totalEngagement / totalImpressions) * 10000) / 100 : 0,
+      searchClicks: OVERVIEW_TOTAL(gsc, 'clicks'),
+      searchImpressions: OVERVIEW_TOTAL(gsc, 'impressions'),
+      searchCtr: OVERVIEW_TOTAL(gsc, 'ctr'),
+      searchPosition: OVERVIEW_TOTAL(gsc, 'position'),
+    },
+    connected: live.length,
+    failed: rows.filter((r) => !r.ok).map((r) => r.platform),
+    topReachPlatform: [...live].sort((a, b) => Math.max(b.impressions, b.reach, b.views) - Math.max(a.impressions, a.reach, a.views))[0]?.platform || null,
+  }
+}
+
+/**
+ * effectiveSummary — server summary first, client derivation as the safety
+ * net. A server summary whose totals are all zero while the platform payloads
+ * carry numbers is treated as absent, because that is exactly the v4.0 shape.
+ */
+export function effectiveSummary(platformData, serverSummary, platformKeys) {
+  const derived = deriveSummary(platformData, platformKeys)
+  if (!serverSummary?.totals) return derived
+  const t = serverSummary.totals
+  const serverHasNumbers = ['audience', 'impressions', 'engagement', 'posts', 'searchClicks'].some(
+    (k) => Number(t[k]) > 0
+  )
+  const derivedHasNumbers = ['audience', 'impressions', 'engagement', 'posts', 'searchClicks'].some(
+    (k) => Number(derived.totals[k]) > 0
+  )
+  if (!serverHasNumbers && derivedHasNumbers) return derived
+  // Keep the server's row detail but never let a zeroed server total win.
+  return {
+    ...serverSummary,
+    derived: false,
+    totals: serverHasNumbers ? t : derived.totals,
+    platforms: serverSummary.platforms?.length ? serverSummary.platforms : derived.platforms,
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Growth, consistency and stage — the numbers that stay meaningful when a
+// channel is young and engagement is genuinely zero.
+// ────────────────────────────────────────────────────────────────────────────
+
+/** [{date, followers, growth}] from whichever history the platform carries. */
+export function growthSeriesOf(p) {
+  if (!p || isErrorPayload(p)) return []
+  if (Array.isArray(p.followerTimeseries) && p.followerTimeseries.length) {
+    return p.followerTimeseries.map((r) => ({ date: r.date, followers: Number(r.followers) || 0, growth: Number(r.growth) || 0 }))
+  }
+  const series = seriesOf(p, 'followers')
+  return series.map((r) => ({ date: r.date, followers: r.value, growth: 0 }))
+}
+
+/**
+ * Publishing calendar: one entry per day with how many posts went out.
+ * Used for the activity heatmap and the consistency score — the honest
+ * "am I showing up?" signal for a channel that has no engagement yet.
+ */
+export function activityCalendarOf(platformData, days = 120, platformKeys = PLATFORM_ORDER) {
+  const counts = new Map()
+  for (const k of platformKeys) {
+    const p = platformData?.[k]
+    if (!p || isErrorPayload(p)) continue
+    const posts = p.posts || p.topPosts || p.latestPosts || []
+    for (const post of posts) {
+      const raw = post.publishedAt || post.published_at || post.date || post.createdTime || post.snippet?.publishedAt
+      if (!raw) continue
+      const day = String(raw).slice(0, 10)
+      counts.set(day, (counts.get(day) || 0) + 1)
+    }
+  }
+  const out = []
+  const end = new Date()
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(end)
+    d.setDate(end.getDate() - i)
+    const key = d.toISOString().slice(0, 10)
+    out.push({ date: key, count: counts.get(key) || 0 })
+  }
+  return out
+}
+
+/** Days since the most recent post across all channels, or null. */
+export function daysSinceLastPost(platformData, platformKeys = PLATFORM_ORDER) {
+  let latest = null
+  for (const k of platformKeys) {
+    const p = platformData?.[k]
+    if (!p || isErrorPayload(p)) continue
+    for (const post of p.posts || p.topPosts || p.latestPosts || []) {
+      const raw = post.publishedAt || post.published_at || post.date || post.snippet?.publishedAt
+      if (!raw) continue
+      if (!latest || String(raw) > latest) latest = String(raw)
+    }
+  }
+  if (!latest) return null
+  const ms = Date.now() - new Date(latest).getTime()
+  return Math.max(0, Math.floor(ms / 86400000))
+}
+
+/**
+ * stageOf — where the channel is on the awareness → consideration → conversion
+ * ladder, from real signals: audience size, publishing consistency and
+ * whether engagement has started at all.
+ */
+export function stageOf(platformData, summary, calendar, platformKeys = PLATFORM_ORDER) {
+  const audience = summary?.totals?.audience || 0
+  const engagement = summary?.totals?.engagement || 0
+  const activeDays = calendar.filter((d) => d.count > 0).length
+  const window = Math.max(1, calendar.length)
+  const consistency = activeDays / window
+
+  let stage = 'awareness'
+  let label = 'Awareness'
+  let blurb = 'People are discovering you exist. The job right now is showing up often enough to be remembered.'
+  if (engagement > 0 && (audience >= 500 || consistency >= 0.12)) {
+    stage = 'consideration'
+    label = 'Consideration'
+    blurb = 'People are comparing you against alternatives. Consistency plus a little engagement means the next job is depth: series, replies, saves.'
+  }
+  if (engagement > 50 && audience >= 2000 && consistency >= 0.2) {
+    stage = 'conversion'
+    label = 'Conversion'
+    blurb = 'Your audience acts on what you publish. Optimise for clicks-through and repeat viewers now.'
+  }
+  return { stage, label, blurb, consistency, activeDays, window, audience, engagement }
+}
+
+/** The next audience milestone above the current number (100 / 500 / 1K / …). */
+export function nextMilestone(value) {
+  const steps = [50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000]
+  const next = steps.find((s) => s > value)
+  if (!next) return null
+  const prev = steps[steps.indexOf(next) - 1] || 0
+  return { next, prev, progress: Math.min(1, Math.max(0, (value - prev) / (next - prev))) }
 }

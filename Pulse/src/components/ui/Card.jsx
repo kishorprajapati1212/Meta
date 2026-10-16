@@ -44,3 +44,16 @@ export function Field({ label, children, className = '' }) {
     </div>
   )
 }
+
+/**
+ * Panel — Card + CardHeader + CardBody in one call. The convenience surface
+ * used by the Overview/Audience panels where a titled box is all that's needed.
+ */
+export function Panel({ title, sub, icon, right, action, children, className = '', bodyClassName = '' }) {
+  return (
+    <Card className={className}>
+      {(title || right || action) && <CardHeader title={title} sub={sub} icon={icon} right={action || right} />}
+      <CardBody className={bodyClassName}>{children}</CardBody>
+    </Card>
+  )
+}

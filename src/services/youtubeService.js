@@ -11,6 +11,7 @@ const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
 const { transformMetrics, buildOverview } = require('../utils/transform');
 const { round, summarize, pctChange } = require('../utils/metrics');
+const demo = require('../utils/demographics');
 
 let ytCache = null;
 let ytExpiry = 0;
@@ -211,7 +212,7 @@ async function fetchAnalytics(query) {
 }
 
 async function fetchInsights(query) {
-  const [channel, analytics] = await Promise.all([
+  const [channel, analytics, demographics] = await Promise.all([
     getChannelInfo(),
     fetchAnalytics(query).catch((err) => ({
       metrics: [],
@@ -221,6 +222,10 @@ async function fetchInsights(query) {
       partialErrors: [{ message: err.message, hint: err.hint || null }],
       fatal: err,
     })),
+    // Demographics must never take the whole page down.
+    fetchDemographics(query).catch((e) =>
+      demo.empty('YouTube Analytics API · viewerPercentage', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices'])
+    ),
   ]);
 
   if (analytics.fatal && (!channel || channel.source === 'fallback')) throw analytics.fatal;
@@ -315,10 +320,130 @@ async function fetchInsights(query) {
     overview,
     timeseries: analytics.timeseries,
     metrics: analytics.metrics,
+    demographics,
     ...(channel.note && { notice: channel.note }),
     ...(!channel.note && analytics.isEmpty && { notice: 'No analytics rows in this range — the channel may have no views yet.' }),
     ...(analytics.partialErrors && { partialErrors: analytics.partialErrors }),
   };
 }
 
-module.exports = { fetchInsights, getYouTubeAccessToken, getChannelInfo };
+/**
+ * fetchDemographics — audience composition from the YouTube Analytics API.
+ *
+ * Uses the `viewerPercentage` metric, which is a *share of viewers* (not a
+ * count). YouTube hides it below its privacy threshold (roughly 100 lifetime
+ * viewers), so an empty result is normal for a new channel and is reported as
+ * `available:false` with an explanation instead of a crash or fake zeros.
+ * Cities do not exist as a YouTube dimension at all.
+ */
+async function fetchDemographics(query) {
+  const source = 'YouTube Analytics API · viewerPercentage';
+  const missing = ['cities'];
+  const blank = (note) => demo.empty(source, note, [...missing, 'age', 'gender', 'countries', 'devices']);
+
+  let token;
+  try {
+    token = await getYouTubeAccessToken();
+  } catch (e) {
+    return blank('YouTube credentials are not configured, so audience composition cannot be read.');
+  }
+
+  const { since, until } = parseDateRange(query, true);
+  let sd = toDateStr(since);
+  let ed = toDateStr(until);
+
+  const get = (dimensions) =>
+    axios
+      .get(config.YOUTUBE_ANALYTICS_URL, {
+        params: { ids: 'channel==MINE', startDate: sd, endDate: ed, metrics: 'viewerPercentage', dimensions },
+        headers: { Authorization: 'Bearer ' + token },
+        timeout: 20000,
+      })
+      .then((r) => r.data?.rows || [])
+      .catch(() => []);
+
+  let [ageRows, countryRows, deviceRows] = await Promise.all([
+    get('ageGroup,gender'),
+    get('country'),
+    get('device'),
+  ]);
+
+  // Privacy threshold: if the window is empty, fall back to the channel's
+  // whole history — composition over all time is still useful and honest.
+  let fellBack = false;
+  if (!ageRows.length && !countryRows.length && !deviceRows.length) {
+    fellBack = true;
+    sd = config.ACCOUNT_CREATED ? toDateStr(Math.floor(new Date(config.ACCOUNT_CREATED).getTime() / 1000)) : '2005-01-01';
+    ed = toDateStr(Math.floor(Date.now() / 1000));
+    [ageRows, countryRows, deviceRows] = await Promise.all([
+      get('ageGroup,gender'),
+      get('country'),
+      get('device'),
+    ]);
+  }
+
+  if (!ageRows.length && !countryRows.length && !deviceRows.length) {
+    return blank(
+      'YouTube only publishes audience composition once a channel passes its privacy threshold (roughly 100 lifetime viewers). Keep publishing — this fills in by itself.'
+    );
+  }
+
+  // ageGroup × gender → buckets
+  const buckets = new Map();
+  const genderTotals = { male: 0, female: 0, unknown: 0 };
+  for (const [ageCode, genderCode, pct] of ageRows) {
+    const bucket = demo.ytAge(ageCode);
+    const g = demo.ytGender(genderCode);
+    const v = Number(pct) || 0;
+    const cur = buckets.get(bucket) || { bucket, male: 0, female: 0, total: 0 };
+    cur[g] += v;
+    cur.total += v;
+    buckets.set(bucket, cur);
+    genderTotals[g] += v;
+  }
+  const gSum = genderTotals.male + genderTotals.female + genderTotals.unknown;
+  const age = demo.AGE_ORDER.filter((b) => buckets.has(b)).map((b) => {
+    const r = buckets.get(b);
+    return { bucket: b, male: demo.round(r.male, 1), female: demo.round(r.female, 1), total: demo.round(r.total, 1) };
+  });
+
+  const countries = countryRows
+    .map(([code, pct]) => ({ code: String(code).toUpperCase(), value: demo.round(Number(pct) || 0, 2) }))
+    .filter((c) => c.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 40)
+    .map((c) => ({ ...c, share: demo.round(c.value, 2) }));
+
+  const devices = deviceRows
+    .map(([code, pct]) => ({ label: demo.deviceLabel(code), value: demo.round(Number(pct) || 0, 2) }))
+    .filter((d) => d.value > 0)
+    .sort((a, b) => b.value - a.value)
+    .map((d) => ({ ...d, share: demo.round(d.value, 2) }));
+
+  const available = Boolean(age.length || countries.length || devices.length);
+  return {
+    available,
+    source,
+    unit: 'share',
+    asOf: ed,
+    note: fellBack
+      ? 'This window is below YouTube’s privacy threshold, so composition is shown for the channel’s whole history instead.'
+      : available
+      ? null
+      : 'No audience composition in this window.',
+    gender: gSum > 0
+      ? {
+          male: demo.round((genderTotals.male / gSum) * 100, 1),
+          female: demo.round((genderTotals.female / gSum) * 100, 1),
+          unknown: demo.round((genderTotals.unknown / gSum) * 100, 1),
+        }
+      : null,
+    age: age.length ? age : null,
+    countries: countries.length ? countries : null,
+    cities: null,
+    devices: devices.length ? devices : null,
+    missing,
+  };
+}
+
+module.exports = { fetchInsights, fetchDemographics, getYouTubeAccessToken, getChannelInfo };

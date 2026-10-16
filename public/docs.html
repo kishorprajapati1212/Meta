@@ -33,7 +33,7 @@
 <body>
 <h1>Meta Social &amp; SEO Analytics API</h1>
 <p class="sub">Facebook · Instagram · YouTube · LinkedIn · Pinterest · Google Search Console — one contract, one dashboard.</p>
-<span class="ver">v4.1.0</span>
+<span class="ver">v4.2.0</span>
 
 <div class="note">
   <strong>New in 4.1:</strong> every metric in <code>data.overview</code> is self-describing
@@ -63,7 +63,7 @@
 <h2>Query parameters</h2>
 <table>
 <tr><th>Param</th><th>Values</th><th>Effect</th></tr>
-<tr><td><code>date_preset</code></td><td><code>today · yesterday · last_7d · last_14d · last_30d · last_90d · last_365d</code></td><td>Selects the window (default <code>last_30d</code>)</td></tr>
+<tr><td><code>date_preset</code></td><td><code>today · yesterday · last_7d · last_14d · last_30d · last_60d · last_90d · last_120d · last_180d · last_365d · all_time</code></td><td>Selects the window (default <code>last_30d</code>). <code>all_time</code> starts at <code>ACCOUNT_CREATED</code>; upstreams cap the window themselves.</td></tr>
 <tr><td><code>since</code> / <code>until</code></td><td><code>YYYY-MM-DD</code></td><td>Explicit window; overrides the preset</td></tr>
 <tr><td><code>compact</code></td><td><code>true</code></td><td>Drops all-zero days from <code>timeseries</code> (Meta, YouTube, GSC). Zernio timelines stay dense.</td></tr>
 <tr><td><code>dimensions</code></td><td><code>date · query · page · country · device</code></td><td>GSC only. Anything but <code>date</code> returns <code>data.topItems[]</code></td></tr>
@@ -166,6 +166,35 @@
   "platforms": { "facebook":"Request failed with status code 400", "pinterest":"ok" }
 }</code></pre>
 <p class="desc"><code>status</code> ∈ <code>ok · error · not_configured · no_account · untested</code>. The flat <code>platforms</code> map is kept for older clients.</p>
+
+<h2>Audience composition — <code>data.demographics</code> <span class="ver">v4.2</span></h2>
+<pre><code>{
+  "available": true,
+  "source": "YouTube Analytics API · viewerPercentage",
+  "unit": "share",                 // 'share' = % of viewers · 'count' = followers/clicks
+  "asOf": "2026-10-15",
+  "note": null,                    // why a dimension may be missing
+  "gender": { "male": 61.4, "female": 36.2, "unknown": 2.4 },
+  "age": [ { "bucket": "25-34", "male": 24.4, "female": 13.9, "total": 38.3 } ],
+  "countries": [ { "code": "IN", "value": 41.2, "share": 41.2 } ],
+  "cities": [ { "name": "Ahmedabad", "value": 214, "share": 16.7 } ],
+  "devices": [ { "label": "Mobile phone", "value": 68.4, "share": 68.4 } ],
+  "missing": ["cities"]            // what this platform cannot report
+}</code></pre>
+<table>
+<tr><th>Platform</th><th>What it reports</th><th>Unit</th></tr>
+<tr><td>YouTube</td><td>Age×gender, country, device (viewer shares; hidden below ~100 lifetime viewers, then falls back to lifetime)</td><td>share</td></tr>
+<tr><td>Instagram</td><td>Country, city, gender×age of current followers (<code>period=lifetime</code>)</td><td>count</td></tr>
+<tr><td>Facebook</td><td>Page-fan country and gender×age (partially retired by Meta — every call optional)</td><td>count</td></tr>
+<tr><td>Search Console</td><td>Clicks by country and device. Age/gender do not exist in this dataset.</td><td>count</td></tr>
+<tr><td>LinkedIn · Pinterest</td><td>Nothing — Zernio exposes no demographics. <code>available:false</code> with the reason.</td><td>—</td></tr>
+</table>
+
+<h2>Docker</h2>
+<pre><code>docker compose up --build                              # real credentials from .env
+docker compose -f docker-compose.yml \
+               -f docker-compose.mock.yml up --build   # no credentials: local mock Zernio</code></pre>
+<p class="desc">Multi-stage image: builds the dashboard, then serves the API and <code>/app</code> from one container as an unprivileged user with a healthcheck.</p>
 
 <h2>Environment variables</h2>
 <pre><code># META (Facebook + Instagram)

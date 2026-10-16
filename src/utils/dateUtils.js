@@ -7,7 +7,14 @@ function parseDateRange(query = {}, skipClip = false) {
     until = query.until ? Math.floor(new Date(query.until).getTime() / 1000) : now;
   } else {
     const preset = query.date_preset || 'last_30d';
-    const days = { today: 1, yesterday: 1, last_7d: 7, last_14d: 14, last_30d: 30, last_90d: 90, last_365d: 365 }[preset] || 30;
+    if (preset === 'all_time' || preset === 'lifetime') {
+      // Whole account history. Upstreams cap the window themselves
+      // (Zernio 366d, GSC 16 months), so this is simply "as far back as we can".
+      since = config.ACCOUNT_CREATED ? Math.floor(new Date(config.ACCOUNT_CREATED).getTime() / 1000) : now - 365 * 86400;
+      until = now;
+      return { since, until };
+    }
+    const days = { today: 1, yesterday: 1, last_7d: 7, last_14d: 14, last_30d: 30, last_60d: 60, last_90d: 90, last_120d: 120, last_180d: 180, last_365d: 365 }[preset] || 30;
     since = now - days * 86400; until = now;
   }
   if (!skipClip && config.ACCOUNT_CREATED) {

@@ -249,8 +249,12 @@ export const DATE_PRESETS = [
   { key: 'last_7d', label: '7 days', days: 7 },
   { key: 'last_14d', label: '14 days', days: 14 },
   { key: 'last_30d', label: '30 days', days: 30 },
+  { key: 'last_60d', label: '60 days', days: 60 },
   { key: 'last_90d', label: '90 days', days: 90 },
+  { key: 'last_120d', label: '120 days', days: 120 },
+  { key: 'last_180d', label: '6 months', days: 180 },
   { key: 'last_365d', label: '12 months', days: 365 },
+  { key: 'all_time', label: 'All time', days: null },
 ]
 
 export function platformMeta(key) {

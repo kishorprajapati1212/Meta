@@ -264,6 +264,67 @@ async function main() {
     assert.ok(report.summary, 'missing summary');
   });
 
+  console.log('\nDemographics contract + date presets');
+  const demo = require('../src/utils/demographics');
+  const { parseDateRange } = require('../src/utils/dateUtils');
+
+  check('withShare turns counts into shares that sum to 100', () => {
+    const rows = demo.withShare([{ code: 'IN', value: 3 }, { code: 'US', value: 1 }]);
+    assert.ok(rows[0].share === 75, 'IN should be 75%');
+    assert.ok(rows[1].share === 25, 'US should be 25%');
+  });
+
+  check('splitAgeGender tolerates Meta and YouTube segment spellings', () => {
+    const meta = demo.splitAgeGender([
+      { segment: 'F.18-24', value: 40 },
+      { segment: 'M.18-24', value: 60 },
+      { segment: 'F.25-34', value: 30 },
+      { segment: 'M.25-34', value: 70 },
+    ]);
+    assert.ok(meta.gender.male === 65, `male should be 65, got ${meta.gender.male}`);
+    assert.ok(meta.age.length === 2, 'two age buckets expected');
+    assert.ok(meta.age[0].bucket === '18-24', 'bucket ordering');
+  });
+
+  check('ytAge/ytGender normalise YouTube dimension codes', () => {
+    assert.ok(demo.ytAge('age25-34') === '25-34', 'age bucket code');
+    assert.ok(demo.ytAge('age65-') === '65+', 'open-ended bucket');
+    assert.ok(demo.ytGender('female') === 'female', 'gender code');
+    assert.ok(demo.ytGender('unknown') === 'unknown', 'unknown gender');
+  });
+
+  check('deviceLabel humanises device codes', () => {
+    assert.ok(demo.deviceLabel('MOBILE') === 'Mobile phone', 'MOBILE label');
+    assert.ok(demo.deviceLabel('game_console') === 'Game console', 'game_console label');
+  });
+
+  check('empty() reports every missing dimension honestly', () => {
+    const e = demo.empty('Zernio', 'not exposed', ['age', 'gender']);
+    assert.ok(e.available === false && e.gender === null && e.countries === null, 'empty shape');
+    assert.ok(e.missing.includes('age'), 'missing list');
+  });
+
+  check('date presets include 60/120/180 day windows', () => {
+    const now = Math.floor(Date.now() / 1000);
+    for (const [preset, days] of [['last_60d', 60], ['last_120d', 120], ['last_180d', 180]]) {
+      const r = parseDateRange({ date_preset: preset }, true);
+      const got = Math.round((r.until - r.since) / 86400);
+      assert.ok(got === days, `${preset} should span ${days} days, got ${got}`);
+    }
+  });
+
+  check('all_time starts at ACCOUNT_CREATED', () => {
+    const r = parseDateRange({ date_preset: 'all_time' }, true);
+    const created = Math.floor(new Date(require('../src/config').ACCOUNT_CREATED).getTime() / 1000);
+    assert.ok(r.since === created, `all_time should start at ACCOUNT_CREATED (${created}), got ${r.since}`);
+    assert.ok(r.until > r.since, 'window must be positive');
+  });
+
+  check('unknown preset still falls back to 30 days', () => {
+    const r = parseDateRange({ date_preset: 'nonsense' }, true);
+    assert.ok(Math.round((r.until - r.since) / 86400) === 30, 'fallback window');
+  });
+
   await mock.close();
   console.log(`\n\x1b[1m${passed} passed, ${failed} failed\x1b[0m\n`);
   process.exit(failed ? 1 : 0);

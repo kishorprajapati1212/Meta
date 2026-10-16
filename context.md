@@ -5,7 +5,7 @@
 > decisions were made and why, and what is known to be broken. `memory.md` is a
 > short summary; this file is the detail.
 >
-> **Last updated:** 2026-10-15 · **API version:** 4.1.0 · **Dashboard version:** 2.0.0
+> **Last updated:** 2026-10-16 · **API version:** 4.2.0 · **Dashboard version:** 2.1.0
 
 ---
 
@@ -49,14 +49,17 @@ Google #2 for GSC) plus Zernio. They are deliberately not shared.
 │   └── utils/            metrics.js (kind system), transform.js, dateUtils.js, response.js
 ├── scripts/
 │   ├── mockZernio.js     Local Zernio stand-in with switchable failure modes
-│   ├── selftest.js       33 backend assertions      → npm test
-│   └── make-fixtures.js  Records real API output    → npm run fixtures
+│   ├── mockServer.js     Runs that mock as a container entry (compose mock profile)
+│   ├── selftest.js       41 backend assertions      → npm test
+│   ├── make-fixtures.js  Records real API output    → npm run fixtures
+│   └── build-worldmap.mjs Generates Pulse/src/assets/worldMap.js (Natural Earth → SVG)
 ├── public/docs.html      Human-readable API docs
 ├── memory.md             Short project summary
 └── Pulse/                Dashboard
     ├── src/
     │   ├── App.jsx       Shell: sidebar + topbar + page switch
-    │   ├── lib/          api, platforms, format, normalize, sample, csv, prefs, cls
+    │   ├── lib/          api, platforms, format, normalize, sample, countries, csv, prefs, cls
+    │   ├── assets/       worldMap.js (GENERATED country paths, ISO alpha-2 keyed)
     │   ├── hooks/        useAnalytics, usePlatformDetail
     │   └── components/   layout/ ui/ charts/ metrics/ platform/ panels/
     └── scripts/
@@ -128,6 +131,42 @@ For `position`, a *falling* number is flagged favourable (`invertTrend`).
 | `compare=false` | GSC | skip the previous-period window |
 | `rowLimit` | GSC | default 1000 for date, 250 for groupings |
 | `sync=false` | LinkedIn/Pinterest | skip the external-post sync trigger |
+
+### 3.4 The demographics contract (v4.2)
+
+`data.demographics` describes **who** the audience is, and is explicit about
+what a platform cannot supply:
+
+```jsonc
+{ "available": true,
+  "source": "YouTube Analytics API · viewerPercentage",
+  "unit": "share",              // 'share' = % of viewers · 'count' = followers/clicks
+  "asOf": "2026-10-15",
+  "note": null,                 // why a dimension may be missing
+  "gender": { "male": 61.4, "female": 36.2, "unknown": 2.4 },
+  "age": [ { "bucket": "25-34", "male": 24.4, "female": 13.9, "total": 38.3 } ],
+  "countries": [ { "code": "IN", "name": "India", "value": 41.2, "share": 41.2 } ],
+  "cities": [ { "name": "Ahmedabad", "value": 214, "share": 16.7 } ],
+  "devices": [ { "label": "Mobile phone", "value": 68.4, "share": 68.4 } ],
+  "missing": ["cities"]         // dimensions this platform cannot report
+}
+```
+
+Per platform: **YouTube** → viewer shares by age×gender, country, device
+(hidden below its ~100-viewer privacy threshold; falls back to lifetime).
+**Instagram** → follower counts by country, city, gender×age (`period=lifetime`).
+**Facebook** → Page-fan counts by country and gender×age (partially retired by
+Meta; every call optional). **Search Console** → clicks by country and device;
+age/gender do not exist in that dataset. **LinkedIn / Pinterest** → Zernio
+exposes nothing, so `available:false` with an honest note. `share` is always a
+percentage even when the upstream gave counts, so one set of charts serves all.
+
+### 3.5 Date presets (v4.2)
+
+`today · yesterday · last_7d · last_14d · last_30d · last_60d · last_90d ·
+last_120d · last_180d · last_365d · all_time`. `all_time` starts at
+`ACCOUNT_CREATED`; upstreams still cap the window themselves (Zernio 366 days,
+GSC ~16 months). Added because a young channel has too little signal in 30 days.
 
 ---
 
@@ -215,6 +254,7 @@ numerals everywhere. Tokens live in `Pulse/tailwind.config.js`; component classe
 | **Facebook / Instagram / YouTube / LinkedIn / Pinterest** | Channel header (identity, source, range, last sync, account stats) → notices → KPI grid (click a card to chart it) → main chart + secondary chart → daily drill-down table with range totals and CSV export → **All metrics** table → platform extras (posts/pins grid, Pinterest boards, follower history) → collapsible API diagnostics |
 | **Search Console** | 4 KPI cards with compare-window deltas · clicks-vs-impressions combo chart · device donut · dimension switcher (Timeline / Keywords / Pages / Countries / Devices) with ranked bar list + exportable table · "Quick wins" (high impressions, below-average CTR) · verified properties |
 | **Connections** | Per-channel credential state with the exact upstream message and the fix · Zernio and YouTube diagnostic runners · API base URL override + test · backend runtime facts |
+| **Audience** (v4.2) | Real choropleth world map (generated Natural Earth paths), age×gender pyramid, gender bar, device donut, top cities, per-channel tabs plus an all-channel presence map. Channels whose upstream has no demographics show a locked card with the reason. |
 
 **Key modules**
 
@@ -229,6 +269,19 @@ numerals everywhere. Tokens live in `Pulse/tailwind.config.js`; component classe
 - `lib/sample.js` — complete payload generator in the exact v4.1 shape.
 - `lib/api.js` — base URL resolution: localStorage override → `VITE_API_BASE_URL`
   → `''` (same origin; the Vite dev server proxies `/api`).
+
+**Overview stage layer** (v4.2): a young channel legitimately has zero
+engagement, so leading with six empty KPI cards read as broken. The Overview now
+opens with a *growth-stage hero* (Awareness → Consideration → Conversion, from
+audience size + publishing consistency + whether engagement has started), a
+*publishing calendar* heatmap (120 days, GitHub-style), *streaks*, a *next
+audience milestone* progress bar, a rule-based *"what to do next"* panel whose
+advice cites the account's own numbers, and a geography teaser. Zero-valued KPI
+tiles are kept — never hidden — but styled dormant with a "not earned yet" tag.
+Crucially the Overview's roll-up no longer trusts `data.summary` alone:
+`effectiveSummary()` rebuilds it client-side from the platform payloads whenever
+the server summary is missing or all-zero (the v4.0 shape), which fixed
+"platform pages show numbers, Overview shows 0 0".
 
 **Sample data mode** (flask icon, top right): renders the whole dashboard from
 `lib/sample.js` so the design can be reviewed while the live credentials are
@@ -249,8 +302,14 @@ tests using payloads recorded from the live v4.0 deployment
 # API
 cp .env.example .env        # fill in credentials
 npm install && npm start    # http://localhost:5000/api  ·  /docs.html
-npm test                    # 33 backend assertions (mock Zernio, no network)
+npm test                    # 41 backend assertions (mock Zernio, no network)
 npm run fixtures            # re-record Pulse/scripts/fixtures/*.json
+
+# Docker
+docker compose up --build                                   # real credentials
+docker compose -f docker-compose.yml \
+               -f docker-compose.mock.yml up --build        # no credentials at all
+node scripts/build-worldmap.mjs                             # regenerate the map asset
 
 # Dashboard
 cd Pulse && npm install
@@ -281,7 +340,33 @@ Deploy: push the repo; Render runs `npm start`. Add
 
 ## 9. Changelog
 
-### 2026-10-15 — API v4.1.0 + Pulse 2.0.0 (this update)
+### 2026-10-16 — API v4.2.0 + Pulse 2.1.0
+- **Fixed** "platform pages show metrics but Overview shows 0 0": the Overview
+  roll-up is now rebuilt client-side (`effectiveSummary`) whenever the server's
+  `data.summary` is missing or all-zero (exactly the deployed v4.0 shape).
+- **Added** the demographics contract (§3.4) to YouTube, Instagram, Facebook and
+  Search Console services, passed through by `/api/combined`, and rendered on a
+  new **Audience** page plus a per-platform strip. Nothing is invented: Zernio
+  platforms report `available:false` with the reason.
+- **Added** a generated world-map asset (`scripts/build-worldmap.mjs` →
+  `Pulse/src/assets/worldMap.js`): Natural Earth 110m boundaries, Miller
+  projection, Douglas–Peucker simplification, antimeridian splitting (Fiji and
+  Russia previously drew as full-width bands), ISO alpha-2 keyed, 86 KB, zero
+  runtime dependencies.
+- **Added** longer ranges: `last_60d / last_120d / last_180d / all_time`, with
+  30/90/120/All as the quick buttons and the full list in the range popover.
+- **Redesigned** the Overview for the awareness/consideration stage: growth-stage
+  hero, publishing-calendar heatmap, streaks, milestone progress, rule-based
+  insights that quote the account's own numbers, geography teaser, and dormant
+  styling for genuinely-zero KPIs (values still shown).
+- **Added** Docker: multi-stage `Dockerfile` (builds the dashboard, runs as
+  `node` user, healthcheck), `docker-compose.yml`, and a
+  `docker-compose.mock.yml` overlay that runs the whole stack credential-free
+  against `scripts/mockServer.js`.
+- **Tests**: backend 33 → 41 (demographics helpers + presets), frontend 43 → 52
+  (derived summary, stage layer, audience page, map geometry).
+
+### 2026-10-15 — API v4.1.0 + Pulse 2.0.0
 - **Fixed** the Pinterest "shows only Posts" bug (see §4) across service, route and UI.
 - **Added** `src/utils/metrics.js` kind system; rewrote `transform.js` around it.
 - **Rewrote** `zernioService.js`: resilient account lookup, metric catalogue, dense timelines, real trends, Pinterest boards, external-post sync, per-step diagnostics.

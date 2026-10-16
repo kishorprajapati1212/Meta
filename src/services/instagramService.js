@@ -9,6 +9,7 @@ const config = require('../config');
 const { getAccountDetails } = require('./tokenService');
 const { parseDateRange, dateRangeMeta } = require('../utils/dateUtils');
 const { transformMetrics, buildOverview } = require('../utils/transform');
+const demo = require('../utils/demographics');
 const { round } = require('../utils/metrics');
 
 const GROUPS = [
@@ -36,8 +37,9 @@ async function fetchInsights(query) {
   const { since, until } = parseDateRange(query);
   const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.INSTAGRAM_ID}/insights`;
 
-  const [accountInfo, ...results] = await Promise.all([
+  const [accountInfo, demographics, ...results] = await Promise.all([
     getAccountDetails().then((d) => d.instagram).catch((e) => ({ error: e.message })),
+    fetchDemographics().catch((e) => ({ ...demo.empty('Instagram Graph API · audience insights', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices']), unit: 'count' })),
     ...GROUPS.map((g) =>
       axios
         .get(url, {
@@ -132,6 +134,7 @@ async function fetchInsights(query) {
     overview,
     timeseries,
     metrics,
+    demographics,
     ...(errors.length ? { partialErrors: errors } : {}),
     ...(hardFailures.length
       ? { notice: `${hardFailures.length} metric group(s) unavailable: ${hardFailures.map((e) => e.metrics).join(' · ')}` }
@@ -150,4 +153,55 @@ function normalise(m) {
   return { ...m, values };
 }
 
-module.exports = { fetchInsights, GROUPS };
+/**
+ * fetchDemographics — Instagram audience composition (follower counts).
+ * Meta only serves audience_* insights for Business/Creator accounts and only
+ * with period=lifetime, so this never uses the date range.
+ */
+async function fetchDemographics() {
+  const source = 'Instagram Graph API · audience insights';
+  const missing = ['devices'];
+  const blank = (note) => ({ ...demo.empty(source, note, [...missing, 'age', 'gender', 'countries', 'cities']), unit: 'count' });
+  if (!config.INSTAGRAM_ID || !config.USER_ACCESS_TOKEN) {
+    return blank('Instagram credentials are not configured.');
+  }
+  const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.INSTAGRAM_ID}/insights`;
+  const get = (metric) =>
+    axios
+      .get(url, { params: { metric, period: 'lifetime', access_token: config.USER_ACCESS_TOKEN }, timeout: 25000 })
+      .then((r) => (r.data.data || []).flatMap((d) => (d.values || []).map((v) => ({ value: Number(v.value ?? v.count ?? 0) || 0, ...v }))))
+      .catch(() => []);
+
+  const [countryRows, cityRows, gaRows] = await Promise.all([
+    get('audience_country'),
+    get('audience_city'),
+    get('audience_gender_age'),
+  ]);
+
+  const countries = demo.withShare(
+    countryRows.filter((r) => r.country).map((r) => ({ code: String(r.country).toUpperCase(), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 40)
+  );
+  const cities = demo.withShare(
+    cityRows.filter((r) => r.city).map((r) => ({ name: String(r.city), value: r.value })).sort((a, b) => b.value - a.value).slice(0, 20)
+  );
+  const ga = demo.splitAgeGender(gaRows.filter((r) => r.gender || r.age).map((r) => ({ segment: `${r.gender || ''}.${r.age || ''}`, value: r.value })));
+
+  const available = Boolean(countries.length || cities.length || ga.age || ga.gender);
+  return {
+    available,
+    source,
+    unit: 'count',
+    asOf: toDateStr(Math.floor(Date.now() / 1000)),
+    note: available
+      ? 'Instagram reports the composition of your current followers, not of the people reached in the selected range.'
+      : 'Instagram only serves audience insights to Business/Creator accounts with at least 100 followers.',
+    gender: ga.gender,
+    age: ga.age,
+    countries: countries.length ? countries : null,
+    cities: cities.length ? cities : null,
+    devices: null,
+    missing,
+  };
+}
+
+module.exports = { fetchInsights, fetchDemographics, GROUPS };

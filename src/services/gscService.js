@@ -313,6 +313,55 @@ function buildTopItems(rows, dimensions) {
 }
 
 // ── Main ────────────────────────────────────────────────────────
+
+/**
+ * fetchDemographics — where search traffic comes from. Search Console has no
+ * age or gender data at all (Google keeps that in Analytics, which this API
+ * does not use), so those dimensions are honestly reported as missing.
+ * Values are clicks; `share` is each row's share of total clicks.
+ */
+async function fetchDemographics(siteUrl, startDate, endDate) {
+  const source = 'Google Search Console · searchAnalytics';
+  const missing = ['age', 'gender', 'cities'];
+  const blank = (note) => ({ ...demo.empty(source, note, [...missing, 'countries', 'devices']), unit: 'count' });
+  try {
+    const [countryRes, deviceRes] = await Promise.all([
+      querySearchAnalytics(siteUrl, { dimensions: ['country'], startDate, endDate, rowLimit: 60 }).catch(() => ({ rows: [] })),
+      querySearchAnalytics(siteUrl, { dimensions: ['device'], startDate, endDate, rowLimit: 10 }).catch(() => ({ rows: [] })),
+    ]);
+    const countries = demo.withShare(
+      countryRes.rows
+        .filter((r) => r.keys && r.keys[0])
+        .map((r) => ({ name: String(r.keys[0]), value: r.clicks || 0, impressions: r.impressions || 0 }))
+        .sort((a, b) => b.value - a.value)
+    );
+    const devices = demo.withShare(
+      deviceRes.rows
+        .filter((r) => r.keys && r.keys[0])
+        .map((r) => ({ label: demo.deviceLabel(String(r.keys[0])), value: r.clicks || 0, impressions: r.impressions || 0 }))
+        .sort((a, b) => b.value - a.value)
+    );
+    const available = Boolean(countries.length || devices.length);
+    return {
+      available,
+      source,
+      unit: 'count',
+      asOf: endDate,
+      note: available
+        ? 'Search Console reports where searchers are, not who they are — age and gender do not exist in this dataset.'
+        : 'No search traffic rows in this window, so there is no geography to show yet.',
+      gender: null,
+      age: null,
+      countries: countries.length ? countries : null,
+      cities: null,
+      devices: devices.length ? devices : null,
+      missing,
+    };
+  } catch (e) {
+    return blank('Demographics unavailable: ' + (e.message || e));
+  }
+}
+
 async function fetchInsights(query) {
   const sites = await getSites();
   const siteUrl = config.GSC_SITE_URL || (sites.length ? sites[0].siteUrl : null);
@@ -340,6 +389,7 @@ async function fetchInsights(query) {
   const days = enumerateDates(startDate, endDate).length;
 
   const rowLimit = Math.min(parseInt(query.rowLimit, 10) || (dimensions[0] === 'date' ? 1000 : 250), 25000);
+  const demographicsPromise = fetchDemographics(siteUrl, startDate, endDate);
   const { rows } = await querySearchAnalytics(siteUrl, {
     dimensions,
     startDate,
@@ -378,6 +428,8 @@ async function fetchInsights(query) {
     ? { from: toDateStr(safeSince - days * DAY), to: toDateStr(safeSince - DAY) }
     : null;
 
+  const demographics = await demographicsPromise;
+
   return {
     platform: 'gsc',
     meta: {
@@ -396,6 +448,7 @@ async function fetchInsights(query) {
     overview: result.overview,
     timeseries: result.timeseries,
     metrics: result.metrics,
+    demographics,
     ...(result.topItems && { topItems: result.topItems }),
     ...(previousRows && isTimeline && { previousTotals: result.previous }),
     ...(rows.length === 0
