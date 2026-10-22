@@ -15,7 +15,11 @@
  */
 process.env.PORT = '5099';
 process.env.ZERNIO_API_KEY = 'sk_fixture_key';
-process.env.ZERNIO_BASE_URL = 'http://127.0.0.1:4988/api';
+// ZERNIO_BASE_URL is assigned below, AFTER the mock has bound its port: the mock
+// listens on an ephemeral port so it can never collide with a running one, and
+// zernioService captures the base URL at require time. Hard-coding :4988 here
+// silently produced empty Pinterest/LinkedIn fixtures (no account, no posts, no
+// boards) because nothing was listening on that port.
 process.env.ACCOUNT_CREATED = '2020-01-01';
 // intentionally unset: ACCESS_TOKEN, FACEBOOK_PAGE_ID, INSTAGRAM_ID,
 // YOUTUBE_*, GOOGLE_*, GSC_*
@@ -59,6 +63,8 @@ async function main() {
   console.log('\nGenerating frontend fixtures from the real API code path…\n');
   const mock = createMock({ port: Number(process.env.MOCK_ZERNIO_PORT || 0), mode: 'zero-analytics' });
   await mock.ready();
+  process.env.ZERNIO_BASE_URL = mock.url;
+  console.log(`  mock Zernio on :${mock.port} → ${mock.url}`);
   require('../src/app');
   await waitForServer();
 

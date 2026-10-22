@@ -15,7 +15,7 @@
 const axios = require('axios');
 const config = require('../config');
 const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils');
-const { summarize, round, pctChange } = require('../utils/metrics');
+const { summarize, round, pctChange, justifiedTrend } = require('../utils/metrics');
 const demo = require('../utils/demographics');
 const { isNetworkError, networkHint } = require('../utils/upstreamErrors');
 
@@ -240,7 +240,14 @@ function buildTimeline(rows, dates, previous) {
       max: s.max,
       points: s.points,
       previous,
-      trend: previous === null ? 0 : pctChange(cur, previous),
+      // GSC is the only channel that queries a genuine previous equal-length
+      // window, so this is the only "vs the previous period" percentage the
+      // dashboard carries. Everything else compares halves of the same range.
+      trend: previous === null ? null : justifiedTrend(cur, previous, metric.kind),
+      trendBasis:
+        previous === null || justifiedTrend(cur, previous, metric.kind) === null
+          ? null
+          : 'previous-window',
       hasData: s.activePoints > 0,
     };
   };
@@ -303,13 +310,13 @@ function buildTopItems(rows, dimensions) {
   const avgPos = withPos.length ? round(withPos.reduce((s, i) => s + i.position, 0) / withPos.length, 2) : null;
 
   const overview = {
-    clicks: { key: 'clicks', label: 'Clicks', kind: 'sum', unit: '', group: 'Traffic', total: totalClicks, previous: null, trend: 0, hasData: totalClicks > 0 },
-    impressions: { key: 'impressions', label: 'Impressions', kind: 'sum', unit: '', group: 'Traffic', total: totalImpressions, previous: null, trend: 0, hasData: totalImpressions > 0 },
-    ctr: { key: 'ctr', label: 'CTR', kind: 'rate', unit: '%', group: 'Quality', total: avgCtr, previous: null, trend: 0, hasData: avgCtr > 0 },
+    clicks: { key: 'clicks', label: 'Clicks', kind: 'sum', unit: '', group: 'Traffic', total: totalClicks, previous: null, trend: null, trendBasis: null, hasData: totalClicks > 0 },
+    impressions: { key: 'impressions', label: 'Impressions', kind: 'sum', unit: '', group: 'Traffic', total: totalImpressions, previous: null, trend: null, trendBasis: null, hasData: totalImpressions > 0 },
+    ctr: { key: 'ctr', label: 'CTR', kind: 'rate', unit: '%', group: 'Quality', total: avgCtr, previous: null, trend: null, trendBasis: null, hasData: avgCtr > 0 },
     ...(avgPos !== null
-      ? { position: { key: 'position', label: 'Avg position', kind: 'avg', unit: '', group: 'Quality', total: avgPos, previous: null, trend: 0, hasData: true } }
+      ? { position: { key: 'position', label: 'Avg position', kind: 'avg', unit: '', group: 'Quality', total: avgPos, previous: null, trend: null, trendBasis: null, hasData: true } }
       : {}),
-    uniqueItems: { key: 'uniqueItems', label: `${DIM_LABEL[dimensions[0]] || 'Rows'} returned`, kind: 'count', unit: '', group: 'Coverage', total: items.length, previous: null, trend: 0, hasData: items.length > 0 },
+    uniqueItems: { key: 'uniqueItems', label: `${DIM_LABEL[dimensions[0]] || 'Rows'} returned`, kind: 'count', unit: '', group: 'Coverage', total: items.length, previous: null, trend: null, trendBasis: null, hasData: items.length > 0 },
   };
 
   return { topItems: items, overview, metrics: [], timeseries: [] };

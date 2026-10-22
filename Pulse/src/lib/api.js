@@ -63,8 +63,8 @@ export async function fetchHealth() {
   return data
 }
 
-export async function fetchCombined(range) {
-  const { data } = await client(120000).get('/api/combined', { params: rangeParams(range) })
+export async function fetchCombined(range, extra = {}) {
+  const { data } = await client(120000).get('/api/combined', { params: rangeParams(range, extra) })
   return data
 }
 
@@ -82,6 +82,31 @@ export async function fetchZernioDebug() {
 
 export async function fetchZernioAccounts() {
   const { data } = await client(30000).get('/api/zernio/accounts')
+  return data
+}
+
+/**
+ * One call that returns everything: every platform payload, the growth
+ * diagnosis for both audience targets, the raw upstream bodies and the
+ * Pinterest/LinkedIn entitlement probes. Credentials are redacted server-side.
+ */
+export function reportParams({ days = 30, raw = true, format, sections } = {}) {
+  const p = { days: String(days) }
+  if (raw) p.raw = 'true'
+  if (format) p.format = format
+  if (sections) p.sections = Array.isArray(sections) ? sections.join(',') : String(sections)
+  return p
+}
+
+/** Absolute URL for the report — used by "open in a new tab" and downloads. */
+export function reportUrl(opts = {}) {
+  const base = effectiveBase().replace(/\/$/, '')
+  const q = new URLSearchParams(reportParams(opts)).toString()
+  return `${base}/api/report?${q}`
+}
+
+export async function fetchReport(opts = {}) {
+  const { data } = await client(180000).get('/api/report', { params: reportParams(opts) })
   return data
 }
 

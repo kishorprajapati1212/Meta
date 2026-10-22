@@ -35,7 +35,7 @@ const DIMENSIONS = [
  * dimension is fetched on demand from GET /api/gsc?dimensions=… and rendered
  * as both a ranked bar list and an exportable table.
  */
-export default function GscPage({ payload, range, sample, healthDetail, onRetry }) {
+export default function GscPage({ payload, range, sample, healthDetail, onRetry, audience, onAudienceChange }) {
   const [dim, setDim] = useState('date')
   const [chartMetric, setChartMetric] = useState('impressions')
   const meta = platformMeta('searchConsole')

@@ -54,6 +54,7 @@ export default function PageHeader({
             {source ? <Tag>{source}</Tag> : null}
             {account?.followers ? (
               <span className="num" title="Current follower/subscriber count">
+                {account.followersEstimated ? '≈' : ''}
                 {compact(account.followers)} followers
               </span>
             ) : null}
@@ -83,7 +84,8 @@ export default function PageHeader({
                 <div key={s.label}>
                   <p className="eyebrow">{s.label}</p>
                   <p className="text-[15px] font-semibold text-ink num mt-0.5" title={full(s.value)}>
-                    {compact(s.value)}
+                    {s.approx ? '≈' : ''}
+                    {typeof s.value === 'number' ? compact(s.value) : s.value}
                   </p>
                 </div>
               ))}

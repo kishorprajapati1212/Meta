@@ -14,7 +14,7 @@
  *     Pinterest/LinkedIn rendered as an empty {} and the UI fell back to a
  *     single "Posts" card.
  */
-const { summarize, labelOf, kindOf, unitOf, round, pctChange, sum, mean } = require('./metrics');
+const { summarize, labelOf, kindOf, unitOf, round, pctChange, justifiedTrend, sum, mean } = require('./metrics');
 
 /** metric ids that describe a level, not a flow */
 const GAUGE_IDS = ['follower_count', 'page_fans'];
@@ -167,7 +167,9 @@ function buildOverview(metrics) {
       unit: '',
       total: net,
       previous: null,
-      trend: 0,
+      // Derived from two totals with no previous window: no percentage to show.
+      trend: null,
+      trendBasis: null,
       hasData: net !== 0,
     };
   }
@@ -187,7 +189,8 @@ function buildOverview(metrics) {
       unit: '%',
       total: rate,
       previous: prevRate,
-      trend: prevRate === null ? 0 : pctChange(rate, prevRate),
+      trend: prevRate === null ? null : justifiedTrend(rate, prevRate, 'rate'),
+      trendBasis: prevRate === null || justifiedTrend(rate, prevRate, 'rate') === null ? null : 'second-half-vs-first-half',
       hasData: rate > 0,
       derived: true,
       formula: `${engSource.label} ÷ ${reachSource.label}`,

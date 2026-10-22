@@ -3,8 +3,8 @@
   "platform": "pinterest",
   "meta": {
     "dateRange": {
-      "from": "2026-09-15",
-      "to": "2026-10-15"
+      "from": "2026-09-22",
+      "to": "2026-10-22"
     },
     "source": "Zernio",
     "hasAnalyticsAccess": true,
@@ -23,11 +23,22 @@
       "boardCount": 18,
       "monthlyViews": 96400,
       "externalPostCount": 7,
-      "lastSyncedAt": "2026-10-15T13:35:14.421Z",
+      "lastSyncedAt": "2026-10-22T10:59:18.655Z",
       "connectedAt": null,
       "tokenExpiresAt": null,
       "isActive": true,
       "accountType": null,
+      "permissions": null,
+      "platformStatus": null,
+      "platformStatusReason": null,
+      "needsReconnection": false,
+      "enabled": true,
+      "scopes": null,
+      "followersCount": null,
+      "followersLastUpdated": null,
+      "lastSuccessfulPublishAt": null,
+      "rateLimitedUntil": null,
+      "byokConfigured": false,
       "rawStats": {
         "pinCount": 342,
         "boardCount": 18,
@@ -70,7 +81,7 @@
           "ok": true,
           "matched": 1,
           "total": 2,
-          "attempt": "{\"limit\":50}",
+          "attempt": "{\"page\":1,\"limit\":50}",
           "error": null,
           "hasAnalyticsAccess": true
         },
@@ -94,6 +105,19 @@
           "reason": "no accountId",
           "attempted": 0
         }
+      },
+      "metricAvailability": {
+        "posts": 3,
+        "allZero": false,
+        "identified": 3,
+        "synced": 2,
+        "external": 1,
+        "agedPastLag": 2,
+        "newestHours": 0,
+        "oldestDays": 18,
+        "beyondLag": true,
+        "accountGaugesEmpty": false,
+        "verdict": "reporting"
       }
     }
   },
@@ -108,6 +132,7 @@
         "total": 23700,
         "previous": 3100,
         "trend": 664.5,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true
       },
       "clicks": {
@@ -119,6 +144,7 @@
         "total": 412,
         "previous": 42,
         "trend": 881,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true
       },
       "outboundClicks": {
@@ -129,7 +155,8 @@
         "group": "Performance",
         "total": 92,
         "previous": 9,
-        "trend": 922.2,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "saves": {
@@ -141,6 +168,7 @@
         "total": 141,
         "previous": 12,
         "trend": 1075,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true
       },
       "closeups": {
@@ -151,7 +179,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "views": {
@@ -162,7 +191,8 @@
         "group": "Engagement",
         "total": 320,
         "previous": 0,
-        "trend": 100,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "engagement": {
@@ -174,6 +204,7 @@
         "total": 553,
         "previous": 54,
         "trend": 924.1,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true
       },
       "engagementRate": {
@@ -185,6 +216,7 @@
         "total": 2.67,
         "previous": 1.74,
         "trend": 53.3,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true,
         "description": "Total engagement ÷ impressions",
         "currentHalfRate": 2.42
@@ -197,7 +229,8 @@
         "group": "Activity",
         "total": 3,
         "previous": 1,
-        "trend": 200,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "followers": {
@@ -209,6 +242,7 @@
         "total": 1284,
         "previous": 1197,
         "trend": 7.3,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true,
         "change": 87,
         "source": "follower-stats"
@@ -221,8 +255,10 @@
         "group": "Audience",
         "total": 342,
         "previous": null,
-        "trend": 0,
-        "hasData": true
+        "trend": null,
+        "trendBasis": null,
+        "hasData": true,
+        "source": "account"
       },
       "boards": {
         "key": "boards",
@@ -232,7 +268,8 @@
         "group": "Audience",
         "total": 3,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "monthlyViews": {
@@ -243,7 +280,8 @@
         "group": "Audience",
         "total": 96400,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "externalPosts": {
@@ -254,13 +292,14 @@
         "group": "Activity",
         "total": 7,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       }
     },
     "timeseries": [
       {
-        "date": "2026-09-15",
+        "date": "2026-09-22",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -279,7 +318,7 @@
         "hasData": false
       },
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -298,7 +337,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -317,7 +356,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -336,7 +375,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -355,7 +394,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -374,7 +413,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -393,7 +432,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -412,7 +451,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -431,7 +470,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -450,7 +489,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -469,7 +508,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -488,7 +527,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "posts": 1,
         "impressions": 3100,
         "reach": 0,
@@ -507,7 +546,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -526,7 +565,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -545,7 +584,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -564,7 +603,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -583,7 +622,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -602,7 +641,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -621,7 +660,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -640,7 +679,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -659,7 +698,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -678,7 +717,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -697,7 +736,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -716,7 +755,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "posts": 1,
         "impressions": 8200,
         "reach": 0,
@@ -735,7 +774,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -754,7 +793,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -773,7 +812,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -792,7 +831,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -811,7 +850,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -830,7 +869,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "posts": 1,
         "impressions": 12400,
         "reach": 0,
@@ -854,17 +893,20 @@
         "postId": "pin_1",
         "content": "Pin 1 — design inspiration board",
         "title": "Pin 1",
-        "publishedAt": "2026-10-15T13:35:15.339Z",
-        "date": "2026-10-15",
+        "publishedAt": "2026-10-22T10:59:19.570Z",
+        "date": "2026-10-22",
         "platformUrl": "https://pinterest.com/pin/1000",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-1.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "UI Design",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 12400,
           "reach": 0,
@@ -885,17 +927,20 @@
         "postId": "pin_2",
         "content": "Pin 2 — design inspiration board",
         "title": "Pin 2",
-        "publishedAt": "2026-10-09T13:35:15.339Z",
-        "date": "2026-10-09",
+        "publishedAt": "2026-10-16T10:59:19.570Z",
+        "date": "2026-10-16",
         "platformUrl": "https://pinterest.com/pin/1001",
         "mediaType": "video",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-2.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Dev Setup",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 8200,
           "reach": 0,
@@ -916,17 +961,20 @@
         "postId": "pin_3",
         "content": "Pin 3 — design inspiration board",
         "title": "Pin 3",
-        "publishedAt": "2026-09-27T13:35:15.339Z",
-        "date": "2026-09-27",
+        "publishedAt": "2026-10-04T10:59:19.570Z",
+        "date": "2026-10-04",
         "platformUrl": "https://pinterest.com/pin/1002",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-3.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Inspiration",
         "isExternal": true,
         "syncStatus": "pending",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 3100,
           "reach": 0,
@@ -949,17 +997,20 @@
         "postId": "pin_1",
         "content": "Pin 1 — design inspiration board",
         "title": "Pin 1",
-        "publishedAt": "2026-10-15T13:35:15.339Z",
-        "date": "2026-10-15",
+        "publishedAt": "2026-10-22T10:59:19.570Z",
+        "date": "2026-10-22",
         "platformUrl": "https://pinterest.com/pin/1000",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-1.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "UI Design",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 12400,
           "reach": 0,
@@ -980,17 +1031,20 @@
         "postId": "pin_2",
         "content": "Pin 2 — design inspiration board",
         "title": "Pin 2",
-        "publishedAt": "2026-10-09T13:35:15.339Z",
-        "date": "2026-10-09",
+        "publishedAt": "2026-10-16T10:59:19.570Z",
+        "date": "2026-10-16",
         "platformUrl": "https://pinterest.com/pin/1001",
         "mediaType": "video",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-2.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Dev Setup",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 8200,
           "reach": 0,
@@ -1011,17 +1065,20 @@
         "postId": "pin_3",
         "content": "Pin 3 — design inspiration board",
         "title": "Pin 3",
-        "publishedAt": "2026-09-27T13:35:15.339Z",
-        "date": "2026-09-27",
+        "publishedAt": "2026-10-04T10:59:19.570Z",
+        "date": "2026-10-04",
         "platformUrl": "https://pinterest.com/pin/1002",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-3.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Inspiration",
         "isExternal": true,
         "syncStatus": "pending",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 3100,
           "reach": 0,
@@ -1074,156 +1131,175 @@
     },
     "followerTimeseries": [
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "followers": 1197,
         "growth": 0
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "followers": 1200,
         "growth": 3
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "followers": 1203,
         "growth": 3
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "followers": 1206,
         "growth": 3
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "followers": 1209,
         "growth": 3
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "followers": 1212,
         "growth": 3
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "followers": 1215,
         "growth": 3
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "followers": 1218,
         "growth": 3
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "followers": 1221,
         "growth": 3
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "followers": 1224,
         "growth": 3
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "followers": 1227,
         "growth": 3
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "followers": 1230,
         "growth": 3
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "followers": 1233,
         "growth": 3
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "followers": 1236,
         "growth": 3
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "followers": 1239,
         "growth": 3
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "followers": 1242,
         "growth": 3
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "followers": 1245,
         "growth": 3
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "followers": 1248,
         "growth": 3
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "followers": 1251,
         "growth": 3
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "followers": 1254,
         "growth": 3
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "followers": 1257,
         "growth": 3
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "followers": 1260,
         "growth": 3
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "followers": 1263,
         "growth": 3
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "followers": 1266,
         "growth": 3
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "followers": 1269,
         "growth": 3
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "followers": 1272,
         "growth": 3
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "followers": 1275,
         "growth": 3
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "followers": 1278,
         "growth": 3
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "followers": 1281,
         "growth": 3
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "followers": 1284,
         "growth": 3
       }
     ],
+    "demographics": {
+      "available": false,
+      "source": "Zernio",
+      "unit": "share",
+      "asOf": null,
+      "note": "Zernio’s public API does not expose audience demographics (age, gender, location) for Pinterest. The audience section below therefore only shows what the platform itself publishes.",
+      "gender": null,
+      "age": null,
+      "countries": null,
+      "cities": null,
+      "devices": null,
+      "missing": [
+        "age",
+        "gender",
+        "countries",
+        "cities",
+        "devices"
+      ]
+    },
     "boards": [
       {
         "id": "b1",
@@ -1246,6 +1322,114 @@
         "privacy": "PUBLIC",
         "url": null
       }
-    ]
+    ],
+    "diagnosis": {
+      "platform": "pinterest",
+      "audience": "institutions",
+      "audienceFit": {
+        "fit": "low",
+        "why": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest."
+      },
+      "stage": "healthy",
+      "headline": "The funnel is working end to end: 3 published → 23.7K impressions → 553 engagement → 92 outboundClicks. Now scale what already works.",
+      "funnel": [
+        {
+          "key": "published",
+          "label": "Published",
+          "value": 3,
+          "display": "3",
+          "verdict": "ok",
+          "note": "3 item(s) in this range"
+        },
+        {
+          "key": "seen",
+          "label": "Seen",
+          "value": 23700,
+          "display": "23.7K",
+          "verdict": "ok",
+          "sourceKey": "impressions",
+          "note": "23.7K impressions"
+        },
+        {
+          "key": "engaged",
+          "label": "Engaged",
+          "value": 553,
+          "display": "553",
+          "verdict": "ok",
+          "sourceKey": "engagement",
+          "note": "553 engagement"
+        },
+        {
+          "key": "followed",
+          "label": "Followers",
+          "value": 1284,
+          "display": "1.3K",
+          "verdict": "ok",
+          "note": "1.3K followers"
+        },
+        {
+          "key": "converted",
+          "label": "Clicked through",
+          "value": 92,
+          "display": "92",
+          "verdict": "ok",
+          "sourceKey": "outboundClicks",
+          "note": "92 outboundClicks"
+        }
+      ],
+      "zeros": [
+        {
+          "key": "closeups",
+          "label": "Closeups",
+          "reason": "no-activity",
+          "explanation": "No closeups on any of the 3 post(s) read in this range (they recorded 553 other interaction(s) between them), and the account-level closeups insight is empty too. This is a measured zero, not a missing metric.",
+          "source": "summed from posts"
+        }
+      ],
+      "benchmark": {
+        "metric": "engagement rate",
+        "yours": 2.33,
+        "typical": "1.9% average",
+        "tier": "≈3.2% median for accounts under 5K followers",
+        "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+        "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting."
+      },
+      "actions": [
+        {
+          "priority": 1,
+          "title": "Scale the format that produced this",
+          "detail": "Repeat the top-performing item's structure for universities and departments and put a small budget or a partner share behind it."
+        }
+      ],
+      "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+      "evidence": {
+        "published": 3,
+        "seen": 23700,
+        "seenKey": "impressions",
+        "engaged": 553,
+        "engagedSource": "account metric",
+        "postSums": {
+          "clicks": 412,
+          "saves": 141
+        },
+        "followers": 1284,
+        "followersPublished": true,
+        "converted": 92,
+        "convertedKey": "outboundClicks",
+        "youngPosts": 1,
+        "lagging": false,
+        "postsRead": 3,
+        "notReported": false,
+        "seenPerPost": 7900,
+        "lowReach": false,
+        "identifiedPosts": 3,
+        "syncedPosts": 2,
+        "agedPosts": 2,
+        "oldestPostDays": 18,
+        "accountGaugesEmpty": true,
+        "accountPermissions": null,
+        "accountPlatformStatus": null
+      }
+    }
   }
 }

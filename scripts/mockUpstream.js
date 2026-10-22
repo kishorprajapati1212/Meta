@@ -106,6 +106,19 @@ function graphInsightsError(query) {
 }
 
 function graphInsightsBody(query) {
+  // The live account (captured 2026-10-21 via /api/report) answers
+  // `metric_type=total_value` combined with `period=day` with an EMPTY 200 — no
+  // error, no rows — while `reach` on the daily form comes back fine. That is how
+  // likes/comments hid behind silent 0 cards: nothing threw, so nothing was
+  // reported. MOCK_IG_INSIGHT_FORM=empty-total-value-day reproduces it so the
+  // variant fallback in instagramService is actually exercised.
+  if (
+    process.env.MOCK_IG_INSIGHT_FORM === 'empty-total-value-day' &&
+    query.metric_type === 'total_value' &&
+    query.period === 'day'
+  ) {
+    return { data: [] };
+  }
   const metrics = String(query.metric || '').split(',').map((m) => m.trim()).filter(Boolean);
   const period = query.period || 'day';
 
@@ -139,6 +152,17 @@ function graphInsightsBody(query) {
   return { data };
 }
 
+/** Mock media ids, so /{media-id}/insights can answer like a media node. */
+const MOCK_MEDIA_IDS = new Set(['17900000000000001', '17900000000000002', '17900000000000003']);
+
+/** Fields the mock refuses, like Meta does for a token/version that lacks them. */
+function badFields() {
+  return String(process.env.MOCK_FB_BAD_FIELDS || '')
+    .split(',')
+    .map((f) => f.trim())
+    .filter(Boolean);
+}
+
 /** Fields a Graph node request may ask for. */
 function graphNodeBody(query, node) {
   const fields = String(query.fields || '').split(',').map((f) => f.split('.')[0].split('(')[0]).filter(Boolean);
@@ -163,8 +187,54 @@ function graphNodeBody(query, node) {
     if (f === 'id') continue;
     out[f] = f in catalogue ? catalogue[f] : null;
   }
+  // Meta's (#36104) on /{ig-id}/media says the field is available "outside of the
+  // Business Discovery API" — i.e. through it. Answer that route so the fallback
+  // in metaPosts.fetchIgMedia can be tested end to end.
+  if (String(query.fields || '').includes('business_discovery')) {
+    if (process.env.MOCK_IG_DISCOVERY === 'denied') {
+      out.business_discovery = null;
+    } else {
+      out.business_discovery = {
+        id: '17840000000000999',
+        username: catalogue.username,
+        media: {
+          data: [
+            {
+              id: '17900000000000011', caption: 'Discovery reel — like_count without /media access',
+              media_type: 'REELS', timestamp: new Date(Date.now() - 4 * 86400000).toISOString(),
+              permalink: 'https://instagram.com/reel/d1', like_count: 21, comments_count: 5, view_count: 1200,
+              thumbnail_url: 'https://example.invalid/d1.jpg',
+            },
+            {
+              id: '17900000000000012', caption: 'Discovery carousel',
+              media_type: 'CAROUSEL_ALBUM', timestamp: new Date(Date.now() - 9 * 86400000).toISOString(),
+              permalink: 'https://instagram.com/p/d2', like_count: 8, comments_count: 2,
+            },
+          ],
+        },
+      };
+    }
+  }
   return out;
 }
+
+// Whole-history totals, so a channel whose Data API access is missing can still
+// show real lifetime views and an estimated subscriber count (137 gained − 5 lost
+// = 132, matching the Data API's subscriberCount so tests can compare directly).
+const LIFETIME_TOTALS = {
+  views: 4820,
+  estimatedMinutesWatched: 15230,
+  likes: 210,
+  comments: 44,
+  shares: 31,
+  subscribersGained: 137,
+  subscribersLost: 5,
+};
+const MOCK_VIDEOS = [
+  ['MOCKVID000000001', 2100, 6400, 96, 21, 12],
+  ['MOCKVID000000002', 1500, 4800, 62, 14, 9],
+  ['MOCKVID000000003', 1220, 4030, 52, 9, 10],
+];
 
 function ytReportBody(query) {
   const dims = String(query.dimensions || '').split(',').filter(Boolean);
@@ -173,6 +243,23 @@ function ytReportBody(query) {
     ...dims.map((name) => ({ name, columnType: 'DIMENSION', dataType: 'STRING' })),
     ...mets.map((name) => ({ name, columnType: 'METRIC', dataType: 'INTEGER' })),
   ];
+
+  // "Top videos" report: dimensions=video + sort + maxResults.
+  if (dims.includes('video')) {
+    const limit = Math.max(1, Math.min(Number(query.maxResults) || 200, MOCK_VIDEOS.length));
+    const rows = MOCK_VIDEOS.slice(0, limit).map((v) => [v[0], ...mets.map((m) => v[1 + ['views', 'estimatedMinutesWatched', 'likes', 'comments', 'shares'].indexOf(m)] ?? 0)]);
+    return { kind: 'youtubeAnalytics#resultTable', columnHeaders, rows };
+  }
+
+  // Lifetime/basic report: no dimensions → exactly one row of totals.
+  if (!dims.length) {
+    return {
+      kind: 'youtubeAnalytics#resultTable',
+      columnHeaders,
+      rows: [mets.map((m) => LIFETIME_TOTALS[m] ?? valueFor(m, 0))],
+    };
+  }
+
   const rows = [];
   for (let i = 0; i < 2; i += 1) {
     const dimValues = dims.map((d) => {
@@ -242,7 +329,7 @@ function createMockUpstream({ port = 4988 } = {}) {
       const raw = await readBody(req);
       record.body = raw;
       requests.push(record);
-      return send(res, 200, { access_token: 'ya29.mock-access-token', expires_in: 3599, scope: 'https://www.googleapis.com/auth/yt-analytics.readonly', token_type: 'Bearer' });
+      return send(res, 200, { access_token: 'ya29.mock-access-token', expires_in: 3599, scope: process.env.MOCK_GOOGLE_SCOPE || 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/yt-analytics.readonly', token_type: 'Bearer' });
     }
 
     // ── YouTube Analytics reports ──────────────────────────────────
@@ -254,6 +341,29 @@ function createMockUpstream({ port = 4988 } = {}) {
     // ── YouTube Data API ───────────────────────────────────────────
     if (url.pathname.includes('/youtube/v3/channels')) {
       requests.push(record);
+      const mode = process.env.MOCK_YT_DATA_API || 'ok';
+      if (mode === 'denied') {
+        // Exactly what the real deployment returns when the refresh token lacks
+        // youtube.readonly: the Analytics API works, the Data API does not.
+        return send(res, 403, {
+          error: {
+            code: 403,
+            message: 'Request had insufficient authentication scopes.',
+            errors: [{ message: 'Request had insufficient authentication scopes.', domain: 'youtube', reason: 'forbidden', extendedHelp: 'https://developers.google.com/youtube/v3/docs/channels/list' }],
+            status: 'PERMISSION_DENIED',
+          },
+        });
+      }
+      if (mode === 'notConfigured') {
+        return send(res, 403, {
+          error: {
+            code: 403,
+            message: 'YouTube Data API v3 has not been used in project 123456 before or it is disabled.',
+            errors: [{ message: 'access not configured', domain: 'usageLimits', reason: 'accessNotConfigured' }],
+            status: 'PERMISSION_DENIED',
+          },
+        });
+      }
       return send(res, 200, {
         items: [{
           id: 'UCmockchannel',
@@ -303,13 +413,132 @@ function createMockUpstream({ port = 4988 } = {}) {
 
     if (node && node.endsWith('/insights')) {
       requests.push(record);
+      const mediaId = node.split('/')[0];
+      if (MOCK_MEDIA_IDS.has(mediaId)) {
+        // Per-media insights: lifetime scalars, no end_time.
+        if (process.env.MOCK_IG_MEDIA_INSIGHTS === 'denied') {
+          return send(res, 403, { error: { message: '(#10) This endpoint requires the instagram_manage_insights permission.', type: 'OAuthException', code: 10 } });
+        }
+        const wanted = String(query.metric || '').split(',').filter(Boolean);
+        const perMedia = { likes: 7, comments: 2, shares: 1, saved: 3, impressions: 540, reach: 402, plays: 1180 };
+        return send(res, 200, {
+          data: wanted.filter((m) => m in perMedia).map((m) => ({ name: m, period: 'lifetime', values: [{ value: perMedia[m] }] })),
+        });
+      }
       const rejection = graphInsightsError(query);
       if (rejection) return send(res, rejection.status, rejection.body);
       return send(res, 200, graphInsightsBody(query));
     }
 
+    // ── Facebook Page posts (three endpoints need different permissions) ──
+    const postsMatch = node && node.match(/^(?:[^/]+)\/(posts|feed|published_posts)$/);
+    if (postsMatch) {
+      requests.push(record);
+      const denied = String(process.env.MOCK_FB_POSTS_DENY || '').split(',').map((x) => x.trim()).filter(Boolean);
+      if (denied.includes(postsMatch[1])) {
+        return send(res, 403, {
+          error: {
+            message: `(#200) Requires extended permission: pages_read_user_content (endpoint: ${postsMatch[1]})`,
+            type: 'OAuthException',
+            code: 200,
+          },
+        });
+      }
+      const list = [
+        {
+          id: `${node.split('/')[0]}_1001`,
+          message: 'Mock post one — the newest thing we shipped.',
+          created_time: new Date(Date.now() - 2 * 86400000).toISOString(),
+          permalink_url: 'https://facebook.com/permalink1001',
+          status_type: 'added_photos',
+          full_picture: 'https://example.invalid/p1.jpg',
+          shares: { count: 2 },
+          reactions: { summary: { total_count: 11, can_reaction: true } },
+          comments: { summary: { total_count: 3, can_comment: true } },
+        },
+        {
+          id: `${node.split('/')[0]}_1002`,
+          message: 'Mock post two — a short text update.',
+          created_time: new Date(Date.now() - 9 * 86400000).toISOString(),
+          permalink_url: 'https://facebook.com/permalink1002',
+          status_type: 'mobile_status_update',
+          reactions: { summary: { total_count: 4 } },
+          comments: { summary: { total_count: 1 } },
+        },
+        {
+          id: `${node.split('/')[0]}_1003`,
+          message: 'Mock post three — outside the range, must not be summed.',
+          created_time: new Date(Date.now() - 400 * 86400000).toISOString(),
+          permalink_url: 'https://facebook.com/permalink1003',
+          status_type: 'added_video',
+          reactions: { summary: { total_count: 99 } },
+          comments: { summary: { total_count: 99 } },
+          shares: { count: 99 },
+        },
+      ];
+      return send(res, 200, { data: list, paging: {} });
+    }
+
+    // ── Instagram media list ──
+    if (node && node.endsWith('/media')) {
+      requests.push(record);
+      if (process.env.MOCK_IG_MEDIA === 'denied') {
+        return send(res, 403, { error: { message: '(#200) Requires extended permission: instagram_basic', type: 'OAuthException', code: 200 } });
+      }
+      // The exact refusal the live account returned on 2026-10-21. Its wording is
+      // the useful part: Meta names the route where the field IS available.
+      if (process.env.MOCK_IG_MEDIA === 'denied-36104') {
+        return send(res, 400, {
+          error: {
+            message: '(#36104) You do not have permission to access this field outside of the Business Discovery API.',
+            type: 'OAuthException',
+            code: 36104,
+            fbtrace_id: 'mocktrace',
+          },
+        });
+      }
+      return send(res, 200, {
+        data: [
+          {
+            id: '17900000000000001', caption: 'Mock reel — behind the scenes', media_type: 'REELS',
+            media_url: 'https://example.invalid/r1.mp4', permalink: 'https://instagram.com/reel/r1',
+            timestamp: new Date(Date.now() - 3 * 86400000).toISOString(),
+            like_count: 18, comments_count: 4, view_count: 940, thumbnail_url: 'https://example.invalid/r1.jpg',
+          },
+          {
+            id: '17900000000000002', caption: 'Mock carousel', media_type: 'CAROUSEL_ALBUM',
+            media_url: 'https://example.invalid/c1.jpg', permalink: 'https://instagram.com/p/c1',
+            timestamp: new Date(Date.now() - 12 * 86400000).toISOString(),
+            like_count: 6, comments_count: 1,
+            children: { data: [{ id: 'child1', media_type: 'IMAGE', media_url: 'https://example.invalid/c1a.jpg' }] },
+          },
+          {
+            id: '17900000000000003', caption: 'Old mock image — outside the range', media_type: 'IMAGE',
+            media_url: 'https://example.invalid/o1.jpg', permalink: 'https://instagram.com/p/o1',
+            timestamp: new Date(Date.now() - 500 * 86400000).toISOString(), like_count: 77, comments_count: 77,
+          },
+        ],
+        paging: {},
+      });
+    }
+
     if (node) {
       requests.push(record);
+      // One unsupported field 400s the WHOLE Graph request — exactly what broke
+      // the Facebook page header. Tests use MOCK_FB_BAD_FIELDS to prove the
+      // layered fetch in tokenService keeps the fields that are allowed.
+      const requested = String(query.fields || '').split(',').map((f) => f.split('.')[0].split('(')[0]);
+      const refused = badFields().filter((f) => requested.includes(f));
+      if (refused.length) {
+        return send(res, 400, {
+          error: {
+            message: `(#100) Unsupported get request. Object with ID '${node.split('/')[0]}' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Requested fields: ${refused.join(', ')}`,
+            type: 'GraphMethodException',
+            code: 100,
+            fbtrace_id: 'mocktrace',
+          },
+        });
+      }
       return send(res, 200, graphNodeBody(query, node.split('/')[0]));
     }
 

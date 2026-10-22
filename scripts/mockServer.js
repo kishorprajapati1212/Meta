@@ -16,7 +16,7 @@ async function main() {
   const mock = await createMock({ port, mode })
   await mock.ready()
   console.log(`mock Zernio listening on :${port} (mode: ${mock.getMode()})`)
-  console.log('modes: zero-analytics | rich | accounts-500 | boards-404 | no-analytics-access')
+  console.log('modes: zero-analytics | rich | accounts-500 | boards-404 | no-analytics-access | sparse-accounts | cross-posted | real-capture')
   process.on('SIGTERM', async () => {
     await mock.close()
     process.exit(0)

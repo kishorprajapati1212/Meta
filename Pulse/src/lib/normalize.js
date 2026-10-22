@@ -63,26 +63,41 @@ export function accountOf(p) {
   const acct = o.account || p.meta?.account || o.channel || null
   if (!acct) return null
   const lifetime = acct.lifetime || null
+  // A card the API marked `unavailable` means the platform does not publish that
+  // number at all (Pinterest followers, LinkedIn personal-profile followers,
+  // monthly views). Showing 0 there reads like a measurement, so it is dropped.
+  const followersUnavailable = o.followers?.unavailable === true
+  const followers = followersUnavailable ? null : acct.followers ?? lifetime?.subscribers ?? null
+  const est = Boolean(acct.followersEstimated || lifetime?.subscribersEstimated)
+  const pins = acct.pinCount ?? (isNum(o.pins?.total) && o.pins.total ? o.pins.total : null)
+  const boards = acct.boardCount ?? (isNum(o.boards?.total) && o.boards.total ? o.boards.total : null)
   return {
     name: acct.name || acct.displayName || acct.title || null,
     handle: acct.handle || acct.username || null,
     picture: acct.picture || acct.thumbnail || acct.profilePicture || null,
     link: acct.link || acct.profileUrl || (acct.handle ? `https://instagram.com/${acct.handle}` : null),
-    followers: acct.followers ?? lifetime?.subscribers ?? null,
+    followers,
+    followersEstimated: followers != null && est,
+    followersNote: followersUnavailable ? o.followers?.unavailableReason || null : null,
     category: acct.category || null,
     website: acct.website || null,
     publishedAt: acct.publishedAt || null,
     lastSyncedAt: acct.lastSyncedAt || p.meta?.sync?.at || null,
     stats: [
-      lifetime?.subscribers != null && { label: 'Subscribers', value: lifetime.subscribers },
-      lifetime?.totalViews != null && { label: 'Lifetime views', value: lifetime.totalViews },
-      lifetime?.totalVideos != null && { label: 'Videos', value: lifetime.totalVideos },
+      lifetime?.subscribers != null && lifetime.subscribers > 0 && {
+        label: lifetime.subscribersEstimated ? 'Subscribers (est.)' : 'Subscribers',
+        value: lifetime.subscribers,
+        approx: Boolean(lifetime.subscribersEstimated),
+      },
+      lifetime?.totalViews != null && lifetime.totalViews > 0 && { label: 'Lifetime views', value: lifetime.totalViews },
+      lifetime?.totalVideos != null && lifetime.totalVideos > 0 && { label: 'Videos', value: lifetime.totalVideos },
+      lifetime?.watchTimeHours != null && lifetime.watchTimeHours > 0 && { label: 'Lifetime watch time', value: `${lifetime.watchTimeHours}h` },
       acct.mediaCount != null && { label: 'Posts', value: acct.mediaCount },
       acct.likes != null && { label: 'Page likes', value: acct.likes },
       acct.following != null && { label: 'Following', value: acct.following },
-      acct.pinCount != null && { label: 'Total pins', value: acct.pinCount },
-      acct.boardCount != null && { label: 'Boards', value: acct.boardCount },
-      acct.monthlyViews != null && { label: 'Monthly views', value: acct.monthlyViews },
+      pins != null && pins > 0 && { label: 'Total pins', value: pins },
+      boards != null && boards > 0 && { label: 'Boards', value: boards },
+      acct.monthlyViews != null && acct.monthlyViews > 0 && { label: 'Monthly views', value: acct.monthlyViews },
       acct.externalPostCount != null && { label: 'External posts', value: acct.externalPostCount },
     ].filter(Boolean),
   }
@@ -151,7 +166,11 @@ function fromOverviewEntry(key, entry, p) {
     total: isNum(entry.total) ? entry.total : 0,
     previous: isNum(entry.previous) ? entry.previous : null,
     change: isNum(entry.change) ? entry.change : null,
-    trend: isNum(entry.trend) ? entry.trend : 0,
+    // null means "no justified comparison" — never coerce it to 0, which the
+    // UI would then render as a real, measured "flat".
+    trend: isNum(entry.trend) ? entry.trend : null,
+    trendBasis: entry.trendBasis || null,
+    trendWindows: entry.trendWindows || null,
     average: isNum(entry.average) ? entry.average : null,
     latest: isNum(entry.latest) ? entry.latest : null,
     points: entry.points ?? null,
@@ -160,6 +179,9 @@ function fromOverviewEntry(key, entry, p) {
     formula: entry.formula || null,
     source: entry.source || null,
     formatted: entry.formatted || null,
+    estimated: Boolean(entry.estimated),
+    unavailable: Boolean(entry.unavailable),
+    unavailableReason: entry.unavailableReason || null,
     series: seriesOf(p, key),
   }
 }
@@ -178,7 +200,9 @@ function fromMetric(m, p) {
     total: isNum(s.total) ? s.total : 0,
     previous: isNum(s.previous) ? s.previous : null,
     change: null,
-    trend: isNum(s.trend) ? s.trend : 0,
+    trend: isNum(s.trend) ? s.trend : null,
+    trendBasis: s.trendBasis || null,
+    trendWindows: s.trendWindows || null,
     average: isNum(s.average) ? s.average : null,
     latest: isNum(s.latest) ? s.latest : null,
     points: s.points ?? (m.values || []).length,
@@ -202,7 +226,8 @@ function fromTotal(key, value, previous, p) {
     total: Number(value) || 0,
     previous: isNum(previous) ? previous : null,
     change: null,
-    trend: 0,
+    trend: null,
+    trendBasis: null,
     average: null,
     latest: null,
     points: null,
@@ -226,6 +251,9 @@ export function metricsOf(platformKey, p) {
     if (NON_METRIC_KEYS.has(k)) continue
     if (!v || typeof v !== 'object' || Array.isArray(v)) continue
     if (!('total' in v) && !('value' in v)) continue
+    // The API marks a card `unavailable` when the platform does not publish that
+    // number at all. Those are removed rather than rendered as a zero.
+    if (v.unavailable === true) continue
     map.set(k, fromOverviewEntry(k, { ...v, total: v.total ?? v.value }, p))
   }
 
@@ -257,6 +285,7 @@ export function metricsOf(platformKey, p) {
     ]
     for (const [key, value, label] of gauges) {
       if (map.has(key) || !isNum(value)) continue
+      if ((p.overview || {})[key]?.unavailable === true) continue
       map.set(key, { ...fromTotal(key, value, null, p), label, kind: 'gauge', group: 'Audience', hasData: value > 0 })
     }
   }
@@ -522,7 +551,7 @@ const OVERVIEW_TOTAL = (p, key) => {
 /** Per-channel row, identical maths to the backend buildSummary(). */
 export function channelRow(platformKey, p) {
   if (!p || isErrorPayload(p)) {
-    return { platform: platformKey, ok: false, error: p?.error || 'No data', audience: 0, impressions: 0, reach: 0, views: 0, engagement: 0, clicks: 0, posts: 0, engagementRate: 0, trend: 0, lifetime: null, account: null, hasData: false }
+    return { platform: platformKey, ok: false, error: p?.error || 'No data', audience: 0, impressions: 0, reach: 0, views: 0, engagement: 0, clicks: 0, posts: 0, engagementRate: 0, trend: null, trendBasis: null, lifetime: null, account: null, hasData: false }
   }
   const o = p.overview || {}
   const audience = OVERVIEW_TOTAL(p, 'followers') || Number(o?.channel?.lifetime?.subscribers) || 0
@@ -544,7 +573,8 @@ export function channelRow(platformKey, p) {
     clicks: OVERVIEW_TOTAL(p, 'clicks'),
     posts: Number(p?.meta?.postCount) || OVERVIEW_TOTAL(p, 'posts') || 0,
     engagementRate: OVERVIEW_TOTAL(p, 'engagementRate'),
-    trend: OVERVIEW_TOTAL(p, 'followers') ? Number(o.followers.trend) || 0 : 0,
+    trend: isNum(o.followers?.trend) ? Number(o.followers.trend) : null,
+    trendBasis: o.followers?.trendBasis || null,
     lifetime: o?.channel?.lifetime || null,
     account: p?.meta?.account || null,
     dateRange: p?.meta?.dateRange || null,

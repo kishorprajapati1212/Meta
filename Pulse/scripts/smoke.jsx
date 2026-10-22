@@ -44,9 +44,17 @@ import GscPage from '../src/components/panels/GscPage.jsx'
 import ConnectionsPage from '../src/components/panels/ConnectionsPage.jsx'
 import AudiencePage from '../src/components/panels/AudiencePage.jsx'
 import MetricTable from '../src/components/metrics/MetricTable.jsx'
-import { metricsOf, healthDetailsOf, healthCountsOf, deriveSummary, effectiveSummary, activityCalendarOf } from '../src/lib/normalize.js'
+import KpiCard from '../src/components/metrics/KpiCard.jsx'
+import PageHeader from '../src/components/platform/PageHeader.jsx'
+import { metricsOf, accountOf, healthDetailsOf, healthCountsOf, deriveSummary, effectiveSummary, activityCalendarOf } from '../src/lib/normalize.js'
 import { PLATFORM_ORDER } from '../src/lib/platforms.js'
-import { sampleCombined, sampleHealth } from '../src/lib/sample.js'
+import { sampleCombined, sampleHealth, sampleDiagnosis, sampleFocus } from '../src/lib/sample.js'
+import { AUDIENCE_OPTIONS } from '../src/lib/audience.js'
+import FocusBoard from '../src/components/panels/FocusBoard.jsx'
+// Diagnoses produced by the REAL server engine (src/utils/diagnosis.js) over the
+// recorded API payloads — see scripts/makeDiagnosisFixtures.cjs. The panel must
+// render exactly what the API sends, so nothing here is hand-written.
+import diagnosisFx from './fixtures/diagnosis.json'
 import { formatValue } from '../src/lib/format.js'
 import { describeError } from '../src/lib/api.js'
 
@@ -178,9 +186,39 @@ check('outbound clicks are surfaced separately from pin clicks', () => {
   assert(pinRichData.overview.outboundClicks.total === 92, `expected 92 got ${pinRichData.overview.outboundClicks.total}`)
   includes(pinRichHtml, 'Outbound clicks')
 })
-check('trends are computed instead of always 0', () => {
-  const trends = Object.values(pinRichData.overview).map((v) => v.trend).filter((t) => typeof t === 'number')
-  assert(trends.some((t) => t !== 0), 'every trend is still zero')
+check('no trend is fabricated — a percentage needs a real, large-enough baseline', () => {
+  const entries = Object.entries(pinRichData.overview)
+  assert(entries.length > 0, 'no overview entries to check')
+  for (const [k, v] of entries) {
+    if (v.trend === null || v.trend === undefined) continue
+    assert(typeof v.trend === 'number' && Number.isFinite(v.trend), `${k} trend is not a number`)
+    assert(v.previous !== null && v.previous !== undefined, `${k} publishes ${v.trend}% with no baseline`)
+    if (v.kind !== 'rate') assert(Math.abs(v.previous) >= 10, `${k} publishes ${v.trend}% off a baseline of ${v.previous}`)
+  }
+  const fabricated = entries.filter(([, v]) => (v.previous === 0 || v.previous === null) && v.trend != null)
+  assert(fabricated.length === 0, `fabricated percentages: ${fabricated.map(([k]) => k).join(', ')}`)
+})
+
+check('a KPI card shows the number and the graph — never a percentage badge', () => {
+  const metric = {
+    key: 'reach', label: 'Reach', kind: 'sum', unit: '', total: 346, previous: 33,
+    trend: 948.5, trendBasis: 'second-half-vs-first-half', hasData: true,
+    series: [{ date: '2026-09-01', value: 10 }, { date: '2026-09-02', value: 20 }, { date: '2026-09-03', value: 30 }],
+  }
+  const html = render(<KpiCard metric={metric} />)
+  includes(html, '346')
+  assert(!/948/.test(html), 'the card printed a percentage change it cannot justify')
+  assert(!/Previous: 33/.test(html), 'the card printed an absolute delta against a half-window')
+  // Recharts' ResponsiveContainer needs a layout pass, so static markup carries
+  // the sparkline slot rather than an <svg>; the slot is what must survive.
+  assert(/height:34px|recharts-responsive-container/.test(html), 'the sparkline slot must stay — that is the honest trend')
+})
+
+check('the metric table labels what its comparison actually is', () => {
+  const html = render(<MetricTable metrics={metricsOf('pinterest', pinRichData)} platformKey="pinterest" color="#E60023" />)
+  includes(html, '1st half')
+  assert(!/>Change</.test(html), 'the unlabelled duplicate Change column must be gone')
+  includes(html, 'Trend')
 })
 
 console.log('\nPinterest — degraded upstream')
@@ -696,6 +734,398 @@ check('MetricTable lists every metric including zeros, with aggregation kinds', 
   includes(html, 'level')
   includes(html, 'Hide empty')
 })
+// ── v4.2.5 — unpublished gauges are removed, estimates are labelled ──
+console.log('\nv4.2.5 — cards the platform cannot publish, and estimated numbers')
+
+// Mirrors the real Pinterest account: Zernio reports 0 followers and no
+// pin/board/monthly-view stats, but 3 pins were published and are known.
+const sparsePinterest = {
+  overview: {
+    impressions: { key: 'impressions', label: 'Impressions', kind: 'sum', total: 0, hasData: false },
+    pins: { key: 'pins', label: 'Total pins', kind: 'gauge', total: 3, hasData: true, source: 'published pins' },
+    boards: { key: 'boards', label: 'Boards', kind: 'gauge', total: 1, hasData: true },
+    followers: {
+      key: 'followers', label: 'Followers', kind: 'gauge', total: 0, hasData: false,
+      unavailable: true,
+      unavailableReason: "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report.",
+    },
+    monthlyViews: {
+      key: 'monthlyViews', label: 'Monthly views', kind: 'gauge', total: 0, hasData: false,
+      unavailable: true, unavailableReason: 'Pinterest does not expose monthly views.',
+    },
+    account: { name: 'kishorprajapati1040', username: 'kishorprajapati1040', followers: 0, pinCount: null, boardCount: null, monthlyViews: null },
+  },
+  metrics: [],
+  timeseries: [],
+  posts: [],
+  meta: { account: { followers: 0, pinCount: null, boardCount: null, monthlyViews: null } },
+}
+
+check('cards the platform does not publish are removed, not rendered as 0', () => {
+  const keys = metricsOf('pinterest', sparsePinterest).map((m) => m.key)
+  assert(!keys.includes('followers'), `followers should be gone, got ${keys.join(', ')}`)
+  assert(!keys.includes('monthlyViews'), `monthlyViews should be gone, got ${keys.join(', ')}`)
+  assert(keys.includes('pins'), 'a real number must stay')
+  assert(keys.includes('impressions'), 'a measured zero must stay (it is not the same as "unpublished")')
+})
+
+check('the account header drops an unpublished follower count and keeps the pins it knows', () => {
+  const a = accountOf(sparsePinterest)
+  assert(a.followers === null, `followers should be null, got ${a.followers}`)
+  includes(a.followersNote || '', 'does not publish')
+  assert(a.stats.some((x) => x.label === 'Total pins' && x.value === 3), JSON.stringify(a.stats))
+  assert(a.stats.some((x) => x.label === 'Boards' && x.value === 1), JSON.stringify(a.stats))
+  assert(!a.stats.some((x) => x.label === 'Monthly views'), 'an unpublished gauge must not appear as 0')
+})
+
+// What the YouTube fallback produces when the token has no youtube.readonly.
+const ytEstimated = {
+  overview: {
+    views: { key: 'views', label: 'Views', kind: 'sum', total: 7, hasData: true },
+    followers: {
+      key: 'followers', label: 'Subscribers', kind: 'gauge', total: 132, hasData: true,
+      estimated: true, source: 'analytics_estimate',
+      description: 'Estimated from lifetime subscribersGained - subscribersLost (the Data API scope is missing).',
+    },
+    account: {
+      name: 'YouTube Channel', followers: 132, followersEstimated: true,
+      lifetime: { subscribers: 132, subscribersEstimated: true, totalViews: 4820, totalVideos: 3, watchTimeHours: 253.8, source: 'analytics_api' },
+    },
+  },
+  metrics: [],
+  timeseries: [],
+  posts: [],
+  meta: {},
+}
+
+check('an estimated subscriber count is labelled, and never renders as 0', () => {
+  const a = accountOf(ytEstimated)
+  assert(a.followers === 132, `expected 132, got ${a.followers}`)
+  assert(a.followersEstimated === true)
+  const sub = a.stats.find((x) => String(x.label).startsWith('Subscribers'))
+  assert(sub && sub.approx === true, JSON.stringify(a.stats))
+  assert(a.stats.some((x) => x.label === 'Lifetime views' && x.value === 4820), JSON.stringify(a.stats))
+  assert(a.stats.some((x) => x.label === 'Lifetime watch time'), JSON.stringify(a.stats))
+  const card = metricsOf('youtube', ytEstimated).find((m) => m.key === 'followers')
+  assert(card && card.estimated === true && card.total === 132, JSON.stringify(card))
+})
+
+check('KpiCard marks an estimated value with a tilde and says so', () => {
+  const card = metricsOf('youtube', ytEstimated).find((m) => m.key === 'followers')
+  const html = render(<KpiCard metric={card} />)
+  includes(html, '\u2248')
+  includes(html, 'Estimated')
+  includes(html, '132')
+})
+
+check('PageHeader shows the estimate marker next to the follower count', () => {
+  const html = render(<PageHeader platformKey="youtube" account={accountOf(ytEstimated)} source="YouTube Analytics API" />)
+  includes(html, '\u2248')
+  includes(html, 'followers')
+  includes(html, 'Subscribers (est.)')
+})
+
+check('a card summed from posts says where the number came from', () => {
+  const fromPosts = {
+    overview: {
+      likes: {
+        key: 'likes', label: 'Likes', kind: 'sum', total: 15, hasData: true, derived: true, source: 'posts',
+        description: 'Summed from 2 Page posts in this range.',
+      },
+    },
+    metrics: [], timeseries: [], posts: [], meta: {},
+  }
+  const html = render(<KpiCard metric={metricsOf('facebook', fromPosts)[0]} />)
+  includes(html, 'Summed from your posts in this range')
+  includes(html, '15')
+})
+
+check('the Pinterest page hides unpublished cards but keeps the real ones', () => {
+  const html = render(
+    <PlatformPage platformKey="pinterest" payload={sparsePinterest} healthDetail={{ status: 'ok', configured: true }} range={range} sample={false} />
+  )
+  notIncludes(html, 'Monthly views')
+  includes(html, 'Total pins')
+  includes(html, 'kishorprajapati1040')
+})
+
+// ────────────────────────────────────────────────────────────────
+console.log('\n\x1b[1mv4.3.0 — growth diagnosis (server engine → panel)\x1b[0m')
+
+const czData = unwrap(combinedZero)
+const diagFor = (platform, audience = 'institutions') => diagnosisFx.zero[audience][platform]
+const diagPin = diagFor('pinterest')
+const diagLi = diagFor('linkedin')
+const diagIg = diagFor('instagram')
+const diagYt = diagFor('youtube')
+const diagGsc = diagFor('searchConsole')
+const diagFb = diagFor('facebook')
+const allDiag = [diagFb, diagIg, diagYt, diagLi, diagPin, diagGsc]
+const focusInst = diagnosisFx.focus.institutions
+const focusStud = diagnosisFx.focus.students
+
+check('the API diagnosis carries the full contract for every channel', () => {
+  for (const d of allDiag) {
+    assert(d && typeof d === 'object', 'diagnosis missing')
+    assert(typeof d.stage === 'string' && d.stage.length > 0, `${d.platform}: no stage`)
+    assert(typeof d.headline === 'string' && d.headline.length > 20, `${d.platform}: no headline`)
+    assert(Array.isArray(d.funnel) && d.funnel.length === 5, `${d.platform}: funnel must have 5 stages`)
+    for (const st of d.funnel) {
+      assert(['ok', 'zero', 'unavailable'].includes(st.verdict), `${d.platform}/${st.key}: bad verdict ${st.verdict}`)
+      assert(typeof st.display === 'string' && st.display.length > 0, `${d.platform}/${st.key}: no display value`)
+    }
+    assert(Array.isArray(d.zeros), `${d.platform}: zeros must be an array`)
+    for (const z of d.zeros) {
+      assert(z.key && z.label && z.reason && z.explanation, `${d.platform}: incomplete zero entry`)
+    }
+    assert(Array.isArray(d.actions) && d.actions.length > 0, `${d.platform}: no actions`)
+    for (const a of d.actions) assert(a.title && a.detail, `${d.platform}: incomplete action`)
+    assert(d.audienceFit && ['high', 'medium', 'low'].includes(d.audienceFit.fit), `${d.platform}: bad audience fit`)
+    assert(typeof d.mechanics === 'string' && d.mechanics.length > 20, `${d.platform}: no channel mechanics`)
+    assert(d.evidence && typeof d.evidence === 'object', `${d.platform}: no evidence`)
+  }
+})
+
+check('zero-engagement channels are diagnosed, not just reported as 0', () => {
+  // combined-zero is the user's real situation: LinkedIn/Pinterest published and
+  // got nothing; the Meta channels had nothing in range at all.
+  assert(diagLi.stage === 'no-distribution', `LinkedIn expected no-distribution, got ${diagLi.stage}`)
+  assert(diagPin.stage === 'no-distribution', `Pinterest expected no-distribution, got ${diagPin.stage}`)
+  // combined-zero records Instagram as an unconfigured error, which must read as
+  // "could not be read" — never as "you published nothing".
+  assert(diagIg.stage === 'unreachable', `Instagram expected unreachable, got ${diagIg.stage}`)
+  assert(diagIg.zeros.length <= 1, `an errored channel gets one explanation, got ${diagIg.zeros.length}`)
+  assert(diagIg.funnel.every((f) => f.verdict === 'unavailable'), 'an errored channel has no readable funnel')
+  assert(/could not be read|error/i.test(diagIg.headline), diagIg.headline)
+  assert(diagIg.actions[0].title.toLowerCase().includes('connection'), diagIg.actions[0].title)
+  includes(diagLi.headline, 'algorithm')
+  includes(diagPin.actions[0].detail.toLowerCase(), 'pin')
+})
+
+check('a channel with real numbers is diagnosed healthy and sums engagement', () => {
+  const pin = diagnosisFx.rich.pinterest
+  const li = diagnosisFx.rich.linkedin
+  assert(pin.stage === 'healthy', `rich Pinterest expected healthy, got ${pin.stage}`)
+  assert(li.stage === 'healthy', `rich LinkedIn expected healthy, got ${li.stage}`)
+  const eng = pin.funnel.find((f) => f.key === 'engaged')
+  assert(eng.value > 0, `expected engagement ${eng.value}`)
+  assert(eng.verdict === 'ok', `an engaged channel must read ok, got ${eng.verdict}`)
+  assert(typeof pin.evidence.engagedSource === 'string' && pin.evidence.engagedSource.length > 0, 'the engagement source must be stated')
+  // The benchmark is prose on the API side: `yours` is a number in percent,
+  // `typical` is a sentence, and the reference must say it is not their data.
+  assert(pin.benchmark, 'a benchmark reference is attached')
+  assert(pin.benchmark.metric === 'engagement rate', `metric is ${pin.benchmark.metric}`)
+  assert(typeof pin.benchmark.yours === 'number' && Number.isFinite(pin.benchmark.yours), 'yours must be a number')
+  assert(/%/.test(String(pin.benchmark.typical)), `typical must quote a percentage, got ${pin.benchmark.typical}`)
+  includes(String(pin.benchmark.reference).toLowerCase(), 'not your data')
+  assert(li.benchmark && typeof li.benchmark.yours === 'number', 'LinkedIn carries a benchmark too')
+})
+
+check('the audience target changes which channel fits', () => {
+  assert(diagFor('linkedin', 'institutions').audienceFit.fit === 'high', 'LinkedIn is high fit for institutions')
+  assert(diagFor('linkedin', 'students').audienceFit.fit === 'medium', 'LinkedIn drops to medium for students')
+  assert(diagFor('instagram', 'institutions').audienceFit.fit === 'low', 'Instagram is low fit for institutions')
+  assert(diagFor('instagram', 'students').audienceFit.fit === 'high', 'Instagram is high fit for students')
+  assert(diagFor('youtube', 'institutions').audienceFit.fit === 'high', 'YouTube reaches institutions')
+  assert(diagFor('facebook', 'students').audienceFit.fit === 'low', 'Facebook is low fit for students')
+})
+
+check('the ranking puts a blocked high-fit channel first, and flips with the audience', () => {
+  assert(focusInst.length === 6, `expected 6 ranked channels, got ${focusInst.length}`)
+  const scores = focusInst.map((r) => r.score)
+  assert(scores.every((v, i) => i === 0 || scores[i - 1] >= v), 'scores must descend')
+  // combined-zero was recorded with missing credentials, so four channels answer
+  // with an error: those outrank everything, because a channel that cannot be
+  // read is the first thing to fix. What must hold is the *shape* of the ranking.
+  const topScore = Math.max(...scores)
+  assert(focusInst[0].score === topScore, `the first row must be the highest score, got ${focusInst[0].score} of ${topScore}`)
+  assert(focusInst[0].audienceFit === 'high', `institutions: the top channel must be a high-fit one, got ${focusInst[0].platform} (${focusInst[0].audienceFit})`)
+  const rankInst = (k) => focusInst.findIndex((r) => r.platform === k)
+  assert(rankInst('linkedin') < rankInst('instagram'), 'LinkedIn must outrank Instagram when targeting institutions')
+  assert(rankInst('linkedin') < rankInst('pinterest'), 'LinkedIn must outrank Pinterest when targeting institutions')
+  const rankStud = (k) => focusStud.findIndex((r) => r.platform === k)
+  assert(rankStud('instagram') < rankStud('linkedin'), 'Instagram must outrank LinkedIn when targeting students')
+  assert(rankStud('facebook') === focusStud.length - 1, `students: Facebook is a low-fit channel and must rank last, got #${rankStud('facebook') + 1}`)
+  assert(focusStud[0].audienceFit === 'high', `students: the top channel must be a high-fit one, got ${focusStud[0].platform}`)
+  for (const row of focusInst) {
+    assert(row.headline && row.firstAction, `${row.platform}: ranking row needs a headline and a first action`)
+    assert(['high', 'medium', 'low'].includes(row.audienceFit), `${row.platform}: ranking row needs an audience fit`)
+  }
+})
+
+check('the focus board stays out of the way when there is nothing to focus on', () => {
+  assert(render(<FocusBoard focus={[]} />) === '', 'an empty focus list must render nothing')
+})
+
+check('the focus board ranks channels and links each row to its page', () => {
+  const html = render(<FocusBoard focus={focusInst} audience="institutions" onAudienceChange={() => {}} onNavigate={() => {}} />)
+  includes(html, 'Where to focus this week')
+  includes(html, 'Highest-value move')
+  for (const row of focusInst.slice(0, 3)) includes(html, row.headline.slice(0, 24).replace(/&/g, '&amp;'))
+  includes(html, 'Priority =')
+})
+
+// v4.3.5 — the user: "remove digital dignosis it just extra thing". The panel is
+// gone from every page; the API still computes `data.diagnosis` (the focus board,
+// the overview hero and /api/report all read it).
+check('no page renders the diagnosis panel any more', () => {
+  // LinkedIn, not Instagram: combined-zero records Instagram as an unconfigured
+  // error payload, which PlatformPage answers with its error state instead.
+  const payload = { ...czData.linkedin, diagnosis: diagLi }
+  const html = render(<PlatformPage platformKey="linkedin" payload={payload} healthDetail={{ status: 'ok', configured: true }} range={range} sample={false} audience="institutions" onAudienceChange={() => {}} />)
+  includes(html, 'Headline metrics')
+  notIncludes(html, 'Growth diagnosis')
+  notIncludes(html, 'Where the funnel stops')
+  notIncludes(html, 'Collapse the diagnosis')
+
+  // gscHtml is the Search Console page rendered from the sample payload above.
+  notIncludes(gscHtml, 'Growth diagnosis')
+  notIncludes(gscHtml, 'Where the funnel stops')
+})
+
+check('a metric published as a single level does not open an empty chart', () => {
+  // Instagram's real shape: follower_count arrives as one total_value with no
+  // per-day breakdown, while reach has a series.
+  const ig = {
+    overview: {
+      followers: { key: 'followers', label: 'Followers', kind: 'gauge', unit: '', group: 'Audience', total: 6, previous: null, trend: null, hasData: true, points: 0 },
+      reach: { key: 'reach', label: 'Reach', kind: 'sum', unit: '', group: 'Performance', total: 346, previous: null, trend: null, hasData: true, points: 2 },
+    },
+    metrics: [],
+    timeseries: [{ date: '2026-09-01', reach: 100 }, { date: '2026-09-02', reach: 246 }],
+    posts: [], meta: {},
+  }
+  const html = render(<PlatformPage platformKey="instagram" payload={ig} healthDetail={{ status: 'ok' }} range={range} sample={false} />)
+  // The chart defaults to the metric that actually has daily values…
+  includes(html, '2 daily values')
+  // …and the page no longer says the same emptiness three different ways.
+  notIncludes(html, 'No follower series in the payload.')
+  notIncludes(html, 'Follower level per day')
+  notIncludes(html, 'No daily values for this metric in the selected range.')
+  notIncludes(html, '0 daily values')
+  notIncludes(html, 'gauge metric')
+})
+
+check('when the only metric has no series, one line says so', () => {
+  const only = {
+    overview: {
+      followers: { key: 'followers', label: 'Followers', kind: 'gauge', unit: '', group: 'Audience', total: 6, previous: null, trend: null, hasData: true, points: 0 },
+    },
+    metrics: [], timeseries: [], posts: [], meta: {},
+  }
+  const html = render(<PlatformPage platformKey="instagram" payload={only} healthDetail={{ status: 'ok' }} range={range} sample={false} />)
+  includes(html, 'published as a single value')
+  includes(html, 'nothing to plot')
+  notIncludes(html, 'No daily values for this metric in the selected range.')
+})
+
+check('the overview page mounts the focus board above the channel table', () => {
+  const html = render(
+    <OverviewPage
+      platformData={czData} summary={czData.summary} focus={focusInst}
+      audience="institutions" onAudienceChange={() => {}} healthDetails={{}} range={range} sample={false} onNavigate={() => {}}
+    />
+  )
+  includes(html, 'Where to focus this week')
+  includes(html, 'Channel performance')
+  assert(html.indexOf('Where to focus this week') < html.indexOf('Channel performance'), 'focus board must come first')
+})
+
+check('sample mode reproduces the diagnosis so the design can be reviewed offline', () => {
+  const sc = sampleCombined(range, 'institutions')
+  assert(Array.isArray(sc.data.focus) && sc.data.focus.length === 6, `expected 6 ranked channels, got ${sc.data.focus?.length}`)
+  const scores = sc.data.focus.map((r) => r.score)
+  assert(scores.every((v, i) => i === 0 || scores[i - 1] >= v), 'sample focus must be sorted descending')
+  for (const k of PLATFORM_ORDER) {
+    const d = sc.data[k].diagnosis
+    assert(d && d.funnel.length === 5, `${k}: sample diagnosis incomplete`)
+    assert(d.audience === 'institutions', `${k}: sample audience not applied`)
+  }
+  assert(sc.data.instagram.diagnosis.audienceFit.fit === 'low', 'for institutions the sample must call Instagram a low fit')
+  assert(sc.data.linkedin.diagnosis.audienceFit.fit === 'high', 'for institutions the sample must call LinkedIn a high fit')
+  const students = sampleCombined(range, 'students')
+  assert(students.data.instagram.diagnosis.audienceFit.fit === 'high', 'students audience keeps Instagram high')
+  assert(students.data.linkedin.diagnosis.audienceFit.fit === 'medium', 'students audience drops LinkedIn to medium')
+  assert(sampleDiagnosis && sampleFocus, 'sample helpers exported')
+})
+
+check('sample mode mirrors the server benchmark contract', () => {
+  const sc = sampleCombined(range, 'institutions')
+  for (const k of PLATFORM_ORDER) {
+    const b = sc.data[k].diagnosis.benchmark
+    if (!b) continue
+    assert(b.metric === 'engagement rate', `${k}: metric is ${b.metric}`)
+    assert(typeof b.yours === 'number', `${k}: yours must be a number`)
+    assert(/%/.test(String(b.typical)), `${k}: typical must quote a percentage`)
+  }
+  assert(diagnosisFx.rich.linkedin.benchmark, 'the engine still ships the benchmark the API publishes')
+})
+
+check('the audience options are exactly the two the user asked for', () => {
+  assert(AUDIENCE_OPTIONS.length === 2, 'two audience targets')
+  assert(AUDIENCE_OPTIONS.map((o) => o.value).join(',') === 'institutions,students', 'institutions first — it is the default')
+})
+
+console.log('\n\x1b[1mv4.3.1 — the real Pinterest capture (synced pins, zero metrics)\x1b[0m')
+
+const realPin = diagnosisFx.realCapture.pinterest
+const realLi = diagnosisFx.realCapture.linkedin
+
+check('a synced pin with zero metrics is "not measured", never "no distribution"', () => {
+  const d = realPin.diagnosis.institutions
+  assert(d.stage === 'not-reported', `stage is ${d.stage}`)
+  assert(d.evidence.notReported === true, 'evidence.notReported must be set')
+  assert(d.evidence.syncedPosts === 6, `syncedPosts is ${d.evidence.syncedPosts}`)
+  assert(d.evidence.identifiedPosts === 6, `identifiedPosts is ${d.evidence.identifiedPosts}`)
+  assert(d.evidence.oldestPostDays >= 30, `oldestPostDays is ${d.evidence.oldestPostDays} — the lag cannot explain it`)
+  assert(d.evidence.accountGaugesEmpty === true, 'the account gauges came back empty upstream')
+  assert(/BUSINESS/.test(d.headline), 'the headline must name the real cause')
+  assert(/not measured/.test(d.headline), 'it must say the zeros are not a verdict on the content')
+  assert(/Business account/.test(d.actions[0].title), `first action is "${d.actions[0].title}"`)
+  assert(d.actions.length >= 3, 'convert, reconnect, and how to read the truth meanwhile')
+  const reasons = new Set(d.zeros.map((z) => z.reason))
+  assert(reasons.has('not-reported'), `zero reasons are ${[...reasons].join(',')}`)
+  assert(!reasons.has('no-distribution'), 'it must not blame the algorithm for a missing entitlement')
+  assert(d.benchmark.yours === null, 'no rate can be computed from a channel that reports nothing')
+})
+
+check('LinkedIn, published the same way, is still judged on its real numbers', () => {
+  const d = realLi.diagnosis.institutions
+  assert(d.evidence.notReported === false, 'the control channel must not inherit the Pinterest verdict')
+  assert(d.stage !== 'not-reported', `stage is ${d.stage}`)
+  assert(d.evidence.seen === 93, `impressions are ${d.evidence.seen}, the capture says 93`)
+  assert(d.evidence.engaged === 2, `engagement is ${d.evidence.engaged}, the capture says 2`)
+  assert(d.evidence.lowReach === true && d.evidence.seenPerPost === 11.6, `seenPerPost is ${d.evidence.seenPerPost}`)
+  assert(/Reach is the binding constraint/.test(d.headline), 'tiny reach must be said out loud')
+  assert(d.actions[0].title === 'Fix reach before anything else', `first action is "${d.actions[0].title}"`)
+  assert(d.benchmark.yours === 2.15, `benchmark.yours is ${d.benchmark.yours}`)
+})
+
+check('the Pinterest advice rules out the scopes the connection already has', () => {
+  const d = realPin.diagnosis.institutions
+  const reconnect = d.actions.find((a) => /Reconnect/i.test(a.title))
+  assert(reconnect, 'the reconnect action must exist')
+  includes(reconnect.detail, 'already grants')
+  includes(reconnect.detail, 'pins:read')
+  includes(reconnect.detail, 'no scope is missing')
+  assert(Array.isArray(d.evidence.accountPermissions) && d.evidence.accountPermissions.includes('user_accounts:read'), 'the permissions must reach the panel')
+  assert(d.evidence.accountPlatformStatus === 'active', `platformStatus is ${d.evidence.accountPlatformStatus}`)
+})
+
+check('the real pins keep their Pinterest id, URL and sync state through the transform', () => {
+  const posts = realPin.payload.posts
+  assert(posts.length === 6, `${posts.length} pins`)
+  assert(posts[0].postId === '1127166613023434329', `postId is ${posts[0].postId} — the pin id must survive`)
+  assert(String(posts[0].platformUrl).includes('pinterest.com/pin/1127166613023434329'), `platformUrl is ${posts[0].platformUrl}`)
+  assert(posts.every((x) => x.syncStatus === 'synced'), 'the per-platform sync state must win over the document-level "external"')
+  assert(posts.every((x) => x.isExternal === true), 'they really were published outside Zernio')
+  const avail = realPin.payload.meta.metricAvailability
+  assert(avail && avail.verdict === 'not-reported', `metricAvailability is ${JSON.stringify(avail)}`)
+  assert(avail.agedPastLag === 5, `${avail.agedPastLag} pins are past the lag window`)
+  assert(/BUSINESS/.test(String(realPin.payload.notice)), 'the notice must explain the zeros')
+  assert(realLi.payload.posts[0].postId.startsWith('urn:li:ugcPost:'), `linkedin postId is ${realLi.payload.posts[0].postId}`)
+})
+
 check('App shell mounts (sidebar, topbar, loading state)', () => {
   const html = render(<App />)
   includes(html, 'Pulse')

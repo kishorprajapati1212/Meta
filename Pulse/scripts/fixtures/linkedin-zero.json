@@ -3,8 +3,8 @@
   "platform": "linkedin",
   "meta": {
     "dateRange": {
-      "from": "2026-09-15",
-      "to": "2026-10-15"
+      "from": "2026-09-22",
+      "to": "2026-10-22"
     },
     "source": "Zernio",
     "hasAnalyticsAccess": true,
@@ -23,11 +23,22 @@
       "boardCount": null,
       "monthlyViews": null,
       "externalPostCount": 2,
-      "lastSyncedAt": "2026-10-15T13:35:14.421Z",
+      "lastSyncedAt": "2026-10-22T10:59:18.655Z",
       "connectedAt": null,
       "tokenExpiresAt": null,
       "isActive": true,
-      "accountType": null
+      "accountType": null,
+      "permissions": null,
+      "platformStatus": null,
+      "platformStatusReason": null,
+      "needsReconnection": false,
+      "enabled": true,
+      "scopes": null,
+      "followersCount": null,
+      "followersLastUpdated": null,
+      "lastSuccessfulPublishAt": null,
+      "rateLimitedUntil": null,
+      "byokConfigured": false
     },
     "sync": {
       "skipped": true,
@@ -41,7 +52,7 @@
           "ok": true,
           "matched": 1,
           "total": 2,
-          "attempt": "{\"limit\":50}",
+          "attempt": "{\"page\":1,\"limit\":50}",
           "error": null,
           "hasAnalyticsAccess": true
         },
@@ -60,6 +71,19 @@
           "reason": "no accountId",
           "attempted": 0
         }
+      },
+      "metricAvailability": {
+        "posts": 1,
+        "allZero": true,
+        "identified": 1,
+        "synced": 1,
+        "external": 0,
+        "agedPastLag": 1,
+        "newestHours": 288,
+        "oldestDays": 12,
+        "beyondLag": true,
+        "accountGaugesEmpty": true,
+        "verdict": "stale"
       }
     }
   },
@@ -73,7 +97,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "reach": {
@@ -84,7 +109,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "clicks": {
@@ -95,7 +121,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "likes": {
@@ -106,7 +133,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "comments": {
@@ -117,7 +145,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "shares": {
@@ -128,7 +157,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "saves": {
@@ -139,7 +169,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "sends": {
@@ -150,7 +181,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "follows": {
@@ -161,7 +193,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "engagement": {
@@ -172,7 +205,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "engagementRate": {
@@ -183,7 +217,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false,
         "description": "Total engagement ÷ impressions",
         "currentHalfRate": null
@@ -196,7 +231,8 @@
         "group": "Activity",
         "total": 1,
         "previous": 0,
-        "trend": 100,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "followers": {
@@ -208,6 +244,7 @@
         "total": 512,
         "previous": 425,
         "trend": 20.5,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true,
         "change": 87,
         "source": "follower-stats"
@@ -220,13 +257,14 @@
         "group": "Activity",
         "total": 2,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       }
     },
     "timeseries": [
       {
-        "date": "2026-09-15",
+        "date": "2026-09-22",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -245,7 +283,7 @@
         "hasData": false
       },
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -264,7 +302,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -283,7 +321,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -302,7 +340,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -321,7 +359,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -340,7 +378,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -359,7 +397,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -378,7 +416,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -397,7 +435,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -416,7 +454,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -435,7 +473,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -454,7 +492,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -473,7 +511,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -492,7 +530,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -511,7 +549,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -530,7 +568,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -549,7 +587,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -568,7 +606,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "posts": 1,
         "impressions": 0,
         "reach": 0,
@@ -587,7 +625,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -606,7 +644,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -625,7 +663,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -644,7 +682,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -663,7 +701,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -682,7 +720,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -701,7 +739,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -720,7 +758,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -739,7 +777,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -758,7 +796,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -777,7 +815,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -796,7 +834,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -820,17 +858,20 @@
         "postId": "li_post_1",
         "content": "Shipped a cross-platform analytics dashboard this week — 6 APIs, one view.",
         "title": null,
-        "publishedAt": "2026-10-03T13:35:14.803Z",
-        "date": "2026-10-03",
+        "publishedAt": "2026-10-10T10:59:19.029Z",
+        "date": "2026-10-10",
         "platformUrl": "https://linkedin.com/feed/update/urn:li:share:1",
         "mediaType": "text",
         "mediaItems": [],
         "thumbnailUrl": "",
         "status": "published",
         "platform": "linkedin",
+        "accountUsername": null,
         "boardName": null,
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -853,17 +894,20 @@
         "postId": "li_post_1",
         "content": "Shipped a cross-platform analytics dashboard this week — 6 APIs, one view.",
         "title": null,
-        "publishedAt": "2026-10-03T13:35:14.803Z",
-        "date": "2026-10-03",
+        "publishedAt": "2026-10-10T10:59:19.029Z",
+        "date": "2026-10-10",
         "platformUrl": "https://linkedin.com/feed/update/urn:li:share:1",
         "mediaType": "text",
         "mediaItems": [],
         "thumbnailUrl": "",
         "status": "published",
         "platform": "linkedin",
+        "accountUsername": null,
         "boardName": null,
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -916,156 +960,349 @@
     },
     "followerTimeseries": [
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "followers": 425,
         "growth": 0
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "followers": 428,
         "growth": 3
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "followers": 431,
         "growth": 3
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "followers": 434,
         "growth": 3
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "followers": 437,
         "growth": 3
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "followers": 440,
         "growth": 3
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "followers": 443,
         "growth": 3
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "followers": 446,
         "growth": 3
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "followers": 449,
         "growth": 3
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "followers": 452,
         "growth": 3
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "followers": 455,
         "growth": 3
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "followers": 458,
         "growth": 3
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "followers": 461,
         "growth": 3
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "followers": 464,
         "growth": 3
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "followers": 467,
         "growth": 3
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "followers": 470,
         "growth": 3
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "followers": 473,
         "growth": 3
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "followers": 476,
         "growth": 3
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "followers": 479,
         "growth": 3
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "followers": 482,
         "growth": 3
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "followers": 485,
         "growth": 3
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "followers": 488,
         "growth": 3
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "followers": 491,
         "growth": 3
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "followers": 494,
         "growth": 3
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "followers": 497,
         "growth": 3
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "followers": 500,
         "growth": 3
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "followers": 503,
         "growth": 3
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "followers": 506,
         "growth": 3
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "followers": 509,
         "growth": 3
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "followers": 512,
         "growth": 3
       }
-    ]
+    ],
+    "demographics": {
+      "available": false,
+      "source": "Zernio",
+      "unit": "share",
+      "asOf": null,
+      "note": "Zernio’s public API does not expose audience demographics (age, gender, location) for LinkedIn. The audience section below therefore only shows what the platform itself publishes.",
+      "gender": null,
+      "age": null,
+      "countries": null,
+      "cities": null,
+      "devices": null,
+      "missing": [
+        "age",
+        "gender",
+        "countries",
+        "cities",
+        "devices"
+      ]
+    },
+    "diagnosis": {
+      "platform": "linkedin",
+      "audience": "institutions",
+      "audienceFit": {
+        "fit": "high",
+        "why": "Heads of department, placement cells, registrars and edtech buyers are all here — and education is LinkedIn's highest-engagement industry."
+      },
+      "stage": "no-distribution",
+      "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+      "funnel": [
+        {
+          "key": "published",
+          "label": "Published",
+          "value": 1,
+          "display": "1",
+          "verdict": "ok",
+          "note": "1 item(s) in this range"
+        },
+        {
+          "key": "seen",
+          "label": "Seen",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "impressions",
+          "note": "The platform showed it to (almost) nobody"
+        },
+        {
+          "key": "engaged",
+          "label": "Engaged",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "engagement",
+          "note": "No engagement yet"
+        },
+        {
+          "key": "followed",
+          "label": "Followers",
+          "value": 512,
+          "display": "512",
+          "verdict": "ok",
+          "note": "512 followers"
+        },
+        {
+          "key": "converted",
+          "label": "Clicked through",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "clicks",
+          "note": "Nobody clicked through"
+        }
+      ],
+      "zeros": [
+        {
+          "key": "impressions",
+          "label": "Impressions",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "reach",
+          "label": "Reach",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "clicks",
+          "label": "Clicks",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "likes",
+          "label": "Reactions",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "comments",
+          "label": "Comments",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "shares",
+          "label": "Reposts",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "saves",
+          "label": "Saves",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "sends",
+          "label": "Sends",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "follows",
+          "label": "Follows from posts",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "engagement",
+          "label": "Total engagement",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        },
+        {
+          "key": "engagementRate",
+          "label": "Engagement rate",
+          "reason": "no-distribution",
+          "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+        }
+      ],
+      "benchmark": {
+        "metric": "engagement rate",
+        "yours": null,
+        "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+        "tier": "≈5.6% median for accounts under 5K followers",
+        "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+        "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+      },
+      "actions": [
+        {
+          "priority": 1,
+          "title": "Fix distribution before creative",
+          "detail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+        },
+        {
+          "priority": 2,
+          "title": "Write for the decision-maker search, not the feed",
+          "detail": "Name the institution type and the outcome in the first line (\"For colleges running manual attendance…\"). Committees share content that names their problem; students do not amplify it for you."
+        }
+      ],
+      "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+      "evidence": {
+        "published": 1,
+        "seen": 0,
+        "seenKey": "impressions",
+        "engaged": 0,
+        "engagedSource": null,
+        "postSums": {
+          "likes": 0,
+          "comments": 0,
+          "shares": 0,
+          "saves": 0
+        },
+        "followers": 512,
+        "followersPublished": true,
+        "converted": 0,
+        "convertedKey": "clicks",
+        "youngPosts": 0,
+        "lagging": false,
+        "postsRead": 1,
+        "notReported": false,
+        "seenPerPost": null,
+        "lowReach": false,
+        "identifiedPosts": 1,
+        "syncedPosts": 1,
+        "agedPosts": 1,
+        "oldestPostDays": 12,
+        "accountGaugesEmpty": true,
+        "accountPermissions": null,
+        "accountPlatformStatus": null
+      }
+    }
   },
-  "notice": "1 posts found, but Zernio returned zero impressions/engagement for them. LinkedIn only returns analytics for posts published through Zernio on personal profiles; organization pages return all posts."
+  "notice": "1 posts found, but Zernio returned zero impressions/engagement for them (the oldest is 12 day(s) old). LinkedIn returned no metrics for 1/1 synced post(s). Personal profiles report impressions but not follower counts; if impressions are 0 too, the posts were not distributed."
 }

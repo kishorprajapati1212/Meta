@@ -6,7 +6,7 @@ const r = Router();
 r.get('/', async (req, res) => {
   try {
     const { value: d } = await fetchWithFallback('searchConsole', () => fetchInsights(req.query), req.query);
-    res.json(platformEnvelope('gsc', d));
+    res.json(platformEnvelope('gsc', d, null, { audience: req.query.audience }));
   } catch (e) { const er = errorResponse(e); res.status(er.httpStatus).json(er.body); }
 });
 module.exports = r;

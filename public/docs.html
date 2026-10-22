@@ -33,12 +33,12 @@
 <body>
 <h1>Meta Social &amp; SEO Analytics API</h1>
 <p class="sub">Facebook · Instagram · YouTube · LinkedIn · Pinterest · Google Search Console — one contract, one dashboard.</p>
-<span class="ver">v4.2.4</span>
+<span class="ver">v4.3.5</span>
 
 <div class="note">
   <strong>New in 4.1:</strong> every metric in <code>data.overview</code> is self-describing
   (<code>kind</code>, <code>unit</code>, <code>group</code>, <code>trend</code>, <code>hasData</code>),
-  zero-value metrics are no longer dropped, trends compare the second half of the range to the first,
+  zero-value metrics are no longer dropped, trends are published only when justified and carry their basis,
   <code>/api/combined</code> passes full platform payloads through and adds <code>data.summary</code>,
   <code>/api/health</code> explains exactly what to fix, Pinterest boards and account stats are included,
   and the dashboard is served from <a href="./app/">/app</a>.
@@ -57,7 +57,8 @@
 <tr><td><span class="get">GET</span><span class="path">/api/combined</span></td><td>All six in one call, plus <code>data.summary</code> cross-channel roll-up</td><td>all</td></tr>
 <tr><td><span class="get">GET</span><span class="path">/api/health</span></td><td>Per-platform <code>{status,message,hint,configured,source}</code> + legacy string map</td><td>all</td></tr>
 <tr><td><span class="get new">GET</span><span class="path">/api/zernio/debug</span></td><td>Zernio connectivity, scopes, account list, analytics access — raw upstream detail</td><td>Zernio key</td></tr>
-<tr><td><span class="get new">GET</span><span class="path">/api/zernio/accounts</span></td><td>Connected Zernio accounts with platform, username and metadata</td><td>Zernio key</td></tr>
+<tr><td><span class="get new">GET</span><span class="path">/api/zernio/accounts</span></td><td>Connected Zernio accounts with platform, username, scopes, platform status and the account-level gauges</td><td>Zernio key</td></tr>
+<tr><td><span class="get new">GET</span><span class="path">/api/report</span> <span class="ver">v4.3.1</span></td><td><strong>Everything in one call</strong>: config, health, all six payloads, the diagnosis for both audiences, the focus ranking, the verbatim upstream bodies and the Pinterest/LinkedIn probes — redacted</td><td>all</td></tr>
 </table>
 
 <h2>Query parameters</h2>
@@ -70,6 +71,11 @@
 <tr><td><code>compare</code></td><td><code>false</code></td><td>GSC only. Skips the previous-period window (saves one API call)</td></tr>
 <tr><td><code>rowLimit</code></td><td>1–25000</td><td>GSC only. 1000 for date, 250 for groupings</td></tr>
 <tr><td><code>sync</code></td><td><code>false</code></td><td>LinkedIn/Pinterest. Don't trigger the external-post sync</td></tr>
+<tr><td><code>days</code> <span class="ver">v4.3.1</span></td><td>1–365</td><td><code>/api/report</code> only. Window length; anything absent, zero or out of range falls back to 30.</td></tr>
+<tr><td><code>raw</code> <span class="ver">v4.3.1</span></td><td><code>true</code> (default) · <code>false</code></td><td><code>/api/report</code> only. <code>false</code> drops the verbatim upstream bodies and keeps the transformed payloads.</td></tr>
+<tr><td><code>format</code> <span class="ver">v4.3.1</span></td><td><code>json</code> (default) · <code>text</code></td><td><code>/api/report</code> only. <code>text</code> returns a paste-able plain-text digest (~15 KB) instead of JSON.</td></tr>
+<tr><td><code>sections</code> <span class="ver">v4.3.1</span></td><td><code>config,health,platforms,diagnosis,combined,raw,probes</code></td><td><code>/api/report</code> only. Comma-separated subset; unrequested sections come back <code>null</code> rather than being silently dropped.</td></tr>
+<tr><td><code>audience</code> <span class="ver">v4.3.0</span></td><td><code>institutions · students</code></td><td>Who the content targets. Retargets <code>data.diagnosis</code> and re-ranks <code>data.focus</code>. Default <code>institutions</code>; unknown values fall back to it. Never an env var.</td></tr>
 </table>
 
 <div class="note warn"><strong>Zernio upstream limits:</strong> max range 366 days, page size 1–100 (the API paginates for you). Pinterest post-level impressions/clicks lag 24–48h after publishing. LinkedIn personal-profile analytics are only available for posts published through Zernio.</div>
@@ -96,7 +102,8 @@
     "overview": {
       "impressions": { "key":"impressions", "label":"Impressions", "kind":"sum", "unit":"",
                        "group":"Traffic", "total":23700, "previous":21100,
-                       "trend":12.3, "hasData":true },
+                       "trend":12.3, "trendBasis":"second-half-vs-first-half",
+                       "hasData":true },
       "pins":        { "key":"pins", "label":"Total pins", "kind":"gauge", "total":342,
                        "hasData":true, "source":"account" }
     },
@@ -124,12 +131,23 @@
 </table>
 <p class="desc">Always read <code>kind</code> before summing anything. <code>hasData:false</code> means a genuine zero — the value is still present and should still be rendered (muted).</p>
 
-<h3>Trends</h3>
+<h3>Trends <span class="ver">v4.3.4</span></h3>
 <ul>
-<li><code>trend</code> = % change of the <strong>second half of the range vs the first half</strong>.</li>
-<li><code>previous</code> = the first-half value the trend was computed against.</li>
-<li>GSC additionally returns a real previous window of equal length (<code>meta.previousRange</code>).</li>
+<li><code>trend</code> is <strong><code>number | null</code></strong>. <code>null</code> means &ldquo;there is no
+comparison worth making&rdquo; — it is <em>not</em> the same claim as <code>0</code> / &ldquo;flat&rdquo;. A percentage is
+published only when a baseline exists, is not zero, and is at least <strong>10</strong> for
+counts/sums/levels/averages. Rates keep their own scale.</li>
+<li><code>trendBasis</code> says what is compared:
+<code>second-half-vs-first-half</code> (the same selected range split in two) ·
+<code>last-day-vs-first-day</code> (gauges) · <code>window-edges</code> (YouTube subscribers) ·
+<code>previous-window</code> (<strong>GSC only</strong> — the one real period-over-period number).
+<code>trendWindows</code> carries the exact ISO dates behind it.</li>
+<li><code>previous</code> = the baseline the trend was computed against (first half, or first day for a gauge).</li>
+<li><code>direction</code> is <code>up | down | flat | null</code>.</li>
 <li>For <code>position</code>, a falling number is favourable — the dashboard inverts the colour.</li>
+<li><strong>A trend was never &ldquo;vs yesterday&rdquo; or &ldquo;vs last week&rdquo;.</strong> The dashboard therefore
+prints no percentage on the top metric cards: a card shows the number and its
+sparkline, and the metric table shows comparisons labelled with their basis.</li>
 </ul>
 
 <h3><code>/api/combined</code></h3>
@@ -190,6 +208,129 @@
 <tr><td>LinkedIn · Pinterest</td><td>Nothing — Zernio exposes no demographics. <code>available:false</code> with the reason.</td><td>—</td></tr>
 </table>
 
+<h2>Growth diagnosis — <code>data.diagnosis</code> <span class="ver">v4.3.0</span></h2>
+<p class="desc"><strong>v4.3.5:</strong> the dashboard no longer renders a diagnosis panel. This payload is unchanged and still powers the Overview ranking and <code>/api/report</code>.</p>
+<p>A <code>0</code> is four different facts: nothing was published, the platform did not
+distribute it, people saw it and did not act, or this platform measures it
+differently. Every payload says which one it is and what to do next. Computed by
+<code>src/utils/diagnosis.js</code> — pure, no I/O, never throws.</p>
+<pre><code>{
+  "platform": "linkedin",            // canonical: /api/gsc reports "searchConsole"
+  "audience": "institutions",        // or "students"
+  "audienceFit": { "fit": "high", "why": "Heads of department, placement cells, registrars …" },
+  "stage": "no-distribution",
+  "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. …",
+  "funnel": [                        // always exactly 5
+    { "key": "published", "label": "Published",      "value": 1,    "display": "1",             "verdict": "ok" },
+    { "key": "seen",      "label": "Seen",           "value": 0,    "display": "0",             "verdict": "zero",
+      "sourceKey": "impressions", "note": "The platform showed it to (almost) nobody" },
+    { "key": "engaged",   "label": "Engaged",        "value": 0,    "display": "0",             "verdict": "zero" },
+    { "key": "followed",  "label": "Followers",      "value": null, "display": "not published",  "verdict": "unavailable" },
+    { "key": "converted", "label": "Clicked through","value": 0,    "display": "0",             "verdict": "zero" }
+  ],
+  "zeros": [                         // one entry per zero / unpublished card
+    { "key": "impressions", "label": "Impressions", "reason": "no-distribution",
+      "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored." }
+  ],
+  "benchmark": {                     // null when this platform has no reference
+    "metric": "engagement rate",
+    "yours": null,                   // a number in percent, or null when there is no reach to divide by
+    "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+    "tier": "≈5.6% median for accounts under 5K followers",
+    "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+    "note": "Document/carousel posts lead at ≈7% engagement. …"
+  },
+  "actions": [ { "priority": 1, "title": "Fix distribution before creative", "detail": "…" } ],
+  "mechanics": "Dwell time and early comments drive distribution. Personal profiles out-reach company pages …",
+  "evidence": { "published": 1, "seen": 0, "seenKey": "impressions", "engaged": 0,
+                "engagedSource": null, "followers": null, "followersPublished": false,
+                "converted": 0, "convertedKey": "clicks", "youngPosts": 0, "lagging": false, "postsRead": 1 }
+}</code></pre>
+
+<h3>Stages — first match wins</h3>
+<table>
+<tr><th><code>stage</code></th><th>Condition</th><th>What it means</th></tr>
+<tr><td><code>unreachable</code></td><td>the payload carries <code>error</code></td><td>Fix the connection first — every number is missing, not zero. The funnel reads <code>not read</code> and there is one explanation, not one per card.</td></tr>
+<tr><td><code>no-content</code></td><td>post count is a <em>known</em> 0</td><td>Cadence is the whole problem.</td></tr>
+<tr><td><code>pending-lag</code></td><td>Pinterest/LinkedIn, reach 0, items younger than 48 h</td><td>Reporting has not caught up. Resolves on its own.</td></tr>
+<tr><td><code>not-reported</code> <span class="ver">v4.3.1</span></td><td>Pinterest: every post is known upstream (real pin id + URL, <code>syncStatus "synced"</code>), every metric is 0, at least one post is past the 48 h lag, and the account gauges (pin count, board count, monthly views) are all empty</td><td>The platform is <em>not measuring</em> this account. Pinterest serves organic analytics to <strong>Business</strong> accounts only, so 0 here is a missing entitlement — not a verdict on the content. Convert the account (free) and reconnect it.</td></tr>
+<tr><td><code>no-distribution</code></td><td>published, reach 0</td><td>The algorithm is not serving it. Creative polish cannot fix this.</td></tr>
+<tr><td><code>seen-not-engaged</code></td><td>reach &gt; 0, engagement 0</td><td>Hook, format or call to action.</td></tr>
+<tr><td><code>engaged-not-followed</code></td><td>engagement &gt; 0, follower growth 0</td><td>No reason to come back — publish a series.</td></tr>
+<tr><td><code>no-conversion</code></td><td>engagement &gt; 0, clicks 0</td><td>Attention with no path to a destination.</td></tr>
+<tr><td><code>healthy</code></td><td>the whole funnel moves</td><td>Scale the format that produced it.</td></tr>
+</table>
+<p>An <em>unknown</em> post count (<code>published: null</code> — Search Console has none, and a
+denied posts endpoint has none) is never reported as idleness: it falls through to
+the reach test and the headline says the count was not reported.</p>
+
+<h3>Engagement is platform-specific</h3>
+<table>
+<tr><th>Channel</th><th>Counts as engagement</th><th>Counts as conversion</th></tr>
+<tr><td>Pinterest</td><td><code>engagement, saves, clicks, closeups</code> — there is no like button; a pin click <em>is</em> the engagement</td><td><code>outboundClicks, websiteClicks</code></td></tr>
+<tr><td>Search Console</td><td><code>clicks</code></td><td>the same click — <code>converted.value</code> is <code>null</code>, the stage displays <code>same as clicks</code></td></tr>
+<tr><td>LinkedIn</td><td><code>engagement, interactions, likes, comments, shares, saves, reposts, sends</code></td><td><code>clicks, websiteClicks, profileVisits</code></td></tr>
+<tr><td>YouTube</td><td><code>engagement, interactions, likes, comments, shares</code></td><td>default list</td></tr>
+<tr><td>Facebook · Instagram</td><td><code>engagement, interactions, total_interactions, likes, comments, shares, saves</code></td><td><code>clicks, outboundClicks, websiteClicks, profileVisits, profileViews, searchClicks, pageViews</code></td></tr>
+</table>
+<p>When the account-level card is empty but the posts have numbers, the funnel sums
+the posts and <code>evidence.engagedSource</code> becomes <code>"summed from posts"</code>; the
+matching zero card is explained as <code>recovered-from-posts</code> rather than "nobody
+engaged". A real account-level number is never overwritten.</p>
+
+<h3><code>data.focus</code> — where to spend this week (<code>/api/combined</code>)</h3>
+<pre><code>[ { "platform": "linkedin", "stage": "no-distribution", "headline": "…", "score": 4.5,
+    "audienceFit": "high", "audienceWhy": "…",
+    "firstAction": "Fix distribution before creative",   // a string, safe to print
+    "firstActionDetail": "…" } ]</code></pre>
+<p><code>score = STAGE_WEIGHT × FIT_WEIGHT</code>, descending:</p>
+<pre><code>STAGE_WEIGHT  unreachable 3.2 · no-distribution 3 · no-content 2.6 · seen-not-engaged 2.2 ·
+              no-conversion 1.8 · engaged-not-followed 1.6 · healthy 1.2 · pending-lag 0.8
+FIT_WEIGHT    high 1.5 · medium 1 · low 0.6</code></pre>
+<p>So a blocked channel that reaches your target audience outranks a healthy one
+that does not — the opposite of ranking by follower count. Fit for
+<code>institutions</code>: LinkedIn / Search Console / YouTube high, Facebook medium,
+Instagram / Pinterest low. For <code>students</code>: Instagram / YouTube high, Pinterest /
+LinkedIn / Search Console medium, Facebook low.</p>
+<div class="note"><strong>Benchmarks are references.</strong> The figures in <code>BENCHMARKS</code> are
+published 2026 education-niche numbers (Hootsuite, Socialinsider, Quid/Rival IQ,
+SociaVault Labs, Sprout Social Index). They are context for a small account, never
+this account's data, and every surface that prints them says so.</div>
+
+<h2>One-call diagnostic report — <code>GET /api/report</code> <span class="ver">v4.3.1</span></h2>
+<p>One URL that returns every output the API can produce, plus the evidence behind
+it. Built for the case where a number looks wrong and the question is
+<em>&ldquo;did the platform say 0, or did we lose it?&rdquo;</em> — which can only be answered
+from the verbatim upstream body.</p>
+<pre><code>GET /api/report?days=90                 # everything, redacted JSON (~600 KB)
+GET /api/report?days=90&amp;format=text     # paste-able digest (~15 KB)
+GET /api/report?sections=probes         # just the Pinterest / LinkedIn verdicts
+GET /api/report?raw=false               # transformed payloads only</code></pre>
+<table>
+<tr><th>Section</th><th>Contents</th></tr>
+<tr><td><code>config</code></td><td>API + dashboard version, node, port, the dashboard bundle hash, which env vars are set (as <code>{set,length,preview}</code> — never values), endpoint overrides, unexpected env vars</td></tr>
+<tr><td><code>health</code></td><td>The same object <code>/api/health</code> returns</td></tr>
+<tr><td><code>platforms</code></td><td>All six payloads exactly as their endpoints return them, with per-channel read timings</td></tr>
+<tr><td><code>diagnosis</code></td><td><code>data.diagnosis.{institutions,students}.{channel}</code> — both audience targets in one call</td></tr>
+<tr><td><code>combined</code></td><td>The focus ranking for both audiences</td></tr>
+<tr><td><code>raw</code></td><td>Verbatim upstream bodies: Meta Graph (page, posts, insights, IG profile, IG media, one media-insight call), Google Search Console (token, sites, one query), YouTube (token → Data API → Analytics, step by step), Zernio (accounts doc, <code>/v1/analytics</code> per platform, follower stats, both board paths)</td></tr>
+<tr><td><code>probes</code></td><td>A written verdict per Zernio channel: connected? analytics enabled? how many posts upstream? how many carry metrics? how old is the oldest? is this an entitlement gap?</td></tr>
+</table>
+<p><code>meta</code> carries <code>tookMs</code>, per-section <code>timings</code>, <code>bytes</code>, <code>truncations</code>
+(every capped list is listed), <code>redacted: true</code> and <code>cacheBypassed: true</code>.
+Sections are collected in parallel; one failing section never fails the report —
+it appears in <code>errors[]</code> with its own message.</p>
+<div class="note"><strong>Redaction contract.</strong> Nothing secret leaves the process.
+Credential keys are masked as <code>[redacted N chars XX…]</code>; a credentials object
+(<code>byokCredentials</code>) is masked whole; a URL keeps its readable part with any
+<code>access_token=</code> query parameter replaced; an expiry <em>date</em> survives because it is
+a fact, not a credential; lists are capped at 60 items and every cap is reported.
+A call recorded under a label that merely mentions a token
+(&ldquo;page token exchange&rdquo;) keeps its evidence.</div>
+<p>From a terminal, against any deployment (works even if that deployment is older
+than 4.3.1 — the script falls back to collecting endpoint by endpoint):</p>
+<pre><code>npm run report -- --api https://your-api.onrender.com --days 90 --out report.json</code></pre>
+
 <h2>Docker</h2>
 <pre><code>docker compose up --build                              # real credentials from .env
 docker compose -f docker-compose.yml \
@@ -246,14 +387,20 @@ ACCOUNT_CREATED=2026-07-05</code></pre>
 <tr><td><code>data.topItems[]</code></td><td>Ranked keyword/page/country/device lists</td></tr>
 <tr><td><code>data.summary</code></td><td>Overview KPI tiles and channel comparison table</td></tr>
 <tr><td><code>meta.account</code> / <code>meta.boards</code></td><td>Channel identity, Pinterest boards panel, audience gauges</td></tr>
-<tr><td><code>meta.diagnostics</code> / <code>notice</code></td><td>Notices and the diagnostics drawer</td></tr>
+<tr><td><code>meta.diagnostics</code> / <code>notice</code></td><td>Notices and the diagnostics drawer — including <code>metricAvailability</code> (Zernio: <code>reporting · lagging · not-reported · stale</code>)</td></tr>
+<tr><td><code>meta.insightVariants</code> <span class="ver">v4.3.2</span></td><td>Instagram: which request form Meta answered for each metric group, and which metrics stayed empty in every form</td></tr>
+<tr><td><code>meta.postsSource</code> / <code>meta.postCount</code> <span class="ver">v4.3.2</span></td><td>Where the post list came from (<code>media · business_discovery · unavailable</code>) and how many were read — <code>null</code> means unknown, never 0</td></tr>
+<tr><td><code>data.diagnosis</code> <span class="ver">v4.3.0</span></td><td>Still computed and still returned, but <strong>no longer rendered as a panel</strong> (removed in v4.3.5 as clutter). It drives the Overview hero and the &ldquo;Where to focus this week&rdquo; ranking, and <code>/api/report</code> ships it for both audiences</td></tr>
 </table>
 
 <h2>Troubleshooting</h2>
 <table>
 <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
 <tr><td>Facebook / Instagram → 400</td><td>Expired token, wrong page or IG id, missing <code>pages_read_engagement</code> / <code>instagram_manage_insights</code></td><td>New long-lived Page token → restart. <code>/api/health</code> returns the exact steps.</td></tr>
-<tr><td>Pinterest / LinkedIn metrics all zero</td><td><code>hasAnalyticsAccess:false</code>, posts outside the range, or 24–48h metric lag</td><td>Enable analytics on the Zernio plan; widen the range; check <code>notice</code> and <code>/api/zernio/debug</code>.</td></tr>
+<tr><td>Instagram shows 0 likes / comments although the posts have them</td><td>Three causes, all proven from a live <code>/api/report</code>: (1) Meta answers the <code>metric_type=total_value</code> + <code>period=day</code> combination with an <strong>empty 200</strong> — no error, no rows; (2) <code>/{ig-id}/media</code> is refused with <code>(#36104) … outside of the Business Discovery API</code>, so per-post counts were unreachable; (3) the post count was then reported as 0, which made the diagnosis claim &ldquo;nothing was published&rdquo;.</td><td>All three are handled: every insights form is tried in turn (<code>meta.insightVariants</code> records which one answered, and a metric empty in all forms lands in <code>partialErrors</code> + <code>notice</code>); the media list falls back to <code>business_discovery.username(…){media{…like_count,comments_count}}</code> (<code>meta.postsSource</code>); and <code>meta.postCount</code> becomes <code>null</code> (unknown) rather than 0, with <code>meta.mediaCountLifetime</code> beside it.</td></tr>
+<tr><td>Facebook has no Comments / Shares card</td><td>Meta retired <code>page_post_engagements</code> breakdowns for many Pages, so those cards are summed from the Page posts — and a summed <em>zero</em> used to be dropped instead of shown.</td><td>Fixed: a measured zero is rendered (&ldquo;0 · summed from 9 posts&rdquo;). Metrics the post endpoint does not expose at all (Facebook impressions, saves) are still never invented, because each mapper declares <code>analyticsProvided</code>.</td></tr>
+<tr><td>Pinterest metrics all zero</td><td>Most often an <strong>entitlement gap</strong>: Pinterest serves organic analytics to Business accounts only. Confirmed on a live account 2026-10-21 — 6 pins, each with a real pin id + URL and <code>syncStatus "synced"</code>, every metric 0, the oldest 32 days (far past the 24–48 h lag), and <code>pinCount</code>/<code>boardCount</code>/<code>monthlyViews</code>/<code>accountType</code> all empty.</td><td>Convert the Pinterest account to a free Business account (Settings → Account management → Convert to business), reconnect it in Zernio <em>after</em> converting, then re-check. Do not re-authorise for scopes: the live capture shows the connection already holds <code>pins:read</code>, <code>boards:read</code> and <code>user_accounts:read</code> with <code>platformStatus:"active"</code> — the missing piece is the account type, and the API says so in <code>notice</code> and in the diagnosis action. <code>GET /api/report?sections=probes</code> states which case you are in; <code>data.diagnosis.stage</code> is <code>not-reported</code> and the API says &ldquo;not measured&rdquo; rather than blaming the content.</td></tr>
+<tr><td>LinkedIn metrics tiny but real</td><td>Personal profiles publish impressions but no follower count, and reach stays small until cadence exists (a live 90-day capture: 8 posts, 93 impressions, 2 likes).</td><td>The diagnosis adds <code>lowReach</code> and ranks &ldquo;fix reach before anything else&rdquo; first. Nothing is broken upstream.</td></tr>
 <tr><td>YouTube shows "YouTube Channel", 0 subscribers</td><td>Refresh token lacks <code>youtube.readonly</code></td><td>Add the scope. Analytics keep working without it.</td></tr>
 <tr><td>GSC position <code>0.00</code></td><td>No impressions in the window</td><td>Expected — rendered muted with a note.</td></tr>
 </table>

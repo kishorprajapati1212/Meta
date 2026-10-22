@@ -3,8 +3,8 @@
   "platform": "system",
   "meta": {
     "uptime": 1,
-    "checkedInMs": 3,
-    "version": "4.1.0"
+    "checkedInMs": 2,
+    "version": "4.3.5"
   },
   "data": {
     "healthy": true,
@@ -53,7 +53,7 @@
         "platform": "linkedin",
         "source": "zernio",
         "configured": true,
-        "checkedAt": "2026-10-15T13:35:15.332Z",
+        "checkedAt": "2026-10-22T10:59:19.564Z",
         "status": "ok",
         "message": "@kishor-prajapati",
         "accountId": "acct_li_1",
@@ -65,7 +65,7 @@
         "platform": "pinterest",
         "source": "zernio",
         "configured": true,
-        "checkedAt": "2026-10-15T13:35:15.333Z",
+        "checkedAt": "2026-10-22T10:59:19.564Z",
         "status": "ok",
         "message": "@kishor.pins",
         "accountId": "acct_pin_1",
@@ -77,6 +77,13 @@
     "configured": 2,
     "ok": 2,
     "total": 6,
-    "serverTime": "2026-10-15T13:35:15.333Z"
+    "serverTime": "2026-10-22T10:59:19.564Z",
+    "cache": {
+      "entries": 2,
+      "fresh": 2,
+      "stale": 0,
+      "ttlMs": 300000,
+      "staleMs": 3600000
+    }
   }
 }

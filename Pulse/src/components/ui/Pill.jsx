@@ -20,9 +20,18 @@ export function Pill({ tone = 'neutral', children, className = '', icon = null }
   )
 }
 
+/** What a trend number actually compares. Shown verbatim in the tooltip. */
+export const BASIS_LABEL = {
+  'second-half-vs-first-half': 'Second half of this range vs the first half',
+  'last-day-vs-first-day': 'Last day of this range vs its first day',
+  'window-edges': 'End of this range vs its start',
+  'previous-window': 'This range vs the equal-length period before it',
+}
+
 /**
  * TrendPill — renders a metric's % change with the correct polarity.
  * `lowerIsBetter` metrics (GSC average position) flip the colour, not the sign.
+ * A null trend renders nothing: "not measured" is not "flat".
  */
 export function TrendPill({ metric, className = '', showFlat = true, compactLabel = false }) {
   const tone = trendTone(metric)
@@ -38,11 +47,12 @@ export function TrendPill({ metric, className = '', showFlat = true, compactLabe
         TONES[tone],
         className
       )}
-      title={
-        metric?.previous !== null && metric?.previous !== undefined
-          ? `Previous period: ${metric.previous}`
-          : 'Change vs. the first half of this range'
-      }
+      title={[
+        BASIS_LABEL[metric?.trendBasis] || BASIS_LABEL['second-half-vs-first-half'],
+        metric?.previous !== null && metric?.previous !== undefined ? `Previous: ${metric.previous}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')}
     >
       <Icon className="w-3 h-3" strokeWidth={2.5} />
       {compactLabel ? (t > 0 ? 'up' : t < 0 ? 'down' : 'flat') : signedPercent(t)}

@@ -1,5 +1,5 @@
 /**
- * Meta Social & SEO Analytics API — v4.2.4
+ * Meta Social & SEO Analytics API — v4.3.5
  *
  * Serves the JSON API for 6 platforms and (if it has been built) the Pulse
  * dashboard from the same origin, so the frontend can call `/api/...` with no
@@ -37,6 +37,7 @@ app.get('/api', (_req, res) => {
       zernioDebug: 'GET /api/zernio/debug',
       zernioAccounts: 'GET /api/zernio/accounts',
       ytDebug: 'GET /api/youtube/debug',
+      report: 'GET /api/report — EVERY diagnostic in one call (payloads + diagnosis + verbatim upstream bodies, redacted). ?format=text for a paste-able digest',
     },
     queryParams: {
       date_preset: ['today', 'yesterday', 'last_7d', 'last_14d', 'last_30d', 'last_90d', 'last_365d'],
@@ -45,10 +46,15 @@ app.get('/api', (_req, res) => {
       gscDimensions: '?dimensions=query|page|country|device (default: date)',
       gscCompare: '?compare=false — skip the previous-period trend window',
       zernioSync: '?sync=false — skip the external-post sync trigger',
+      audience: '?audience=institutions|students — who the content targets (growth diagnosis + ranking)',
+      report: '/api/report?days=30&raw=true|false&format=json|text&sections=config,health,platforms,diagnosis,combined,raw,probes',
     },
     responseShape: {
       envelope: '{ success, platform, meta, data, notice? }',
-      overviewEntry: '{ key, label, kind, unit, group, total, previous, trend, average?, hasData }',
+      overviewEntry:
+        '{ key, label, kind, unit, group, total, previous, trend|null, trendBasis|null, average?, hasData }',
+      trendRule:
+        'trend is null unless a real baseline exists (>=10 for counts/sums/levels/averages); trendBasis names what is compared',
       kinds: {
         sum: 'additive counter — total is the sum of the range',
         gauge: 'point-in-time level — total is the LAST value (followers, pins, boards)',
@@ -70,6 +76,7 @@ app.use('/api/gsc', require('./routes/gsc'));
 app.use('/api/combined', require('./routes/combined'));
 app.use('/api/health', require('./routes/health'));
 app.use('/api/zernio', require('./routes/zernio'));
+app.use('/api/report', require('./routes/report'));
 
 // ── Static: API docs + the built dashboard ───────────────────────
 app.use(express.static(path.join(__dirname, '..', 'public')));

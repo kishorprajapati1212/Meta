@@ -12,7 +12,7 @@ const r = Router();
 r.get('/', async (req, res) => {
   try {
     const { value: d } = await fetchWithFallback('pinterest', () => fetchPinterest(req.query), req.query);
-    res.json(platformEnvelope('pinterest', d, { boards: (d.meta && d.meta.boards) || [] }));
+    res.json(platformEnvelope('pinterest', d, { boards: (d.meta && d.meta.boards) || [] }, { audience: req.query.audience }));
   } catch (e) {
     const er = errorResponse(e);
     res.status(er.httpStatus).json(er.body);

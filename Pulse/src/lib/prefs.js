@@ -36,4 +36,10 @@ export const PREF_KEYS = {
   sidebar: 'sidebarCollapsed',
   gscDim: 'gscDimension',
   metricByPlatform: 'metricSelection',
+  // Who the content is written for. Changes the growth diagnosis, the
+  // channel ranking and the advice — institutions is the education default.
+  audience: 'audienceTarget',
+  // Whether the growth diagnosis shows its detail (funnel, zero reasons,
+  // actions). Collapsed by default so the metrics stay the first thing on a
+  // channel page — the numbers are the product, the advice is one click away.
 }

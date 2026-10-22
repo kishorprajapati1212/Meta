@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Download, EyeOff } from 'lucide-react'
 import { cls } from '../../lib/cls'
-import { formatValue, formatValueFull, trendTone, signedPercent } from '../../lib/format'
+import { formatValue, formatValueFull } from '../../lib/format'
 import { exportCSV } from '../../lib/csv'
 import { TrendPill, Tag } from '../ui/Pill'
 import Sparkline from '../charts/Sparkline'
@@ -45,8 +45,8 @@ export default function MetricTable({
       { label: 'Kind', value: (r) => r.kind },
       { label: 'Unit', value: (r) => r.unit },
       { label: 'Total', value: (r) => r.total },
-      { label: 'Previous', value: (r) => r.previous ?? '' },
-      { label: 'Change %', value: (r) => r.trend },
+      { label: 'Previous (2nd half vs 1st)', value: (r) => r.previous ?? '' },
+      { label: 'Change % (2nd half vs 1st)', value: (r) => r.trend ?? '' },
       { label: 'Daily average', value: (r) => r.average ?? '' },
       { label: 'Peak day', value: (r) => peakOf(r) ?? '' },
       { label: 'Data points', value: (r) => r.points ?? (r.series || []).length },
@@ -82,11 +82,14 @@ export default function MetricTable({
             <tr className="bg-sunken/70 border-b border-line">
               <th className="th w-[26%]">Metric</th>
               <th className="th text-right">Total</th>
-              <th className="th text-right">Previous</th>
-              <th className="th text-right">Change</th>
+              <th className="th text-right" title="Second half of the selected range. Not a previous week or month.">
+                1st half
+              </th>
               <th className="th text-right">Daily avg</th>
               <th className="th text-right">Peak</th>
-              <th className="th text-center w-[16%]">Trend</th>
+              <th className="th text-center w-[16%]" title="2nd half of this range vs the 1st half. Only shown when the baseline is large enough for a percentage to mean something.">
+                Trend
+              </th>
               <th className="th w-[18%]">Last {Math.min(60, rows[0]?.series?.length || 30)} days</th>
             </tr>
           </thead>
@@ -120,13 +123,6 @@ export default function MetricTable({
                       <span className="text-faint">—</span>
                     ) : (
                       formatValue(m.previous, m)
-                    )}
-                  </td>
-                  <td className={cls('td-num', toneClass(trendTone(m)))}>
-                    {m.previous === null || m.previous === undefined ? (
-                      <span className="text-faint">—</span>
-                    ) : (
-                      signedPercent(m.trend)
                     )}
                   </td>
                   <td className="td-num text-muted">
@@ -174,7 +170,4 @@ function kindLabel(kind) {
   return { sum: 'total', gauge: 'level', rate: 'rate', avg: 'avg', duration: 'time', count: 'count' }[kind] || kind
 }
 
-function toneClass(tone) {
-  return tone === 'pos' ? 'text-pos' : tone === 'neg' ? 'text-neg' : 'text-muted'
-}
 

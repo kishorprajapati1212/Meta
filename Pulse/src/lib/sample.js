@@ -42,21 +42,43 @@ function shape(rand, base, i, n) {
   return Math.max(0, Math.round(base * weekend * growth * noise))
 }
 
+const MIN_TREND_BASELINE = 10
+
+/**
+ * pct — mirrors src/utils/metrics.js: a percentage only exists when the
+ * baseline is real and big enough to mean something. Returns null otherwise,
+ * never a fabricated +100% off a zero baseline.
+ */
+function pct(cur, prev, kind) {
+  const c = Number(cur)
+  const p = Number(prev)
+  if (!Number.isFinite(c) || !Number.isFinite(p) || p === 0) return null
+  const t = Math.round(((c - p) / Math.abs(p)) * 1000) / 10
+  if (kind === 'rate') return t
+  return Math.abs(p) < MIN_TREND_BASELINE ? null : t
+}
+
+const dirOf = (t) => (t === null ? null : t > 0 ? 'up' : t < 0 ? 'down' : 'flat')
+
 function summarize(kind, values) {
   const n = values.length
   const sum = values.reduce((a, b) => a + b, 0)
   const mid = Math.floor(n / 2)
   const prev = values.slice(0, mid).reduce((a, b) => a + b, 0)
   const cur = values.slice(mid).reduce((a, b) => a + b, 0)
-  const trend = prev === 0 ? (cur === 0 ? 0 : 100) : Math.round(((cur - prev) / Math.abs(prev)) * 1000) / 10
-  if (kind === 'gauge') return { total: values[n - 1], previous: values[0], trend: Math.round(((values[n - 1] - values[0]) / (values[0] || 1)) * 1000) / 10, average: Math.round(sum / n), latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: '', direction: trend > 0 ? 'up' : trend < 0 ? 'down' : 'flat' }
+  if (kind === 'gauge') {
+    const trend = pct(values[n - 1], values[0], 'gauge')
+    return { total: values[n - 1], previous: values[0], trend, trendBasis: trend === null ? null : 'last-day-vs-first-day', average: Math.round(sum / n), latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: '', direction: dirOf(trend) }
+  }
   if (kind === 'rate' || kind === 'avg') {
     const mean = (arr) => Math.round((arr.reduce((a, b) => a + b, 0) / (arr.length || 1)) * 100) / 100
     const total = mean(values)
-    const previous = prev.length ? mean(values.slice(0, mid)) : null
-    return { total, previous, trend: previous ? Math.round(((mean(values.slice(mid)) - previous) / (previous || 1)) * 1000) / 10 : 0, average: total, latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: kind === 'rate' ? '%' : '', direction: trend > 0 ? 'up' : 'down' }
+    const previous = mid ? mean(values.slice(0, mid)) : null
+    const trend = previous === null ? null : pct(mean(values.slice(mid)), previous, kind)
+    return { total, previous, trend, trendBasis: trend === null ? null : 'second-half-vs-first-half', average: total, latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: kind === 'rate' ? '%' : '', direction: dirOf(trend) }
   }
-  return { total: sum, previous: mid ? prev : null, trend, average: Math.round(sum / n), latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: '', direction: trend > 0 ? 'up' : trend < 0 ? 'down' : 'flat' }
+  const trend = mid ? pct(cur, prev, kind) : null
+  return { total: sum, previous: mid ? prev : null, trend, trendBasis: trend === null ? null : 'second-half-vs-first-half', average: Math.round(sum / n), latest: values[n - 1], min: Math.min(...values), max: Math.max(...values), points: n, activePoints: values.filter((v) => v > 0).length, kind, unit: '', direction: dirOf(trend) }
 }
 
 function metric(id, label, kind, values, dates, unit = '', group = 'Performance', description = '') {
@@ -587,7 +609,7 @@ export function sampleDemographics(key) {
   }
 }
 
-export function sampleCombined(range) {
+export function sampleCombined(range, sampleAudience = 'institutions') {
   const dates = rangeDates(range)
   const rand = rng(20261015)
   const data = {
@@ -600,6 +622,11 @@ export function sampleCombined(range) {
   }
 
   for (const key of PLATFORM_ORDER) data[key].demographics = sampleDemographics(key)
+  // Sample mode has no API, so the growth diagnosis is reproduced from the same
+  // numbers (see sampleDiagnosis above) and the ranking follows the same rules.
+  for (const key of PLATFORM_ORDER) data[key].diagnosis = sampleDiagnosis(key, data[key], sampleAudience)
+  data.audience = sampleAudience
+  data.focus = sampleFocus(data, sampleAudience)
 
   const platforms = PLATFORM_ORDER.map((key) => {
     const p = data[key]
@@ -648,6 +675,209 @@ export function sampleCombined(range) {
     data,
     sample: true,
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Sample-mode growth diagnosis
+ *
+ * Sample mode has no API, so the diagnosis the server would return is
+ * reproduced here from the same sample numbers: the funnel is read off the
+ * overview totals and the stage follows the same precedence the backend uses
+ * (src/utils/diagnosis.js). Benchmarks are the same published education-niche
+ * references, clearly labelled as references and never as this account's data.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+const SAMPLE_LABELS = {
+  facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube',
+  linkedin: 'LinkedIn', pinterest: 'Pinterest', searchConsole: 'Search Console',
+}
+
+// Reference engagement rates for the education niche, per follower band.
+const SAMPLE_BENCH = {
+  facebook: { nano: 5.6, micro: 5.2, mid: 2.9, large: 1.8 },
+  instagram: { nano: 5.9, micro: 5.4, mid: 3.1, large: 2.1 },
+  youtube: { nano: 4.6, micro: 4.0, mid: 3.0, large: 2.4 },
+  linkedin: { nano: 5.6, micro: 3.4, mid: 3.0, large: 1.9 },
+  pinterest: { nano: 3.2, micro: 1.9, mid: 1.5, large: 1.1 },
+}
+
+const SAMPLE_FIT = {
+  institutions: {
+    linkedin: ['high', 'Admissions committees, principals and department heads are all on LinkedIn — the decision-makers for education content.'],
+    searchConsole: ['high', 'Institutions search before they follow: "syllabus", "admission process", " accreditation" queries are buying intent.'],
+    youtube: ['high', 'Long-form lectures and campus walkthroughs are what institutions evaluate you on, and they keep ranking for years.'],
+    facebook: ['medium', 'Parent and community groups are here; institutional decision-makers are not their primary feed.'],
+    instagram: ['low', 'Skews young. Great for student reach, weak for reaching a registrar or a principal.'],
+    pinterest: ['low', 'A student and teacher inspiration board, not a place institutions evaluate providers.'],
+  },
+  students: {
+    instagram: ['high', 'Students live here — reels and carousels are the fastest route to a young audience.'],
+    youtube: ['high', 'Students search for explanations and watch full lectures; the format matches how they learn.'],
+    pinterest: ['medium', 'Strong for notes, projects and exam-prep inspiration boards.'],
+    linkedin: ['medium', 'Students appear later in their journey, mostly for internships and placements.'],
+    searchConsole: ['medium', 'Students search, but the queries are informational rather than enrolment-driven.'],
+    facebook: ['low', 'The youngest cohort has largely left Facebook for Instagram and YouTube.'],
+  },
+}
+
+const SAMPLE_MECHANICS = {
+  facebook: 'Page organic reach is capped and falling; the algorithm favours content that sparks comments and shares within the first hour.',
+  instagram: 'Reach is decided in the first few hours by saves, shares and watch-through — carousels and reels out-perform single images.',
+  youtube: 'Impressions are earned by click-through rate and average view duration; a video keeps being recommended for months if both hold up.',
+  linkedin: 'Dwell time and early comments drive distribution. Personal profiles out-reach company pages by a wide margin.',
+  pinterest: 'Pins are indexed like search results: impressions build over weeks, and analytics lag publishing by 24–48 hours.',
+  searchConsole: 'Position decides clicks. Data is delayed 2–3 days and averaged, so a new page can take weeks to show movement.',
+}
+
+function sampleStageOf(e) {
+  if (!e.published) return 'no-content'
+  if (!e.seen) return 'no-distribution'
+  if (!e.engaged) return 'seen-not-engaged'
+  if (!e.followers) return 'engaged-not-followed'
+  if (!e.converted) return 'no-conversion'
+  return 'healthy'
+}
+
+function sampleFunnel(platform, o, seen, engaged, followers, converted) {
+  const rows = [
+    { key: 'published', label: 'Published', value: o.posts?.total ?? null, sourceKey: 'posts' },
+    { key: 'seen', label: platform === 'youtube' ? 'Views' : platform === 'searchConsole' ? 'Impressions' : 'Seen', value: seen, sourceKey: 'impressions' },
+    { key: 'engaged', label: 'Engaged', value: engaged, sourceKey: 'engagement' },
+    { key: 'followed', label: 'Followers', value: followers, sourceKey: 'followers' },
+    { key: 'converted', label: 'Clicked', value: converted, sourceKey: 'clicks' },
+  ]
+  return rows.map((r) => ({
+    ...r,
+    display: r.value === null || r.value === undefined ? 'not published' : r.value.toLocaleString('en-IN'),
+    verdict: r.value === null || r.value === undefined ? 'unavailable' : r.value > 0 ? 'ok' : 'zero',
+  }))
+}
+
+function sampleZeros(platform, o) {
+  const out = []
+  const LABELS = {
+    likes: 'Likes', comments: 'Comments', shares: 'Shares', saves: 'Saves', saves_and_reposts: 'Saves',
+    engagement: 'Engagement', interactions: 'Interactions', total_interactions: 'Interactions',
+    clicks: 'Clicks', outboundClicks: 'Outbound clicks', followers: 'Followers', reach: 'Reach',
+    impressions: 'Impressions', posts: 'Posts', views: 'Views', contentViews: 'Content views',
+    watchTime: 'Watch time', subscribersGained: 'Subscribers gained', replies: 'Replies', sends: 'Sends',
+  }
+  for (const [key, card] of Object.entries(o || {})) {
+    if (!card || typeof card !== 'object') continue
+    if (card.unavailable) continue
+    if (Number(card.total) !== 0) continue
+    if (!LABELS[key]) continue
+    out.push({
+      key,
+      label: LABELS[key],
+      reason: platform === 'pinterest' && (key === 'likes' || key === 'comments')
+        ? 'unpublished'
+        : 'seen-not-engaged',
+      explanation: platform === 'pinterest' && (key === 'likes' || key === 'comments')
+        ? 'Pinterest only reports impressions and clicks — there is no like or comment count to show.'
+        : 'The API reports this metric as zero for the selected range, so it is real, not a connection problem.',
+      source: 'sample',
+    })
+  }
+  return out.slice(0, 6)
+}
+
+function sampleBenchmark(platform, followers, rate) {
+  const bands = SAMPLE_BENCH[platform]
+  if (!bands) return null
+  const tier = followers < 1000 ? 'nano' : followers < 10000 ? 'micro' : followers < 100000 ? 'mid' : 'large'
+  const typical = bands[tier]
+  // Same shape the API sends: `yours` is a number in percent, `typical` is prose.
+  return {
+    metric: 'engagement rate',
+    yours: Math.round(Number(rate) * 100) / 100,
+    typical: `${typical}% for education-niche ${tier} accounts`,
+    tier: `${SAMPLE_LABELS[platform]} · ${tier} account · education niche`,
+    reference: `Published 2026 industry benchmarks for the education niche — a reference range, not your data.`,
+    note: null,
+  }
+}
+
+function sampleActions(platform, stage, audience) {
+  const fit = SAMPLE_FIT[audience]?.[platform]?.[0] || 'medium'
+  const lead = fit === 'high'
+    ? `This is a high-fit channel for ${audience === 'students' ? 'students' : 'universities and institutes'} — prioritise it.`
+    : fit === 'low'
+      ? `This channel is a weak fit for ${audience === 'students' ? 'students' : 'institutional'} audiences — keep it light.`
+      : null
+  const byStage = {
+    'no-content': ['Publish 3 posts this week', 'Nothing in the range means nothing to measure. Consistency beats volume at this stage.'],
+    'no-distribution': ['Re-publish with a different hook', 'The content exists but the algorithm did not serve it. Change the first line and the format, then post at a peak hour.'],
+    'seen-not-engaged': ['Ask a question in the first line', 'Reach without engagement means the content was scrolled past. End with one specific question relevant to your audience.'],
+    'engaged-not-followed': ['Add a reason to follow', 'People engaged but did not stay. Publish a short series so there is something to follow for.'],
+    'no-conversion': ['Put one clear link or call to action', 'Attention is not turning into visits. One link, one ask, in the post and the profile.'],
+    healthy: ['Double down on the best format', 'This channel is working. Find the top post and publish three variations of it.'],
+  }[stage] || ['Review the range', 'Widen the date range to see more history.']
+  const actions = [{ priority: 1, title: byStage[0], detail: byStage[1], effort: 'this week' }]
+  if (lead) actions.push({ priority: 2, title: 'Treat this as a primary channel', detail: lead, effort: 'ongoing' })
+  return actions
+}
+
+/** One channel's sample diagnosis, mirroring the server contract. */
+export function sampleDiagnosis(platform, payload, audience = 'institutions') {
+  const o = payload?.overview || {}
+  const t = (k) => Number(o[k]?.total) || 0
+  const posts = Array.isArray(payload?.posts) ? payload.posts : []
+  const published = t('posts') || posts.length
+  const seen = platform === 'youtube' ? t('views') : platform === 'searchConsole' ? t('impressions') : t('impressions') || t('reach') || t('views') || t('contentViews') || t('pageViews')
+  const engaged = t('engagement') || t('interactions') || t('total_interactions') || (t('likes') + t('comments') + t('shares') + t('saves'))
+  const followers = t('followers') || Number(o.account?.lifetime?.subscribers) || 0
+  const converted = t('clicks') || t('outboundClicks') || t('websiteClicks') || t('profileViews') || 0
+  const stage = sampleStageOf({ published, seen, engaged, followers, converted })
+  const rate = Number(o.engagementRate?.total) || (seen ? (engaged / seen) * 100 : 0)
+  const fit = SAMPLE_FIT[audience]?.[platform] || ['medium', '']
+  const headline = {
+    'no-content': `Nothing was published to ${SAMPLE_LABELS[platform]} in this range, so every metric reads zero.`,
+    'no-distribution': `${SAMPLE_LABELS[platform]} published ${published} item(s) but the algorithm served almost none of them.`,
+    'seen-not-engaged': `${SAMPLE_LABELS[platform]} reached ${seen.toLocaleString('en-IN')} people but only ${engaged.toLocaleString('en-IN')} interactions followed.`,
+    'engaged-not-followed': `People are engaging on ${SAMPLE_LABELS[platform]} but not following — there is no reason to come back yet.`,
+    'no-conversion': `${SAMPLE_LABELS[platform]} is getting attention but no click-through to your site or profile.`,
+    healthy: `${SAMPLE_LABELS[platform]} is moving through the whole funnel: seen, engaged, followed and clicked.`,
+  }[stage]
+
+  return {
+    platform,
+    audience,
+    audienceFit: { fit: fit[0], why: fit[1] },
+    stage,
+    headline,
+    funnel: sampleFunnel(platform, o, seen, engaged, followers, converted),
+    zeros: sampleZeros(platform, o),
+    benchmark: sampleBenchmark(platform, followers, rate),
+    actions: sampleActions(platform, stage, audience),
+    mechanics: SAMPLE_MECHANICS[platform] || null,
+    evidence: {
+      published, seen, engaged, followers, converted,
+      engagedSource: 'account insights', postsRead: posts.length, youngPosts: 0, lagging: false,
+    },
+  }
+}
+
+const STAGE_WEIGHT = {
+  'no-distribution': 3, 'no-content': 2.6, 'seen-not-engaged': 2.2,
+  'no-conversion': 1.8, 'engaged-not-followed': 1.6, healthy: 1.2, 'pending-lag': 0.8,
+}
+const FIT_WEIGHT = { high: 1.5, medium: 1, low: 0.6 }
+
+/** Ranked "where to focus" list for sample mode. */
+export function sampleFocus(data, audience = 'institutions') {
+  return Object.keys(SAMPLE_LABELS)
+    .filter((k) => data && data[k])
+    .map((k) => {
+      const d = sampleDiagnosis(k, data[k], audience)
+      const score = Math.round((STAGE_WEIGHT[d.stage] || 1) * (FIT_WEIGHT[d.audienceFit.fit] || 1) * 100) / 100
+      return {
+        platform: k, stage: d.stage, headline: d.headline, score,
+        audienceFit: d.audienceFit.fit, audienceWhy: d.audienceFit.why,
+        firstAction: d.actions[0]?.title || null,
+      }
+    })
+    .sort((a, b) => b.score - a.score)
 }
 
 export function sampleHealth() {

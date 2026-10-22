@@ -11,6 +11,9 @@ const { Router } = require('express');
 const { success, errorResponse } = require('../utils/response');
 const { round } = require('../utils/metrics');
 const { fetchWithFallback, cacheStats } = require('../utils/resilience');
+const { diagnose, focusOrder } = require('../utils/diagnosis');
+
+const AUDIENCES = new Set(['institutions', 'students']);
 
 const r = Router();
 
@@ -24,10 +27,17 @@ const KEYS_META = ['facebook', 'instagram', 'youtube', 'linkedin', 'pinterest', 
  * endpoints had them. Pass the payload through; only guarantee the two keys the
  * dashboard always reads.
  */
-function passthrough(v) {
+function passthrough(v, key, audience) {
   if (!v) return null;
   const { platform: _platform, ...rest } = v;
-  return { overview: {}, timeseries: [], ...rest };
+  const out = { overview: {}, timeseries: [], ...rest };
+  // v4.3.0: every channel carries its own "why is this 0 / what do I do".
+  try {
+    out.diagnosis = diagnose(key, out, { audience });
+  } catch (e) {
+    console.error(`[diagnosis] ${key}:`, e.message);
+  }
+  return out;
 }
 
 function num(v) {
@@ -61,7 +71,13 @@ function buildSummary(data) {
       clicks: total(o, 'clicks'),
       posts: num(p.meta?.postCount) || total(o, 'posts') || 0,
       engagementRate: total(o, 'engagementRate'),
-      trend: total(o, 'followers') ? num(o.followers.trend) : 0,
+      // Preserved as null when the followers comparison is not justified, so a
+      // missing measurement is never rendered as a real "0% / flat".
+      trend:
+        total(o, 'followers') && o.followers.trend !== null && o.followers.trend !== undefined
+          ? num(o.followers.trend)
+          : null,
+      trendBasis: o?.followers?.trendBasis || null,
       lifetime: o?.channel?.lifetime || null,
       account: p.meta?.account || null,
       dateRange: p.meta?.dateRange || null,
@@ -124,6 +140,10 @@ r.get('/', async (req, res) => {
 
     const data = {};
     const stalePlatforms = [];
+    // Who the content is aimed at changes which channel matters most. The
+    // dashboard sends its own choice; institutions is the default because for
+    // education content a university — not a student — is the buyer.
+    const audience = AUDIENCES.has(String(q.audience || '')) ? String(q.audience) : 'institutions';
     keys.forEach((k, i) => {
       const r = settled[i];
       if (r && r._err) {
@@ -138,7 +158,7 @@ r.get('/', async (req, res) => {
         };
         return;
       }
-      data[k] = passthrough(r.value) || { error: 'No data returned', overview: {}, timeseries: [] };
+      data[k] = passthrough(r.value, k, audience) || { error: 'No data returned', overview: {}, timeseries: [] };
       if (r.fromCache) stalePlatforms.push(k);
     });
 
@@ -153,7 +173,14 @@ r.get('/', async (req, res) => {
           stalePlatforms,
           cache: cacheStats(),
         },
-        data: { ...data, summary: buildSummary(data) },
+        data: {
+          ...data,
+          summary: buildSummary(data),
+          audience,
+          // Ranked "where to spend this week": unblocking a dead channel that
+          // reaches the target audience outranks polishing a working one.
+          focus: focusOrder(keys.map((k) => data[k] && data[k].diagnosis).filter(Boolean), audience),
+        },
       })
     );
   } catch (e) {

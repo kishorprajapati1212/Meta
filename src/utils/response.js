@@ -1,3 +1,5 @@
+const { diagnose } = require('./diagnosis');
+
 function parseError(err) {
   const body = err.response?.data;
   let msg = '', code = '', details = null;
@@ -28,12 +30,20 @@ function success({ platform, meta = {}, data, notice }) {
  *
  * `extra` adds route-specific keys (Pinterest exposes meta.boards at top level).
  */
-function platformEnvelope(platform, result, extra) {
+function platformEnvelope(platform, result, extra, opts) {
   const { platform: _ignored, meta, notice, ...data } = result || {};
+  const payload = extra ? { ...data, ...extra } : data;
+  // v4.3.0: every channel answers "why is this 0 and what do I do about it".
+  // Optional and never fatal — a diagnosis bug must not blank a working channel.
+  try {
+    payload.diagnosis = diagnose(platform, payload, { audience: opts && opts.audience });
+  } catch (e) {
+    console.error(`[diagnosis] ${platform}:`, e.message);
+  }
   return success({
     platform,
     meta: meta || {},
-    data: extra ? { ...data, ...extra } : data,
+    data: payload,
     notice: notice || undefined,
   });
 }

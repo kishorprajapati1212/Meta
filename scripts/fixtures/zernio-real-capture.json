@@ -1,0 +1,1326 @@
+{
+ "_provenance": {
+  "capturedAt": null,
+  "source": "https://meta-ptze.onrender.com (deployed v4.2.4) via scripts/collect-report.js --days 90",
+  "purpose": "Regression fixture: the exact upstream situation behind 'Pinterest shows 0'. Served by scripts/mockZernio.js under MOCK_MODE=real-capture.",
+  "verbatim": [
+   "posts.pinterest[0] \u2014 the full raw /v1/analytics document for the newest pin (pin id 1127166613023434329, URL, platforms[], all-zero analytics)",
+   "posts.linkedin[0] \u2014 the full raw document for the newest LinkedIn post (urn:li:ugcPost:7517925769025699840, impressions 8 / reach 2)",
+   "boards \u2014 the raw /v1/accounts/{id}/pinterest-boards response (1 board, pinCount null)",
+   "followerStats \u2014 the raw /v1/accounts/follower-stats rows (all zeros)",
+   "accounts \u2014 the /api/zernio/accounts projection (v4.2.4 strips permissions/platformStatus/metadata.scope; /api/report in v4.3.1 captures them verbatim)",
+   "accountsRaw permissions / platformStatus / tokenExpiresAt \u2014 captured live from /api/report (v4.3.1) on 2026-10-21: the Pinterest connection DOES hold pins:read, boards:read and user_accounts:read and is marked active, so the missing Pinterest analytics are an account entitlement (Business account), not a scope problem."
+  ],
+  "reconstructed": [
+   "posts.pinterest[1..5] and posts.linkedin[1..7] \u2014 real latePostId, real publishedAt and real per-post analytics from the captured /api/pinterest and /api/linkedin payloads, wrapped in the raw document shape of the verbatim doc. v4.2.4's debug endpoint only exposed the FIRST raw post, so pin ids/URLs for the older pins were not captured (platformPostId/platformPostUrl are null there).",
+   "capturedAgeDays is the age at capture time; the mock rebases publishedAt from it so the fixture never expires out of a date window."
+  ],
+  "conclusion": "Pinterest knows every pin (real id + URL, syncStatus synced) and the connection holds pins:read / boards:read / user_accounts:read with platformStatus active, yet all metrics are 0 for pins up to 32 days old and pinCount/boardCount/monthlyViews/accountType are empty. Pinterest serves organic analytics to BUSINESS accounts only, so the zeros mean 'not measured' \u2014 and re-authorising the same scopes cannot fix it. The LinkedIn copy of the same cross-post DOES report impressions, which is the control."
+ },
+ "hasAnalyticsAccess": true,
+ "boards": [
+  {
+   "id": "1127166681679490974",
+   "name": "Testing 1",
+   "pinCount": null,
+   "privacy": "PUBLIC",
+   "url": null
+  }
+ ],
+ "followerStats": {
+  "pinterest": [
+   {
+    "date": "2026-10-11",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-12",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-13",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-14",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-15",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-16",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-17",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-18",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-19",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-20",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-21",
+    "followers": 0
+   }
+  ],
+  "linkedin": [
+   {
+    "date": "2026-09-19",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-20",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-21",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-22",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-23",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-24",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-25",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-26",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-27",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-28",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-29",
+    "followers": 0
+   },
+   {
+    "date": "2026-09-30",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-01",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-02",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-03",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-04",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-05",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-06",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-07",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-08",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-09",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-10",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-11",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-12",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-13",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-14",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-15",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-16",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-17",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-18",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-19",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-20",
+    "followers": 0
+   },
+   {
+    "date": "2026-10-21",
+    "followers": 0
+   }
+  ]
+ },
+ "posts": {
+  "pinterest": [
+   {
+    "_id": "6ad62f7d8024457fec7120af",
+    "latePostId": "6ad462c70edd18bc5d4bd3c9",
+    "platform": "pinterest",
+    "content": "Aaj ka plan?\n\nAaj ka plan?\npoll: Garba pakka / pehle attendance \ud83d\ude05",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": null,
+      "thumbnail": "https://i.pinimg.com/564x/1b/86/ca/1b86caf682cf88eeca5bdaa12170b18e.jpg",
+      "mediaStatus": "unavailable",
+      "unavailableReason": "platform_withheld"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/1b/86/ca/1b86caf682cf88eeca5bdaa12170b18e.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-19T12:33:18.000Z",
+    "capturedAgeDays": 1.5,
+    "scheduledFor": null,
+    "platformPostUrl": "https://www.pinterest.com/pin/1127166613023434329/",
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": "1127166613023434329",
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": "https://www.pinterest.com/pin/1127166613023434329/",
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": true
+   },
+   {
+    "_id": "reconstructed_pin_doc_2",
+    "latePostId": "6acb1c92b73b07bd6216c817",
+    "platform": "pinterest",
+    "content": "",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": null,
+      "thumbnail": "https://i.pinimg.com/564x/6e/dd/2d/6edd2dd6cb4e0bb2536f77c482468b27.jpg",
+      "mediaStatus": "unavailable",
+      "unavailableReason": "platform_withheld"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/6e/dd/2d/6edd2dd6cb4e0bb2536f77c482468b27.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-17T12:32:39.000Z",
+    "capturedAgeDays": 3.5,
+    "scheduledFor": null,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_pin_doc_3",
+    "latePostId": "6acb12beced2a63cf5f8936d",
+    "platform": "pinterest",
+    "content": "",
+    "mediaType": "image",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg",
+      "thumbnail": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-16T12:31:27.000Z",
+    "capturedAgeDays": 4.5,
+    "scheduledFor": null,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_pin_doc_4",
+    "latePostId": "6acb11daa6f390d66e5391db",
+    "platform": "pinterest",
+    "content": "",
+    "mediaType": "image",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg",
+      "thumbnail": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-14T12:32:32.000Z",
+    "capturedAgeDays": 6.5,
+    "scheduledFor": null,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_pin_doc_5",
+    "latePostId": "6acb1102a98c701bd1a030df",
+    "platform": "pinterest",
+    "content": "",
+    "mediaType": "image",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg",
+      "thumbnail": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-12T12:31:39.000Z",
+    "capturedAgeDays": 8.5,
+    "scheduledFor": null,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_pin_doc_6",
+    "latePostId": "",
+    "platform": "pinterest",
+    "content": "",
+    "mediaType": "image",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg",
+      "thumbnail": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg"
+     }
+    ],
+    "thumbnailUrl": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-09-18T04:07:53.000Z",
+    "capturedAgeDays": 32.8,
+    "scheduledFor": null,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 0,
+     "reach": 0,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "pinterest",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab857a8d284ffb210cbec0",
+      "accountUsername": "kishorprajapati1040",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 0,
+       "reach": 0,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   }
+  ],
+  "linkedin": [
+   {
+    "_id": "6ad62f8295da94eabaa6e0e5",
+    "latePostId": "6ad462c70edd18bc5d4bd3c9",
+    "platform": "linkedin",
+    "content": "Aaj ka plan?\npoll: Garba pakka / pehle attendance \ud83d\ude05",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": "https://media.zernio.com/media/1792303809618_sjozd3ga_4.mp4",
+      "thumbnail": "https://media.zernio.com/media/1792303809618_sjozd3ga_4.mp4"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-19T12:33:00.413Z",
+    "capturedAgeDays": 1.5,
+    "platformPostUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7517925769025699840/",
+    "analytics": {
+     "impressions": 8,
+     "reach": 2,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": "urn:li:ugcPost:7517925769025699840",
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7517925769025699840/",
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 8,
+       "reach": 2,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": true
+   },
+   {
+    "_id": "reconstructed_li_doc_2",
+    "latePostId": "6acb1c92b73b07bd6216c817",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": "https://media.zernio.com/media/1791695937589_0mlsh0i0_3.mp4",
+      "thumbnail": "https://media.zernio.com/media/1791695937589_0mlsh0i0_3.mp4"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-17T12:32:29.920Z",
+    "capturedAgeDays": 3.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 9,
+     "reach": 4,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 2,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 9,
+       "reach": 4,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 2,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_3",
+    "latePostId": "6acb12beced2a63cf5f8936d",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "carousel",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693498263_2ohkpwmj_file_000000005fdc820aa358080578dfd355.png",
+      "thumbnail": "https://media.zernio.com/media/1791693498263_2ohkpwmj_file_000000005fdc820aa358080578dfd355.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693496190_h883cawk_file_00000000ae848210a0eece1104ff0ea1.png",
+      "thumbnail": "https://media.zernio.com/media/1791693496190_h883cawk_file_00000000ae848210a0eece1104ff0ea1.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693493778_t4n44aot_file_00000000abc482089e4ec9d0002194fe.png",
+      "thumbnail": "https://media.zernio.com/media/1791693493778_t4n44aot_file_00000000abc482089e4ec9d0002194fe.png"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-16T12:31:37.238Z",
+    "capturedAgeDays": 4.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 10,
+     "reach": 5,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 10,
+       "reach": 5,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_4",
+    "latePostId": "6acb19a20853a5e7d3c35071",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": "https://media.zernio.com/media/1791695244030_hj7t5xcv_attendx-reel-final.mp4",
+      "thumbnail": "https://media.zernio.com/media/1791695244030_hj7t5xcv_attendx-reel-final.mp4"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-15T12:31:26.657Z",
+    "capturedAgeDays": 5.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 20,
+     "reach": 13,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 2,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 20,
+       "reach": 13,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 2,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_5",
+    "latePostId": "6acb11daa6f390d66e5391db",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "carousel",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693267817_cplwn5t9_file_00000000dbf08246b7e37ef84bfb27cc.png",
+      "thumbnail": "https://media.zernio.com/media/1791693267817_cplwn5t9_file_00000000dbf08246b7e37ef84bfb27cc.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693269638_mlbzphml_file_000000003b8882469547640183c0b642.png",
+      "thumbnail": "https://media.zernio.com/media/1791693269638_mlbzphml_file_000000003b8882469547640183c0b642.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693271488_da15u2xu_file_000000002854824684241bfc5115a90a.png",
+      "thumbnail": "https://media.zernio.com/media/1791693271488_da15u2xu_file_000000002854824684241bfc5115a90a.png"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-14T12:32:45.556Z",
+    "capturedAgeDays": 6.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 15,
+     "reach": 8,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 15,
+       "reach": 8,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_6",
+    "latePostId": "6acb1741b6fdbf11fd8130b0",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "video",
+    "mediaItems": [
+     {
+      "type": "video",
+      "url": "https://media.zernio.com/media/1791694614525_fpycmngf_attendx-prototype-walkthrough.mp4",
+      "thumbnail": "https://media.zernio.com/media/1791694614525_fpycmngf_attendx-prototype-walkthrough.mp4"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-13T12:31:37.120Z",
+    "capturedAgeDays": 7.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 1,
+     "reach": 1,
+     "likes": 0,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 1,
+     "follows": 0,
+     "engagement": 0,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 1,
+       "reach": 1,
+       "likes": 0,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 1,
+       "follows": 0,
+       "engagement": 0,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_7",
+    "latePostId": "6acb1102a98c701bd1a030df",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "carousel",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693051070_4aqbudct_Screenshot_2026-10-11_095638.png",
+      "thumbnail": "https://media.zernio.com/media/1791693051070_4aqbudct_Screenshot_2026-10-11_095638.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693053338_ykm67r96_Screenshot_2026-10-11_095631.png",
+      "thumbnail": "https://media.zernio.com/media/1791693053338_ykm67r96_Screenshot_2026-10-11_095631.png"
+     },
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1791693055379_hzam9n8l_Screenshot_2026-10-11_095618.png",
+      "thumbnail": "https://media.zernio.com/media/1791693055379_hzam9n8l_Screenshot_2026-10-11_095618.png"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-10-12T12:31:50.974Z",
+    "capturedAgeDays": 8.5,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 24,
+     "reach": 9,
+     "likes": 1,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 1,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 24,
+       "reach": 9,
+       "likes": 1,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 1,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   },
+   {
+    "_id": "reconstructed_li_doc_8",
+    "latePostId": "6aacb9137a644cb28b6333f8",
+    "platform": "linkedin",
+    "content": "",
+    "mediaType": "image",
+    "mediaItems": [
+     {
+      "type": "image",
+      "url": "https://media.zernio.com/media/1789704336279_07e35rp4_Gemini_Generated_Image_n7i4zhn7i4zhn7i4.png",
+      "thumbnail": "https://media.zernio.com/media/1789704336279_07e35rp4_Gemini_Generated_Image_n7i4zhn7i4zhn7i4.png"
+     }
+    ],
+    "thumbnailUrl": "",
+    "status": "published",
+    "isExternal": true,
+    "isAd": false,
+    "publishedAt": "2026-09-18T04:07:57.404Z",
+    "capturedAgeDays": 32.8,
+    "platformPostUrl": null,
+    "analytics": {
+     "impressions": 6,
+     "reach": 1,
+     "likes": 1,
+     "comments": 0,
+     "shares": 0,
+     "saves": 0,
+     "sends": 0,
+     "clicks": 0,
+     "outboundClicks": 0,
+     "views": 0,
+     "follows": 0,
+     "engagement": 1,
+     "engagementRate": 0
+    },
+    "platforms": [
+     {
+      "platform": "linkedin",
+      "status": "published",
+      "platformPostId": null,
+      "accountId": "6aab85698d284ffb210cbe73",
+      "accountUsername": "kishor prajapati",
+      "syncStatus": "synced",
+      "platformPostUrl": null,
+      "errorMessage": null,
+      "errorCode": null,
+      "isOwner": true,
+      "analytics": {
+       "impressions": 6,
+       "reach": 1,
+       "likes": 1,
+       "comments": 0,
+       "shares": 0,
+       "saves": 0,
+       "sends": 0,
+       "clicks": 0,
+       "outboundClicks": 0,
+       "views": 0,
+       "follows": 0,
+       "engagement": 1,
+       "engagementRate": 0
+      }
+     }
+    ],
+    "_capturedVerbatim": false
+   }
+  ]
+ },
+ "overview": {
+  "pinterest": {
+   "impressions": 0,
+   "clicks": 0,
+   "outboundClicks": 0,
+   "saves": 0,
+   "closeups": 0,
+   "views": 0,
+   "engagement": 0,
+   "engagementRate": 0,
+   "posts": 6,
+   "followers": 0,
+   "pins": 0,
+   "boards": 1,
+   "monthlyViews": 0
+  },
+  "linkedin": {
+   "impressions": 93,
+   "reach": 43,
+   "clicks": 0,
+   "likes": 2,
+   "comments": 0,
+   "shares": 0,
+   "saves": 0,
+   "sends": 0,
+   "follows": 0,
+   "engagement": 2,
+   "engagementRate": 2.61,
+   "posts": 8,
+   "followers": 0,
+   "views": 5
+  }
+ },
+ "accountsRaw": [
+  {
+   "_id": "6aab85698d284ffb210cbe73",
+   "userId": "usr_captured",
+   "profileId": "6aab85698d284ffb210cbe73",
+   "platform": "linkedin",
+   "platformUserId": null,
+   "username": "kishor prajapati",
+   "displayName": "kishor prajapati",
+   "profilePicture": "https://media.licdn.com/dms/image/v2/D4E03AQE3ixxITiNjDw/profile-displayphoto-scale_400_400/B4EaEphufMJkAg-/0/1791698070409?e=1794441600&v=beta&t=0kuvThTyLcyjm0mjYVPOLBJPN-aiyFTKLgiZkp7skik",
+   "profileUrl": "https://www.linkedin.com/in/kishor-prajapati-1a3ab8437/",
+   "tokenExpiresAt": "2026-11-17T13:23:43.535Z",
+   "isActive": true,
+   "permissions": [
+    "openid",
+    "profile",
+    "r_basicprofile",
+    "email",
+    "w_member_social",
+    "w_member_social_feed",
+    "r_member_postAnalytics",
+    "r_member_profileAnalytics",
+    "r_1st_connections_size",
+    "w_organization_social",
+    "w_organization_social_feed",
+    "rw_organization_admin",
+    "r_organization_social",
+    "r_organization_social_feed",
+    "r_organization_followers",
+    "r_ads",
+    "rw_ads",
+    "r_ads_reporting",
+    "r_marketing_leadgen_automation",
+    "rw_conversions"
+   ],
+   "metadata": {
+    "accountType": "personal",
+    "scope": "email,openid,profile,r_1st_connections_size,r_ads,r_ads_reporting,r_basicprofile,r_marketing_leadgen_automation,r_member_postAnalytics,r_member_profileAnalytics,r_organization_followers,r_organization_social,r_organization_social_feed,rw_ads,rw_conversions,rw_organization_admin,w_member_social,w_member_social_feed,w_organization_social,w_organization_social_feed"
+   },
+   "platformStatus": "active",
+   "platformStatusReason": null,
+   "byokCredentials": {
+    "configured": true
+   },
+   "followersCount": 0,
+   "followersLastUpdated": "2026-10-21T05:39:41.289Z",
+   "rateLimitedUntil": null,
+   "lastSuccessfulPublishAt": null,
+   "needsReconnection": null,
+   "enabled": true,
+   "createdAt": "2026-09-17T06:15:05.066Z",
+   "updatedAt": "2026-09-17T06:15:05.066Z",
+   "adsStatus": null,
+   "externalPostCount": 0,
+   "analyticsLastSyncedAt": null,
+   "accountStats": {
+    "pinCount": null,
+    "boardCount": null,
+    "monthlyViews": null
+   },
+   "_note": "captured live from /api/report on 2026-10-21 (v4.3.1)."
+  },
+  {
+   "_id": "6aab857a8d284ffb210cbec0",
+   "userId": "usr_captured",
+   "profileId": "6aab857a8d284ffb210cbec0",
+   "platform": "pinterest",
+   "platformUserId": null,
+   "username": "kishorprajapati1040",
+   "displayName": "kishorprajapati1040",
+   "profilePicture": "https://i.pinimg.com/600x600_R/09/3a/df/093adfded15d978f4d5360701eb05432.jpg",
+   "profileUrl": "https://pinterest.com/kishorprajapati1040",
+   "tokenExpiresAt": "2026-11-10T04:29:46.916Z",
+   "isActive": true,
+   "permissions": [
+    "boards:read",
+    "boards:write",
+    "pins:read",
+    "pins:write",
+    "user_accounts:read",
+    "ads:read",
+    "ads:write"
+   ],
+   "metadata": {
+    "accountType": null,
+    "scope": null
+   },
+   "platformStatus": "active",
+   "platformStatusReason": null,
+   "byokCredentials": {
+    "configured": true
+   },
+   "followersCount": 0,
+   "followersLastUpdated": null,
+   "rateLimitedUntil": null,
+   "lastSuccessfulPublishAt": null,
+   "needsReconnection": false,
+   "enabled": true,
+   "createdAt": "2026-09-17T06:15:22.110Z",
+   "updatedAt": "2026-09-17T06:15:22.110Z",
+   "adsStatus": null,
+   "externalPostCount": 0,
+   "analyticsLastSyncedAt": null,
+   "accountStats": {
+    "pinCount": null,
+    "boardCount": null,
+    "monthlyViews": null
+   },
+   "_note": "permissions/platformStatus/tokenExpiresAt captured live from /api/report on 2026-10-21 (v4.3.1); the v4.2.4 projection stripped them."
+  }
+ ]
+}

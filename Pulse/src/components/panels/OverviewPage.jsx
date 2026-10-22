@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
-  ArrowUpRight, ArrowDownRight, Heart, PenLine, Gauge, Search, Sparkles,
+  ArrowUpRight, Heart, PenLine, Gauge, Search, Sparkles,
   ChevronRight, AlertTriangle,
 } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '../ui/Card'
@@ -18,6 +18,7 @@ import {
   effectiveSummary, activityCalendarOf, daysSinceLastPost, stageOf, nextMilestone,
 } from '../../lib/normalize'
 import { StageHero, ActivityHeat, InsightsPanel, GeoTeaser, buildInsights, computeStreaks } from './OverviewExtras'
+import FocusBoard from './FocusBoard'
 import { codeOf } from '../../lib/countries'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
 import { compact, formatValue, dateLong, dateShort, truncate, percent } from '../../lib/format'
@@ -83,6 +84,9 @@ const TREND_OPTIONS = [
 export default function OverviewPage({
   platformData,
   summary,
+  focus = [],
+  audience = 'institutions',
+  onAudienceChange,
   healthDetails = {},
   range,
   sample = false,
@@ -174,6 +178,9 @@ export default function OverviewPage({
         ))}
       </section>
 
+      {/* ── Where to focus: ranked by blockage × audience fit ──── */}
+      <FocusBoard focus={focus} audience={audience} onAudienceChange={onAudienceChange} onNavigate={onNavigate} />
+
       {/* ── Consistency + geography ───────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.55fr_1fr]">
         <ActivityHeat calendar={calendar} streaks={streaks} />
@@ -205,7 +212,9 @@ export default function OverviewPage({
                 <th className="th text-right">Eng. rate</th>
                 <th className="th text-right">Clicks</th>
                 <th className="th text-right">Posts</th>
-                <th className="th text-right">Audience trend</th>
+                <th className="th text-right" title="Second half of this range vs the first half. An em dash means there is no comparison worth making.">
+                  Followers change
+                </th>
                 <th className="th w-10" />
               </tr>
             </thead>
@@ -255,10 +264,12 @@ export default function OverviewPage({
                     <td className="td text-right">
                       {err ? (
                         <StatusPill status={detail?.configured === false ? 'unconfigured' : 'error'} />
-                      ) : r.trend ? (
-                        <TrendPill metric={{ trend: r.trend }} />
+                      ) : r.trend !== null && r.trend !== undefined ? (
+                        <TrendPill metric={{ trend: r.trend, trendBasis: r.trendBasis }} />
                       ) : (
-                        <span className="text-faint text-[12px]">flat</span>
+                        <span className="text-faint text-[12px]" title="No justified comparison in this range — a baseline of zero or under 10 makes a percentage meaningless">
+                          —
+                        </span>
                       )}
                     </td>
                     <td className="td text-right pr-4">
@@ -531,9 +542,7 @@ function ContentRow({ item }) {
   )
 }
 
-function KpiTile({ label, value, kind = 'sum', unit = '', sub, trend = null, breakdown = [], extra = [], onClick }) {
-  const up = trend !== null && trend > 0
-  const down = trend !== null && trend < 0
+function KpiTile({ label, value, kind = 'sum', unit = '', sub, breakdown = [], extra = [], onClick }) {
   const max = Math.max(...breakdown.map((b) => b.value || 0), 1)
   const zero = Number(value) === 0 && !(extra && extra.length)
   return (
@@ -541,20 +550,7 @@ function KpiTile({ label, value, kind = 'sum', unit = '', sub, trend = null, bre
       className={cls('card p-4 flex flex-col gap-2.5 card-hover', zero && 'bg-sunken/60 border-dashed')}
       title={zero ? 'Nothing recorded in this range yet — normal for a young channel. The stage panel above tracks what is moving.' : undefined}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11.5px] font-medium text-muted leading-tight">{label}</p>
-        {trend !== null && trend !== undefined ? (
-          <span
-            className={cls(
-              'inline-flex items-center gap-0.5 text-[11px] font-semibold num shrink-0',
-              up ? 'text-pos' : down ? 'text-neg' : 'text-faint'
-            )}
-          >
-            {up ? <ArrowUpRight className="w-3 h-3" strokeWidth={2.5} /> : down ? <ArrowDownRight className="w-3 h-3" strokeWidth={2.5} /> : null}
-            {Math.abs(trend)}%
-          </span>
-        ) : null}
-      </div>
+      <p className="text-[11.5px] font-medium text-muted leading-tight">{label}</p>
       <p className={cls('font-display text-[24px] leading-7 font-bold num', zero ? 'text-faint' : 'text-ink')}>
         {formatValue(value, { kind, unit })}
       </p>
@@ -599,40 +595,35 @@ function buildKpis(summary, platformData) {
   const t = summary?.totals || {}
   const rows = summary?.platforms || []
   const withAudience = rows.filter((r) => r.audience > 0)
-  const prevAudience = withAudience.reduce((s, r) => {
-    const f = platformData?.[r.platform]?.overview?.followers
-    return s + (f && typeof f.previous === 'number' ? f.previous : r.audience)
-  }, 0)
-  const audienceTrend = prevAudience > 0 ? Math.round(((t.audience - prevAudience) / prevAudience) * 1000) / 10 : null
 
-  const gsc = platformData?.searchConsole?.overview || {}
-
+  // No trend props: the tiles are numbers, not growth claims. Direction lives
+  // in the charts, and the only labelled comparisons are in the tables below.
   return [
     {
       id: 'audience', label: 'Total audience', value: t.audience || 0, kind: 'gauge',
-      sub: `${withAudience.length} channel${withAudience.length === 1 ? '' : 's'} reporting`, trend: audienceTrend,
+      sub: `${withAudience.length} channel${withAudience.length === 1 ? '' : 's'} reporting`,
       breakdown: withAudience.map((r) => ({ platform: r.platform, value: r.audience })),
     },
     {
       id: 'impressions', label: 'Impressions / reach', value: t.impressions || 0, kind: 'sum',
-      sub: 'Largest of impressions, reach or views per channel', trend: null,
+      sub: 'Largest of impressions, reach or views per channel',
       breakdown: rows
         .map((r) => ({ platform: r.platform, value: Math.max(r.impressions || 0, r.reach || 0, r.views || 0) }))
         .filter((b) => b.value > 0),
     },
     {
       id: 'engagement', label: 'Engagement', value: t.engagement || 0, kind: 'sum',
-      sub: 'Likes, comments, shares, saves and clicks', trend: null,
+      sub: 'Likes, comments, shares, saves and clicks',
       breakdown: rows.map((r) => ({ platform: r.platform, value: r.engagement || 0 })).filter((b) => b.value > 0),
     },
     {
       id: 'posts', label: 'Content published', value: t.posts || 0, kind: 'count',
-      sub: 'Posts, pins and videos in range', trend: null,
+      sub: 'Posts, pins and videos in range',
       breakdown: rows.map((r) => ({ platform: r.platform, value: r.posts || 0 })).filter((b) => b.value > 0),
     },
     {
       id: 'searchClicks', label: 'Search clicks', value: t.searchClicks || 0, kind: 'sum',
-      sub: `${compact(t.searchImpressions || 0)} impressions from Google`, trend: gsc.clicks?.trend ?? null,
+      sub: `${compact(t.searchImpressions || 0)} impressions from Google`,
       extra: [
         { label: 'CTR', value: t.searchCtr || 0, kind: 'rate', unit: '%' },
         { label: 'Position', value: t.searchPosition || 0, kind: 'avg' },
@@ -640,7 +631,7 @@ function buildKpis(summary, platformData) {
     },
     {
       id: 'engagementRate', label: 'Engagement rate', value: t.engagementRate || 0, kind: 'rate', unit: '%',
-      sub: 'Total engagement ÷ total impressions', trend: null,
+      sub: 'Total engagement ÷ total impressions',
     },
   ]
 }

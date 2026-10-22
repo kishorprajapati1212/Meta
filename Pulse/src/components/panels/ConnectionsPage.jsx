@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { Activity, Server, PlugZap, RefreshCw, Terminal, CheckCircle2, AlertTriangle, FlaskConical, Save, RotateCcw, ExternalLink } from 'lucide-react'
+import { Activity, Server, PlugZap, RefreshCw, Terminal, CheckCircle2, AlertTriangle, FlaskConical, Save, RotateCcw, ExternalLink, FileDown, Download, EyeOff, KeyRound } from 'lucide-react'
 import { Card, CardHeader, CardBody } from '../ui/Card'
 import { StatusPill, Pill, Tag } from '../ui/Pill'
 import BrandIcon from '../ui/BrandIcon'
 import { NoticeBar, EmptyState } from '../ui/States'
-import { fetchZernioDebug, fetchYouTubeDebug, fetchIndex, setBaseUrl, getBaseUrl, effectiveBase, describeError } from '../../lib/api'
+import { fetchZernioDebug, fetchYouTubeDebug, fetchZernioAccounts, fetchReport, reportUrl, fetchIndex, setBaseUrl, getBaseUrl, effectiveBase, describeError } from '../../lib/api'
 import { healthCountsOf, healthDetailsOf } from '../../lib/normalize'
 import { PLATFORM_ORDER, platformMeta } from '../../lib/platforms'
-import { relativeTime, dateTime } from '../../lib/format'
+import { relativeTime, dateTime, compact } from '../../lib/format'
 import { cls } from '../../lib/cls'
 
 /**
@@ -26,6 +26,46 @@ export default function ConnectionsPage({ health, healthError, sampleMode, onTog
   const [url, setUrl] = useState(getBaseUrl())
   const [saved, setSaved] = useState(false)
   const [probe, setProbe] = useState(null)
+  const [report, setReport] = useState({ state: 'idle' })
+  const [accounts, setAccounts] = useState({ state: 'idle' })
+
+  async function runReport(days = 30) {
+    setReport({ state: 'loading', days })
+    try {
+      const res = await fetchReport({ days, raw: true })
+      setReport({ state: 'ok', days, res })
+    } catch (e) {
+      setReport({ state: 'error', days, message: describeError(e) })
+    }
+  }
+
+  function downloadReport() {
+    const res = report.res
+    if (!res) return
+    try {
+      const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `meta-report-${String(res?.meta?.generatedAt || new Date().toISOString()).slice(0, 10)}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+    } catch {
+      window.open(reportUrl({ days: report.days || 30 }), '_blank')
+    }
+  }
+
+  async function runAccounts() {
+    setAccounts({ state: 'loading' })
+    try {
+      const res = await fetchZernioAccounts()
+      setAccounts({ state: 'ok', list: res?.data?.accounts || [], hasAnalyticsAccess: res?.data?.hasAnalyticsAccess })
+    } catch (e) {
+      setAccounts({ state: 'error', message: describeError(e) })
+    }
+  }
 
   async function saveBase() {
     setBaseUrl(url.trim())
@@ -140,6 +180,159 @@ export default function ConnectionsPage({ health, healthError, sampleMode, onTog
           accent="#FF0033"
         />
       </div>
+
+      {/* ── One-call diagnostic report ───────────────────────── */}
+      <Card>
+        <CardHeader
+          title="Full diagnostic report"
+          sub="One call returns everything: all six channels, both audience diagnoses, the raw upstream bodies and the Pinterest / LinkedIn probes"
+          icon={<FileDown className="w-4 h-4" strokeWidth={2} />}
+          right={<Tag>GET /api/report</Tag>}
+        />
+        <CardBody className="flex flex-col gap-3">
+          <p className="text-[12.5px] leading-relaxed text-muted">
+            Send this when a number looks wrong. It bypasses every cache, times each upstream call, redacts all
+            credentials, and says per channel whether a zero came from the platform or from this API.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <button className="btn-primary" onClick={() => runReport(30)} disabled={report.state === 'loading'}>
+              {report.state === 'loading' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" strokeWidth={2} /> : <FileDown className="w-3.5 h-3.5" strokeWidth={2} />}
+              Build report (30 days)
+            </button>
+            <button className="btn" onClick={() => runReport(90)} disabled={report.state === 'loading'}>90 days</button>
+            <a className="btn" href={reportUrl({ days: 90, format: 'text' })} target="_blank" rel="noreferrer">
+              <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} />
+              Text digest
+            </a>
+            {report.state === 'ok' ? (
+              <button className="btn" onClick={downloadReport}>
+                <Download className="w-3.5 h-3.5" strokeWidth={2} />
+                Download JSON
+              </button>
+            ) : null}
+          </div>
+
+          {report.state === 'error' ? <NoticeBar tone="error">{report.message}</NoticeBar> : null}
+
+          {report.state === 'ok' ? (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <Fact label="API version" value={report.res?.meta?.version || '—'} />
+                <Fact label="Built in" value={`${report.res?.meta?.tookMs ?? '—'} ms`} />
+                <Fact label="Payload" value={`${compact(Math.round((report.res?.meta?.bytes || 0) / 1024))} KB`} />
+                <Fact label="Upstream errors" value={String((report.res?.errors || []).length)} />
+              </div>
+
+              {Object.entries(report.res?.data?.probes || {}).map(([key, pr]) => (
+                <div
+                  key={key}
+                  className={cls(
+                    'rounded-xl border px-3.5 py-3 flex flex-col gap-1.5',
+                    pr.entitlementGap ? 'border-warn-line bg-warn-soft/50' : 'border-line bg-sunken/50'
+                  )}
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <BrandIcon platform={key} className="w-4 h-4" />
+                    <span className="text-[12.5px] font-semibold text-ink capitalize">{key} probe</span>
+                    {pr.entitlementGap ? (
+                      <Pill tone="warn" icon={<EyeOff className="w-3 h-3" strokeWidth={2.2} />}>not measured upstream</Pill>
+                    ) : pr.postsWithAnyMetric > 0 ? (
+                      <Pill tone="pos">metrics upstream</Pill>
+                    ) : (
+                      <Pill tone="neutral">no metrics upstream</Pill>
+                    )}
+                    <span className="text-[11px] text-faint num ml-auto">
+                      {pr.postsUpstream ?? 0} post(s) · {pr.postsWithAnyMetric ?? 0} with metrics
+                      {pr.oldestPostAgeDays != null ? ` · oldest ${pr.oldestPostAgeDays}d` : ''}
+                    </span>
+                  </div>
+                  <p className="text-[12.5px] leading-relaxed text-body">{pr.verdict}</p>
+                </div>
+              ))}
+
+              {report.res?.meta?.truncations?.length ? (
+                <p className="text-[11.5px] text-faint">
+                  {report.res.meta.truncations.length} list(s) were capped for size — the full payload is in the
+                  downloaded JSON.
+                </p>
+              ) : null}
+              <p className="text-[11.5px] text-faint">
+                From a terminal instead:{' '}
+                <code className="font-mono text-muted">npm run report -- --api {effectiveBase() || '<your-api-url>'}</code>
+              </p>
+            </div>
+          ) : null}
+        </CardBody>
+      </Card>
+
+      {/* ── Zernio account entitlements ─────────────────────── */}
+      <Card>
+        <CardHeader
+          title="Connected accounts (Zernio)"
+          sub="What LinkedIn and Pinterest actually allow this connection to read"
+          icon={<KeyRound className="w-4 h-4" strokeWidth={2} />}
+          right={
+            <button className="btn text-[12px]" onClick={runAccounts} disabled={accounts.state === 'loading'}>
+              {accounts.state === 'loading' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" strokeWidth={2} /> : <PlugZap className="w-3.5 h-3.5" strokeWidth={2} />}
+              Read accounts
+            </button>
+          }
+        />
+        <CardBody className="flex flex-col gap-3">
+          {accounts.state === 'idle' ? (
+            <p className="text-[12.5px] text-faint">
+              Shows account type, granted scopes and the account-level gauges. When Pinterest returns no pin count,
+              board count or monthly views, its organic analytics are not available to this connection — that is an
+              entitlement gap, not a posting problem.
+            </p>
+          ) : null}
+          {accounts.state === 'error' ? <NoticeBar tone="error">{accounts.message}</NoticeBar> : null}
+          {accounts.state === 'ok' ? (
+            <div className="flex flex-col gap-2.5">
+              {accounts.hasAnalyticsAccess === false ? (
+                <NoticeBar tone="warn">
+                  Zernio reports <b>analytics access is off</b> for this API key — post metrics stay empty until it is
+                  enabled on the plan.
+                </NoticeBar>
+              ) : null}
+              {(accounts.list || []).map((a) => {
+                const gaugesEmpty = a.pinCount == null && a.boardCount == null && a.monthlyViews == null
+                return (
+                  <div key={a.zernioAccountId || a.platform} className="rounded-xl border border-line bg-sunken/50 px-3.5 py-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <BrandIcon platform={a.platform} className="w-4 h-4" />
+                      <span className="text-[13px] font-semibold text-ink">@{a.username || '—'}</span>
+                      {a.accountType ? <Pill tone="neutral">{a.accountType}</Pill> : null}
+                      {a.platform === 'pinterest' && !a.accountType && gaugesEmpty ? (
+                        <Pill tone="warn" icon={<EyeOff className="w-3 h-3" strokeWidth={2.2} />}>no analytics entitlement</Pill>
+                      ) : null}
+                      {a.needsReconnection ? <Pill tone="neg">needs reconnection</Pill> : null}
+                      {a.platformStatus && a.platformStatus !== 'ok' ? <Pill tone="warn">{String(a.platformStatus)}</Pill> : null}
+                      <span className="text-[11px] text-faint num ml-auto">
+                        connected {a.connectedAt ? String(a.connectedAt).slice(0, 10) : '—'}
+                        {a.lastSuccessfulPublishAt ? ` · last publish ${String(a.lastSuccessfulPublishAt).slice(0, 10)}` : ''}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                      <Fact label="Followers" value={a.followers != null ? compact(a.followers) : '—'} />
+                      <Fact label="Pins" value={a.pinCount != null ? compact(a.pinCount) : 'not reported'} />
+                      <Fact label="Boards" value={a.boardCount != null ? compact(a.boardCount) : 'not reported'} />
+                      <Fact label="Monthly views" value={a.monthlyViews != null ? compact(a.monthlyViews) : 'not reported'} />
+                      <Fact label="Scopes" value={a.scopes?.length ? `${a.scopes.length} granted` : 'not reported'} />
+                    </div>
+                    {a.platformStatusReason ? (
+                      <p className="text-[11.5px] text-warn">{a.platformStatusReason}</p>
+                    ) : null}
+                    {a.scopes?.length ? (
+                      <p className="text-[11px] text-faint font-mono break-words">{a.scopes.join(', ')}</p>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+        </CardBody>
+      </Card>
 
       {/* ── API target ───────────────────────────────────────── */}
       <Card>

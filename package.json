@@ -1,6 +1,6 @@
 {
   "name": "meta-social-analytics-api",
-  "version": "4.2.4",
+  "version": "4.3.5",
   "description": "Facebook + Instagram + YouTube + LinkedIn + Pinterest + Google Search Console analytics API",
   "main": "src/app.js",
   "scripts": {
@@ -12,7 +12,8 @@
     "build:ui": "npm run build --prefix Pulse",
     "smoke": "npm run smoke --prefix Pulse",
     "test:api": "node scripts/selftest.js",
-    "test:upstream": "node scripts/upstreamtest.js"
+    "test:upstream": "node scripts/upstreamtest.js",
+    "report": "node scripts/collect-report.js"
   },
   "dependencies": {
     "axios": "^1.7.0",

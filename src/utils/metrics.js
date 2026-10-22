@@ -107,12 +107,41 @@ function round(n, dp = 2) {
   return Math.round(n * f) / f;
 }
 
-/** Percentage change, safe against zero / null baselines. */
+/**
+ * Smallest baseline a percentage may be computed from. Below this the ratio is
+ * noise: 3 → 9 reads "+200%" and means nothing about a young account.
+ */
+const MIN_TREND_BASELINE = 10;
+
+/**
+ * Percentage change — returns null instead of inventing a number.
+ *
+ * v4.3.4: this used to return 100 for ANY non-zero value over a zero baseline
+ * (`if (p === 0) return c === 0 ? 0 : 100`), which is how a dashboard for a
+ * beginner account ended up printing "+100%" for the first like it ever
+ * received, and "+953%" for reach going 33 → 346. The arithmetic was correct;
+ * the claim was not. No baseline, no percentage.
+ */
 function pctChange(current, previous) {
-  const c = Number(current) || 0;
-  const p = Number(previous) || 0;
-  if (p === 0) return c === 0 ? 0 : 100;
+  const c = Number(current);
+  const p = Number(previous);
+  if (!Number.isFinite(c) || !Number.isFinite(p)) return null;
+  if (p === 0) return null;
   return round(((c - p) / Math.abs(p)) * 100, 1);
+}
+
+/**
+ * justifiedTrend — a percentage only survives when a baseline exists AND is
+ * large enough to mean something. Rates keep their own scale (CTR 1.2% → 1.5%
+ * is a real statement); counts, sums, levels and averages need at least
+ * MIN_TREND_BASELINE in the comparison window.
+ */
+function justifiedTrend(current, previous, kind) {
+  const t = pctChange(current, previous);
+  if (t === null) return null;
+  if (kind === 'rate') return t;
+  if (Math.abs(Number(previous)) < MIN_TREND_BASELINE) return null;
+  return t;
 }
 
 /** Split an ordered list of {value} into two equal halves (previous | current). */
@@ -136,36 +165,62 @@ function mean(arr) {
  * Aggregate a daily value series into a summary, respecting the metric KIND.
  * `values` = [{ date, value }] already sorted ascending by date.
  */
+/**
+ * summarize — aggregate a daily series into a summary, respecting metric KIND.
+ *
+ * The trend is a WITHIN-RANGE comparison, never "vs yesterday" or "vs last
+ * week": flow metrics compare the second half of the selected window with the
+ * first half, gauges compare the last day with the first day. That basis is now
+ * published alongside the number (`trendBasis`, `trendWindows`) so no UI can
+ * present it as something it is not, and the number is `null` whenever the
+ * comparison is not justified. Only GSC carries a true previous-window trend.
+ */
 function summarize(id, values) {
   const kind = kindOf(id);
   const nums = (values || []).map((v) => Number(v.value) || 0);
+  const dates = (values || []).map((v) => v.date);
   const n = nums.length;
   const { prev, cur } = halves(nums);
+  const mid = Math.floor(n / 2);
+  const hasDates = n > 0 && dates.length === n && dates.every(Boolean);
 
   let total;
   let previous = null;
-  let trend = 0;
+  let trend = null;
+  let trendBasis = null;
+  let trendWindows = null;
+
+  const halvesWindows = () =>
+    hasDates && mid > 0
+      ? { current: { from: dates[mid], to: dates[n - 1] }, previous: { from: dates[0], to: dates[mid - 1] } }
+      : null;
 
   switch (kind) {
     case 'gauge': {
       // Level metric: the "total" is where we ended up, not the sum of days.
       total = n ? nums[n - 1] : 0;
       previous = n ? nums[0] : null;
-      trend = pctChange(total, previous);
+      trend = justifiedTrend(total, previous, 'gauge');
+      trendBasis = trend === null ? null : 'last-day-vs-first-day';
+      trendWindows = trend === null || !hasDates ? null : { current: dates[n - 1], previous: dates[0] };
       break;
     }
     case 'rate':
     case 'avg': {
       total = round(mean(nums), kind === 'rate' ? 2 : 1);
       previous = cur.length && prev.length ? round(mean(prev), 2) : null;
-      trend = previous === null ? 0 : pctChange(round(mean(cur), 2), previous);
+      trend = previous === null ? null : justifiedTrend(round(mean(cur), 2), previous, kind);
+      trendBasis = trend === null ? null : 'second-half-vs-first-half';
+      trendWindows = trend === null ? null : halvesWindows();
       break;
     }
     default: {
       // sum | duration | count
       total = round(sum(nums), 2);
       previous = cur.length && prev.length ? round(sum(prev), 2) : null;
-      trend = previous === null ? 0 : pctChange(sum(cur), previous);
+      trend = previous === null ? null : justifiedTrend(sum(cur), previous, kind);
+      trendBasis = trend === null ? null : 'second-half-vs-first-half';
+      trendWindows = trend === null ? null : halvesWindows();
     }
   }
 
@@ -174,6 +229,8 @@ function summarize(id, values) {
     total,
     previous,
     trend,
+    trendBasis,
+    trendWindows,
     average: round(n ? sum(nums) / n : 0, 2),
     latest: n ? nums[n - 1] : 0,
     min: n ? Math.min(...nums) : 0,
@@ -182,8 +239,9 @@ function summarize(id, values) {
     activePoints: nonZero.length,
     kind,
     unit: unitOf(id),
-    direction: trend > 0 ? 'up' : trend < 0 ? 'down' : 'flat',
-    favourable: trend === 0 ? null : trendIsGood(id, trend),
+    // null means "not measured", which is NOT the same claim as "flat".
+    direction: trend === null ? null : trend > 0 ? 'up' : trend < 0 ? 'down' : 'flat',
+    favourable: trend === null || trend === 0 ? null : trendIsGood(id, trend),
   };
 }
 
@@ -208,6 +266,8 @@ module.exports = {
   kindOf,
   labelOf,
   unitOf,
+  justifiedTrend,
+  MIN_TREND_BASELINE,
   trendIsGood,
   humanize,
   round,

@@ -98,7 +98,14 @@ async function refreshGoogle(clientId, clientSecret, refreshToken) {
   return data;
 }
 
-r.get('/', async (_req, res) => {
+/**
+ * buildHealth — the whole connectivity probe as a plain function.
+ *
+ * Extracted from the route so `GET /api/report` can include it in the single
+ * diagnostic bundle without an internal HTTP hop. The response shape is
+ * byte-identical to what the route has always returned.
+ */
+async function buildHealth() {
   const details = {};
   const started = Date.now();
 
@@ -213,8 +220,7 @@ r.get('/', async (_req, res) => {
     if (v.status !== 'ok' && v.configured) healthy = false;
   }
 
-  res.json(
-    success({
+  return success({
       platform: 'system',
       meta: {
         uptime: Math.round(process.uptime()),
@@ -231,8 +237,12 @@ r.get('/', async (_req, res) => {
         serverTime: new Date().toISOString(),
         cache: cacheStats(),
       },
-    })
-  );
+    });
+}
+
+r.get('/', async (_req, res) => {
+  res.json(await buildHealth());
 });
 
 module.exports = r;
+module.exports.buildHealth = buildHealth;

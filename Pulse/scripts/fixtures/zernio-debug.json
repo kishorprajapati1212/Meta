@@ -2,11 +2,11 @@
   "success": true,
   "platform": "zernio/debug",
   "meta": {
-    "baseUrl": "http://127.0.0.1:4988/api"
+    "baseUrl": "http://127.0.0.1:37345/api"
   },
   "data": {
     "configured": true,
-    "baseUrl": "http://127.0.0.1:4988/api",
+    "baseUrl": "http://127.0.0.1:37345/api",
     "steps": {
       "accounts": {
         "ok": true,
@@ -25,7 +25,7 @@
           "profilePicture": "https://example.com/pin-avatar.jpg",
           "currentFollowers": 1284,
           "externalPostCount": 7,
-          "analyticsLastSyncedAt": "2026-10-15T13:35:14.421Z",
+          "analyticsLastSyncedAt": "2026-10-22T10:59:18.655Z",
           "isActive": true,
           "accountStats": {
             "pinCount": 342,
@@ -42,7 +42,7 @@
           "postId": "li_post_1",
           "platform": "linkedin",
           "content": "Shipped a cross-platform analytics dashboard this week — 6 APIs, one view.",
-          "publishedAt": "2026-10-03T13:35:16.651Z",
+          "publishedAt": "2026-10-10T10:59:20.880Z",
           "platformPostUrl": "https://linkedin.com/feed/update/urn:li:share:1",
           "mediaType": "text",
           "status": "published",
@@ -63,123 +63,123 @@
         "ok": true,
         "rows": [
           {
-            "date": "2026-09-16",
+            "date": "2026-09-23",
             "followers": 425
           },
           {
-            "date": "2026-09-17",
+            "date": "2026-09-24",
             "followers": 428
           },
           {
-            "date": "2026-09-18",
+            "date": "2026-09-25",
             "followers": 431
           },
           {
-            "date": "2026-09-19",
+            "date": "2026-09-26",
             "followers": 434
           },
           {
-            "date": "2026-09-20",
+            "date": "2026-09-27",
             "followers": 437
           },
           {
-            "date": "2026-09-21",
+            "date": "2026-09-28",
             "followers": 440
           },
           {
-            "date": "2026-09-22",
+            "date": "2026-09-29",
             "followers": 443
           },
           {
-            "date": "2026-09-23",
+            "date": "2026-09-30",
             "followers": 446
           },
           {
-            "date": "2026-09-24",
+            "date": "2026-10-01",
             "followers": 449
           },
           {
-            "date": "2026-09-25",
+            "date": "2026-10-02",
             "followers": 452
           },
           {
-            "date": "2026-09-26",
+            "date": "2026-10-03",
             "followers": 455
           },
           {
-            "date": "2026-09-27",
+            "date": "2026-10-04",
             "followers": 458
           },
           {
-            "date": "2026-09-28",
+            "date": "2026-10-05",
             "followers": 461
           },
           {
-            "date": "2026-09-29",
+            "date": "2026-10-06",
             "followers": 464
           },
           {
-            "date": "2026-09-30",
+            "date": "2026-10-07",
             "followers": 467
           },
           {
-            "date": "2026-10-01",
+            "date": "2026-10-08",
             "followers": 470
           },
           {
-            "date": "2026-10-02",
+            "date": "2026-10-09",
             "followers": 473
           },
           {
-            "date": "2026-10-03",
+            "date": "2026-10-10",
             "followers": 476
           },
           {
-            "date": "2026-10-04",
+            "date": "2026-10-11",
             "followers": 479
           },
           {
-            "date": "2026-10-05",
+            "date": "2026-10-12",
             "followers": 482
           },
           {
-            "date": "2026-10-06",
+            "date": "2026-10-13",
             "followers": 485
           },
           {
-            "date": "2026-10-07",
+            "date": "2026-10-14",
             "followers": 488
           },
           {
-            "date": "2026-10-08",
+            "date": "2026-10-15",
             "followers": 491
           },
           {
-            "date": "2026-10-09",
+            "date": "2026-10-16",
             "followers": 494
           },
           {
-            "date": "2026-10-10",
+            "date": "2026-10-17",
             "followers": 497
           },
           {
-            "date": "2026-10-11",
+            "date": "2026-10-18",
             "followers": 500
           },
           {
-            "date": "2026-10-12",
+            "date": "2026-10-19",
             "followers": 503
           },
           {
-            "date": "2026-10-13",
+            "date": "2026-10-20",
             "followers": 506
           },
           {
-            "date": "2026-10-14",
+            "date": "2026-10-21",
             "followers": 509
           },
           {
-            "date": "2026-10-15",
+            "date": "2026-10-22",
             "followers": 512
           }
         ]
@@ -193,7 +193,7 @@
           "platform": "pinterest",
           "content": "Pin 1 — design inspiration board",
           "title": "Pin 1",
-          "publishedAt": "2026-10-15T13:35:16.905Z",
+          "publishedAt": "2026-10-22T10:59:21.134Z",
           "platformPostUrl": "https://pinterest.com/pin/1000",
           "thumbnailUrl": "https://example.com/pin-1.jpg",
           "mediaType": "image",
@@ -240,123 +240,123 @@
         "ok": true,
         "rows": [
           {
-            "date": "2026-09-16",
+            "date": "2026-09-23",
             "followers": 1197
           },
           {
-            "date": "2026-09-17",
+            "date": "2026-09-24",
             "followers": 1200
           },
           {
-            "date": "2026-09-18",
+            "date": "2026-09-25",
             "followers": 1203
           },
           {
-            "date": "2026-09-19",
+            "date": "2026-09-26",
             "followers": 1206
           },
           {
-            "date": "2026-09-20",
+            "date": "2026-09-27",
             "followers": 1209
           },
           {
-            "date": "2026-09-21",
+            "date": "2026-09-28",
             "followers": 1212
           },
           {
-            "date": "2026-09-22",
+            "date": "2026-09-29",
             "followers": 1215
           },
           {
-            "date": "2026-09-23",
+            "date": "2026-09-30",
             "followers": 1218
           },
           {
-            "date": "2026-09-24",
+            "date": "2026-10-01",
             "followers": 1221
           },
           {
-            "date": "2026-09-25",
+            "date": "2026-10-02",
             "followers": 1224
           },
           {
-            "date": "2026-09-26",
+            "date": "2026-10-03",
             "followers": 1227
           },
           {
-            "date": "2026-09-27",
+            "date": "2026-10-04",
             "followers": 1230
           },
           {
-            "date": "2026-09-28",
+            "date": "2026-10-05",
             "followers": 1233
           },
           {
-            "date": "2026-09-29",
+            "date": "2026-10-06",
             "followers": 1236
           },
           {
-            "date": "2026-09-30",
+            "date": "2026-10-07",
             "followers": 1239
           },
           {
-            "date": "2026-10-01",
+            "date": "2026-10-08",
             "followers": 1242
           },
           {
-            "date": "2026-10-02",
+            "date": "2026-10-09",
             "followers": 1245
           },
           {
-            "date": "2026-10-03",
+            "date": "2026-10-10",
             "followers": 1248
           },
           {
-            "date": "2026-10-04",
+            "date": "2026-10-11",
             "followers": 1251
           },
           {
-            "date": "2026-10-05",
+            "date": "2026-10-12",
             "followers": 1254
           },
           {
-            "date": "2026-10-06",
+            "date": "2026-10-13",
             "followers": 1257
           },
           {
-            "date": "2026-10-07",
+            "date": "2026-10-14",
             "followers": 1260
           },
           {
-            "date": "2026-10-08",
+            "date": "2026-10-15",
             "followers": 1263
           },
           {
-            "date": "2026-10-09",
+            "date": "2026-10-16",
             "followers": 1266
           },
           {
-            "date": "2026-10-10",
+            "date": "2026-10-17",
             "followers": 1269
           },
           {
-            "date": "2026-10-11",
+            "date": "2026-10-18",
             "followers": 1272
           },
           {
-            "date": "2026-10-12",
+            "date": "2026-10-19",
             "followers": 1275
           },
           {
-            "date": "2026-10-13",
+            "date": "2026-10-20",
             "followers": 1278
           },
           {
-            "date": "2026-10-14",
+            "date": "2026-10-21",
             "followers": 1281
           },
           {
-            "date": "2026-10-15",
+            "date": "2026-10-22",
             "followers": 1284
           }
         ]

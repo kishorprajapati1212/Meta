@@ -32,7 +32,9 @@ const range = { preset: 'last_30d' }
 
 let passed = 0
 let failed = 0
+let skipped = 0
 const failures = []
+const skips = []
 const rows = []
 const ENRICHMENT = ['demographics', 'stage', 'account', 'partialErrors', 'totals', 'topItems', 'topPosts', 'boards', 'level']
 const droppedFields = []
@@ -51,6 +53,24 @@ function check(name, fn) {
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg || 'assertion failed')
+}
+
+/** A check that cannot run against this deployment (usually: it is too old). */
+function skip(name, reason) {
+  skipped += 1
+  skips.push(`${name}: ${reason}`)
+  if (!asJson) console.log(`  \x1b[33m–\x1b[0m ${name}\n      \x1b[33mskipped\x1b[0m — ${reason}`)
+}
+
+/** Loose semver compare: -1 if a<b, 0 if equal, 1 if a>b. */
+function versionCompare(a, b) {
+  const pa = String(a || '0').split('.').map((n) => Number.parseInt(n, 10) || 0)
+  const pb = String(b || '0').split('.').map((n) => Number.parseInt(n, 10) || 0)
+  for (let i = 0; i < 3; i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0)
+    if (d) return d < 0 ? -1 : 1
+  }
+  return 0
 }
 
 async function get(path) {
@@ -115,6 +135,8 @@ async function main() {
           range={range}
           sample={false}
           onRetry={() => {}}
+          audience={combined.body?.data?.data?.audience || combined.body?.data?.audience || 'institutions'}
+          onAudienceChange={() => {}}
         />
       )
       assert(html.length > 400, `page rendered almost nothing (${html.length} chars)`)
@@ -158,6 +180,9 @@ async function main() {
       <OverviewPage
         platformData={combinedData}
         summary={combinedData.summary || null}
+        focus={combinedData.focus || []}
+        audience={combinedData.audience || 'institutions'}
+        onAudienceChange={() => {}}
         healthDetails={details}
         range={range}
         sample={false}
@@ -204,8 +229,130 @@ async function main() {
     assert(lying.length === 0, `healthy but empty: ${lying.map((r) => r.platform).join(', ')}`)
   })
 
+  // ── v4.3.0 — the growth diagnosis layer ───────────────────────────
+  const apiVersion = String(health.body?.meta?.version || health.body?.data?.version || '0').replace(/[^0-9.].*$/, '')
+  const hasDiagnosis = versionCompare(apiVersion, '4.3.0') >= 0
+
+  if (!asJson) console.log('\nv4.3.0 — growth diagnosis')
+
+  if (!hasDiagnosis) {
+    skip(
+      'the diagnosis layer is deployed',
+      `this API reports v${apiVersion || 'unknown'} — the growth diagnosis ships in v4.3.0. ` +
+        'Rebuild the backend (Render: Deploy latest / manual deploy, not just a restart), then re-run this check.'
+    )
+  } else {
+    const focus = combinedData.focus || []
+    check('GET /api/combined ranks every channel for the chosen audience', () => {
+      assert(Array.isArray(focus) && focus.length > 0, `no data.focus (got ${JSON.stringify(focus)})`)
+      assert(['institutions', 'students'].includes(combinedData.audience), `data.audience is ${combinedData.audience}`)
+      const scores = focus.map((r) => r.score)
+      assert(scores.every((v, i) => i === 0 || scores[i - 1] >= v), `scores must descend: ${scores.join(',')}`)
+      for (const r of focus) {
+        assert(r.platform && r.stage && r.headline, `incomplete row ${JSON.stringify(r).slice(0, 120)}`)
+        assert(typeof r.firstAction === 'string' && r.firstAction.length > 0, `${r.platform}: firstAction must be a string`)
+      }
+    })
+
+    check('every channel payload explains its own zeros', () => {
+      for (const key of PLATFORM_ORDER) {
+        const d = combinedData[key]?.diagnosis
+        assert(d, `${key}: no diagnosis in /api/combined`)
+        assert(Array.isArray(d.funnel) && d.funnel.length === 5, `${key}: funnel must have 5 stages`)
+        assert(Array.isArray(d.actions) && d.actions.length > 0, `${key}: no actions`)
+        for (const z of d.zeros || []) assert(z.label && z.reason && z.explanation, `${key}: incomplete zero explanation`)
+        assert(!JSON.stringify(d).includes('NaN'), `${key}: NaN leaked into the diagnosis`)
+      }
+    })
+
+    const aud = await get('/api/instagram?date_preset=last_30d&audience=students')
+    check('?audience=students re-targets the diagnosis', () => {
+      assert(aud.status === 200, `HTTP ${aud.status}`)
+      const d = unwrap(aud.body)?.diagnosis
+      assert(d, 'no diagnosis on /api/instagram')
+      assert(d.audience === 'students', `diagnosed for ${d.audience}`)
+      assert(d.audienceFit.fit === 'high', `Instagram should be a high fit for students, got ${d.audienceFit.fit}`)
+    })
+
+    check('Instagram engagement is either a real number or honestly explained', () => {
+      const data = unwrap(aud.body) || {}
+      const likes = Number(data.overview?.likes?.total) || 0
+      const comments = Number(data.overview?.comments?.total) || 0
+      const posts = Array.isArray(data.posts) ? data.posts.length : 0
+      const d = data.diagnosis || {}
+      const engaged = (d.funnel || []).find((f) => f.key === 'engaged')?.value || 0
+      const explained = (d.zeros || []).some((z) => z.key === 'likes' || z.key === 'comments')
+      assert(
+        likes + comments > 0 || engaged > 0 || explained || posts === 0,
+        `Instagram shows 0 likes/comments with ${posts} post(s) in range and no explanation — ` +
+          'that is the reported bug. Deploy v4.3.0 and re-run.'
+      )
+      rows.push({
+        platform: 'instagram-engagement',
+        health: likes + comments > 0 || engaged > 0 ? 'from posts' : explained ? 'explained' : 'zero',
+        endpoint: aud.status,
+        metrics: posts,
+        metricsWithData: engaged,
+        numbersOnPage: likes + comments,
+        demographics: d.stage || '—',
+        error: null,
+      })
+    })
+
+    check('the built dashboard renders the diagnosis and the focus board', () => {
+      const platformHtml = renderToStaticMarkup(
+        <PlatformPage
+          platformKey="instagram"
+          payload={combinedData.instagram}
+          healthDetail={details.instagram || {}}
+          range={range}
+          sample={false}
+          onRetry={() => {}}
+          audience={combinedData.audience || 'institutions'}
+          onAudienceChange={() => {}}
+        />
+      )
+      assert(platformHtml.includes('Growth diagnosis'), 'the channel page does not render the diagnosis panel')
+      const overviewHtml = renderToStaticMarkup(
+        <OverviewPage
+          platformData={combinedData}
+          summary={combinedData.summary || null}
+          focus={focus}
+          audience={combinedData.audience || 'institutions'}
+          onAudienceChange={() => {}}
+          healthDetails={details}
+          range={range}
+          sample={false}
+          onNavigate={() => {}}
+          loading={false}
+        />
+      )
+      assert(overviewHtml.includes('Where to focus this week'), 'the Overview does not render the focus board')
+      assert(!overviewHtml.includes('[object Object]'), 'an object reached the markup')
+    })
+
+    if (!asJson) {
+      console.log('\n  channel          blocked at          first action')
+      for (const r of focus) {
+        console.log(`  ${String(r.platform).padEnd(16)} ${String(r.stage).padEnd(19)} ${String(r.firstAction || '—').slice(0, 62)}`)
+      }
+      console.log('')
+      for (const key of PLATFORM_ORDER) {
+        const d = combinedData[key]?.diagnosis
+        if (!d) continue
+        console.log(`  ${key}: ${d.headline}`)
+        if (d.zeros?.length) console.log(`      zeros: ${d.zeros.map((z) => `${z.label} (${z.reason})`).join(', ')}`)
+        if (d.benchmark) {
+          const yours = d.benchmark.yours === null || d.benchmark.yours === undefined ? '— (no reach to measure against)' : `${d.benchmark.yours}%`
+          console.log(`      benchmark: yours ${yours} · typical ${d.benchmark.typical}`)
+        }
+      }
+      console.log('')
+    }
+  }
+
   if (asJson) {
-    console.log(JSON.stringify({ api: API, passed, failed, failures, rows }, null, 2))
+    console.log(JSON.stringify({ api: API, version: apiVersion, passed, failed, skipped, failures, skips, rows }, null, 2))
   } else {
     console.log('\n  platform        health          metrics  with data  numbers  demographics')
     for (const r of rows) {
@@ -214,7 +361,12 @@ async function main() {
           (r.error ? `\n      └ ${r.error}` : '')
       )
     }
-    console.log(`\n\x1b[1m${passed} passed, ${failed} failed\x1b[0m\n`)
+    console.log(`\n\x1b[1m${passed} passed, ${failed} failed${skipped ? `, ${skipped} skipped` : ''}\x1b[0m\n`)
+    if (skips.length) {
+      console.log('Skipped:')
+      skips.forEach((f) => console.log(`  - ${f}`))
+      console.log('')
+    }
     if (failures.length) {
       console.log('Failures:')
       failures.forEach((f) => console.log(`  - ${f}`))

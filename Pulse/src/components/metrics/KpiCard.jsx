@@ -1,15 +1,19 @@
 import { Info } from 'lucide-react'
 import { cls } from '../../lib/cls'
-import { formatValue, formatValueFull, trendTone } from '../../lib/format'
-import { TrendPill } from '../ui/Pill'
+import { formatValue, formatValueFull } from '../../lib/format'
 import Sparkline from '../charts/Sparkline'
 
 /**
  * KpiCard — one metric, rendered with the correct semantics for its kind:
  *   value      → formatValue(total, {kind, unit})   (never sums a gauge)
- *   delta      → % change + absolute change vs the previous window
- *   sparkline  → the metric's own daily series
+ *   sparkline  → the metric's own daily series — this IS the trend
  *   zero state → muted value + "no data yet", never a hidden card
+ *
+ * v4.3.4: the card no longer prints a % change badge. It used to show
+ * second-half-vs-first-half of the same window as if it were growth, plus an
+ * absolute delta against that same first-half sum, and "0%" whenever the
+ * backend had never measured a comparison at all. A card shows a number and a
+ * graph; the metric table below it shows comparisons, labelled with their basis.
  */
 export default function KpiCard({
   metric,
@@ -22,12 +26,8 @@ export default function KpiCard({
   className = '',
 }) {
   if (!metric) return null
-  const { label, kind = 'sum', unit = '', total, previous, trend, series = [], hasData, description, formula, group } = metric
-  const tone = trendTone(metric)
+  const { label, kind = 'sum', unit = '', total, series = [], hasData, description, formula, group, estimated, source } = metric
   const Tag = onClick ? 'button' : 'div'
-
-  const absoluteDelta =
-    previous !== null && previous !== undefined ? Math.round((total - previous) * 100) / 100 : null
 
   return (
     <Tag
@@ -43,35 +43,29 @@ export default function KpiCard({
     >
       <span className="absolute left-0 top-0 h-full w-[3px]" style={{ background: selected ? color : `${color}00` }} />
 
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[12px] font-medium text-muted truncate flex items-center gap-1">
-            {label}
-            {(description || formula) && onClick === null ? (
-              <span className="text-faint" title={formula ? `${description || ''} (${formula})` : description}>
-                <Info className="w-3 h-3" strokeWidth={2} />
-              </span>
-            ) : null}
-          </p>
-          {group && size === 'lg' ? <p className="text-[10px] uppercase tracking-[0.08em] text-faint font-semibold mt-0.5">{group}</p> : null}
-        </div>
-        {trend !== null && trend !== undefined ? <TrendPill metric={metric} /> : null}
+      <div className="min-w-0">
+        <p className="text-[12px] font-medium text-muted truncate flex items-center gap-1">
+          {label}
+          {(description || formula) && onClick === null ? (
+            <span className="text-faint" title={formula ? `${description || ''} (${formula})` : description}>
+              <Info className="w-3 h-3" strokeWidth={2} />
+            </span>
+          ) : null}
+        </p>
+        {group && size === 'lg' ? <p className="text-[10px] uppercase tracking-[0.08em] text-faint font-semibold mt-0.5">{group}</p> : null}
       </div>
 
-      <div className="flex items-baseline gap-2 flex-wrap">
-        <span
-          className={cls('font-display font-bold num tracking-tight', size === 'lg' ? 'text-kpi' : 'text-[24px] leading-8', !hasData && 'text-faint')}
-          title={formatValueFull(total, { kind, unit })}
-        >
-          {formatValue(total, { kind, unit })}
-        </span>
-        {absoluteDelta !== null && absoluteDelta !== 0 ? (
-          <span className={cls('text-[11.5px] num font-medium', tone === 'pos' ? 'text-pos' : tone === 'neg' ? 'text-neg' : 'text-faint')}>
-            {absoluteDelta > 0 ? '+' : ''}
-            {formatValue(absoluteDelta, { kind: kind === 'rate' ? 'rate' : 'sum', unit: kind === 'rate' ? 'pt' : '' })}
-          </span>
-        ) : null}
-      </div>
+      <span
+        className={cls('font-display font-bold num tracking-tight', size === 'lg' ? 'text-kpi' : 'text-[24px] leading-8', !hasData && 'text-faint')}
+        title={
+          (estimated ? 'Estimated — ' : '') +
+          (description ? description + ' · ' : '') +
+          formatValueFull(total, { kind, unit })
+        }
+      >
+        {estimated ? '≈' : ''}
+        {formatValue(total, { kind, unit })}
+      </span>
 
       {showSparkline ? (
         <Sparkline data={series} color={hasData ? color : '#C9D1DC'} height={size === 'lg' ? 44 : 34} />
@@ -81,6 +75,14 @@ export default function KpiCard({
         <p className="text-[11px] text-faint -mt-1">No activity recorded in this range</p>
       ) : footnote ? (
         <p className="text-[11px] text-faint -mt-1 num">{footnote}</p>
+      ) : source === 'posts' ? (
+        <p className="text-[11px] text-faint -mt-1" title={description || undefined}>
+          Summed from your posts in this range
+        </p>
+      ) : estimated ? (
+        <p className="text-[11px] text-faint -mt-1" title={description || undefined}>
+          Estimated
+        </p>
       ) : null}
     </Tag>
   )

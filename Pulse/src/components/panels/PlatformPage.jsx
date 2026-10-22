@@ -22,6 +22,9 @@ import { cls } from '../../lib/cls'
 
 const KPI_LIMIT = 8
 
+/** A metric the platform publishes as a single level has no daily series. */
+const hasSeries = (m) => Array.isArray(m?.series) && m.series.length > 0
+
 /**
  * PlatformPage — one channel, everything the API returned about it.
  *
@@ -29,7 +32,7 @@ const KPI_LIMIT = 8
  *   header → notices → KPI grid → main chart → daily breakdown table →
  *   full metric table → platform-specific panels (posts / boards / audience)
  */
-export default function PlatformPage({ platformKey, payload, healthDetail, range, sample, onRetry, onNavigate }) {
+export default function PlatformPage({ platformKey, payload, healthDetail, range, sample, onRetry, onNavigate, audience, onAudienceChange }) {
   const meta = platformMeta(platformKey)
   const [selected, setSelected] = useState(null)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
@@ -42,7 +45,15 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
 
   const chartMetric = useMemo(() => {
     if (!metrics.length) return null
-    return metrics.find((m) => m.key === selected) || metrics.find((m) => m.hasData) || metrics[0]
+    // Prefer a metric that actually has daily values. Instagram publishes
+    // follower_count as one level with no per-day breakdown, so defaulting to
+    // the first metric with data used to open the page on an empty chart.
+    return (
+      metrics.find((m) => m.key === selected) ||
+      metrics.find((m) => m.hasData && hasSeries(m)) ||
+      metrics.find((m) => m.hasData) ||
+      metrics[0]
+    )
   }, [metrics, selected])
 
   if (isErrorPayload(payload)) {
@@ -69,6 +80,81 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
   const partialErrors = safePartial.filter((e) => !e.optional)
   const optionalErrors = safePartial.filter((e) => e.optional)
 
+  // The side chart only earns a panel when there is something in it. An empty
+  // box that says "No follower series in the payload." under a Followers card
+  // that has already printed the number is noise, not information.
+  const followerSeries = seriesOf(payload, 'followers')
+  const publishingSignal = timeline.some(
+    (r) => (r.posts || 0) !== 0 || (r.impressions || 0) !== 0 || (r.reach || 0) !== 0
+  )
+  const subscriberMovement = timeline.some(
+    (r) => (r.subscribersGained || 0) !== 0 || (r.subscribersLost || 0) !== 0
+  )
+  const secondaryPanel = isZernio ? (
+    publishingSignal ? (
+      <Card>
+        <CardHeader
+          title="Publishing vs reach"
+          sub="Posts per day (bars) against impressions (line)"
+          icon={<Layers className="w-4 h-4" strokeWidth={2} />}
+        />
+        <CardBody>
+          <ColumnChart
+            data={timeline}
+            bars={[{ key: 'posts', label: platformKey === 'pinterest' ? 'Pins' : 'Posts', color: `${meta.color}66`, maxBarSize: 18 }]}
+            lines={[{ key: 'impressions', label: 'Impressions', color: meta.color, axis: 'right' }]}
+            height={260}
+            spanDays={spanOf(payload, range)}
+            rightAxis
+            emptyMessage="No daily rows in this range."
+          />
+        </CardBody>
+      </Card>
+    ) : null
+  ) : platformKey === 'youtube' ? (
+    subscriberMovement ? (
+      <Card>
+        <CardHeader
+          title="Audience"
+          sub="Subscriber movement per day"
+          icon={<Users className="w-4 h-4" strokeWidth={2} />}
+        />
+        <CardBody>
+          <ColumnChart
+            data={timeline}
+            bars={[
+              { key: 'subscribersGained', label: 'Gained', color: '#12924F', maxBarSize: 14 },
+              { key: 'subscribersLost', label: 'Lost', color: '#DC4849', maxBarSize: 14 },
+            ]}
+            height={260}
+            spanDays={spanOf(payload, range)}
+            stacked={false}
+            emptyMessage="No subscriber movement recorded."
+          />
+        </CardBody>
+      </Card>
+    ) : null
+  ) : followerSeries.length ? (
+    <Card>
+      <CardHeader
+        title="Audience"
+        sub="Follower level per day"
+        icon={<Users className="w-4 h-4" strokeWidth={2} />}
+      />
+      <CardBody>
+        <AreaTrend
+          data={followerSeries}
+          color={meta.color}
+          label="Followers"
+          kind="gauge"
+          height={260}
+          showAverage={false}
+          spanDays={spanOf(payload, range)}
+        />
+      </CardBody>
+    </Card>
+  ) : null
+
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
@@ -94,11 +180,14 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
         }
       />
 
+      {/* clamp: a backend notice can run to several sentences (Pinterest's
+          entitlement note does). Two lines on the page, the rest one click away —
+          the text stays in the DOM either way. */}
       {state.message ? (
-        <NoticeBar tone={state.state === 'empty' ? 'warn' : 'info'}>{state.message}</NoticeBar>
+        <NoticeBar tone={state.state === 'empty' ? 'warn' : 'info'} clamp={2}>{state.message}</NoticeBar>
       ) : null}
       {partialErrors.map((e, i) => (
-        <NoticeBar key={i} tone="warn">
+        <NoticeBar key={i} tone="warn" clamp={2}>
           <b>Partial data:</b> {e.message}
           {e.hint ? <span className="block mt-1 opacity-85">{e.hint}</span> : null}
           {e.metrics ? <span className="block mt-1 text-[11px] opacity-70 font-mono">{e.metrics}</span> : null}
@@ -137,13 +226,15 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
 
       {/* ── Main chart + secondary ───────────────────────────── */}
       {chartMetric ? (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-          <Card className="xl:col-span-2">
+        <div className={cls('grid gap-5', secondaryPanel && 'grid-cols-1 xl:grid-cols-3')}>
+          <Card className={secondaryPanel ? 'xl:col-span-2' : ''}>
             <CardHeader
               title={chartMetric.label}
               sub={
                 chartMetric.description ||
-                `${chartMetric.kind} metric · ${formatValue(chartMetric.total, chartMetric)} total · ${chartMetric.points ?? chartMetric.series.length} daily values`
+                (hasSeries(chartMetric)
+                  ? `${formatValue(chartMetric.total, chartMetric)} total · ${chartMetric.points ?? chartMetric.series.length} daily values`
+                  : `${formatValue(chartMetric.total, chartMetric)} total · published as a single value, no daily series`)
               }
               icon={<LineChartIcon className="w-4 h-4" strokeWidth={2} />}
               right={
@@ -154,77 +245,30 @@ export default function PlatformPage({ platformKey, payload, healthDetail, range
               }
             />
             <CardBody>
-              <AreaTrend
-                data={chartMetric.series}
-                color={meta.color}
-                label={chartMetric.label}
-                kind={chartMetric.kind}
-                unit={chartMetric.unit}
-                height={300}
-                spanDays={spanOf(payload, range)}
-              />
+              {hasSeries(chartMetric) ? (
+                <AreaTrend
+                  data={chartMetric.series}
+                  color={meta.color}
+                  label={chartMetric.label}
+                  kind={chartMetric.kind}
+                  unit={chartMetric.unit}
+                  height={300}
+                  spanDays={spanOf(payload, range)}
+                />
+              ) : (
+                <p className="py-12 text-center text-[12.5px] leading-relaxed text-muted">
+                  {chartMetric.label} is published as a single value —{' '}
+                  <b className="num text-ink">{formatValue(chartMetric.total, chartMetric)}</b>.{' '}
+                  {meta.label} sends no daily breakdown for it, so there is nothing to plot.
+                </p>
+              )}
               {chartMetric.formula ? (
                 <p className="text-[11.5px] text-faint mt-2 text-center">Derived metric — {chartMetric.formula}</p>
               ) : null}
             </CardBody>
           </Card>
 
-          <Card>
-            {isZernio ? (
-              <>
-                <CardHeader
-                  title="Publishing vs reach"
-                  sub="Posts per day (bars) against impressions (line)"
-                  icon={<Layers className="w-4 h-4" strokeWidth={2} />}
-                />
-                <CardBody>
-                  <ColumnChart
-                    data={timeline}
-                    bars={[{ key: 'posts', label: platformKey === 'pinterest' ? 'Pins' : 'Posts', color: `${meta.color}66`, maxBarSize: 18 }]}
-                    lines={[{ key: 'impressions', label: 'Impressions', color: meta.color, axis: 'right' }]}
-                    height={260}
-                    spanDays={spanOf(payload, range)}
-                    rightAxis
-                    emptyMessage="No daily rows in this range."
-                  />
-                </CardBody>
-              </>
-            ) : (
-              <>
-                <CardHeader
-                  title="Audience"
-                  sub={platformKey === 'youtube' ? 'Subscriber movement per day' : 'Follower level per day'}
-                  icon={<Users className="w-4 h-4" strokeWidth={2} />}
-                />
-                <CardBody>
-                  {platformKey === 'youtube' ? (
-                    <ColumnChart
-                      data={timeline}
-                      bars={[
-                        { key: 'subscribersGained', label: 'Gained', color: '#12924F', maxBarSize: 14 },
-                        { key: 'subscribersLost', label: 'Lost', color: '#DC4849', maxBarSize: 14 },
-                      ]}
-                      height={260}
-                      spanDays={spanOf(payload, range)}
-                      stacked={false}
-                      emptyMessage="No subscriber movement recorded."
-                    />
-                  ) : (
-                    <AreaTrend
-                      data={seriesOf(payload, 'followers')}
-                      color={meta.color}
-                      label="Followers"
-                      kind="gauge"
-                      height={260}
-                      showAverage={false}
-                      spanDays={spanOf(payload, range)}
-                      emptyMessage="No follower series in the payload."
-                    />
-                  )}
-                </CardBody>
-              </>
-            )}
-          </Card>
+          {secondaryPanel}
         </div>
       ) : null}
 

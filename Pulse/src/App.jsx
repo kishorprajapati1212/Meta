@@ -27,17 +27,25 @@ export default function App() {
   const [view, setView] = useState(() => readPref(PREF_KEYS.view, 'overview'))
   const [audienceChannel, setAudienceChannel] = useState('all')
   const [range, setRange] = useState(() => readPref(PREF_KEYS.range, { preset: 'last_30d' }))
+  // v4.3.0: who the content is written for. Education content aimed at
+  // universities is judged on different channels than content aimed at
+  // students, so this preference drives the growth diagnosis and the ranking.
+  const [audience, setAudience] = useState(() => {
+    const v = readPref(PREF_KEYS.audience, 'institutions')
+    return v === 'students' ? 'students' : 'institutions'
+  })
   const [sampleMode, setSampleMode] = useState(() => readPref(PREF_KEYS.sample, false))
   const [collapsed, setCollapsed] = useState(() => readPref(PREF_KEYS.sidebar, false))
   const [mobileNav, setMobileNav] = useState(false)
 
   const {
-    platformData, summary, health, healthDetails, loading, refreshing, retrying, stale, error, healthError, lastUpdated, isSample, refetch,
-  } = useAnalytics(range, { sample: sampleMode })
+    platformData, summary, focus, health, healthDetails, loading, refreshing, retrying, stale, error, healthError, lastUpdated, isSample, refetch,
+  } = useAnalytics(range, { sample: sampleMode, audience })
 
   useEffect(() => writePref(PREF_KEYS.view, view), [view])
   useEffect(() => writePref(PREF_KEYS.range, range), [range])
   useEffect(() => writePref(PREF_KEYS.sample, sampleMode), [sampleMode])
+  useEffect(() => writePref(PREF_KEYS.audience, audience), [audience])
   useEffect(() => writePref(PREF_KEYS.sidebar, collapsed), [collapsed])
 
   // "r" refreshes, unless the user is typing in a field.
@@ -144,6 +152,9 @@ export default function App() {
             <OverviewPage
               platformData={platformData}
               summary={summary}
+              focus={focus}
+              audience={audience}
+              onAudienceChange={setAudience}
               healthDetails={healthDetails || {}}
               range={range}
               sample={isSample}
@@ -180,6 +191,8 @@ export default function App() {
           ) : view === 'searchConsole' ? (
             <GscPage
               payload={payload}
+              audience={audience}
+              onAudienceChange={setAudience}
               range={range}
               sample={isSample}
               healthDetail={healthDetails?.searchConsole}
@@ -199,6 +212,8 @@ export default function App() {
               }}
               payload={payload}
               healthDetail={healthDetails?.[view]}
+              audience={audience}
+              onAudienceChange={setAudience}
               range={range}
               sample={isSample}
               onRetry={onRefresh}

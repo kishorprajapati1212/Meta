@@ -1,0 +1,3706 @@
+{
+  "generatedAt": "2026-10-21T13:35:31.447Z",
+  "engine": "4.3.2",
+  "source": {
+    "zero": "fixtures/combined-zero.json (recorded from the live API, all channels at zero)",
+    "pinterestRich": "fixtures/pinterest-rich.json",
+    "linkedinRich": "fixtures/linkedin-rich.json",
+    "realCapture": "scripts/fixtures/zernio-real-capture.json — upstream documents captured from the live account on 2026-10-21, replayed through the real zernioService"
+  },
+  "zero": {
+    "institutions": {
+      "facebook": {
+        "platform": "facebook",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "medium",
+          "why": "Faculty and parent groups, and university pages still live here — good for credibility, weak for buying decisions."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "2.9% average · 5.2% for education",
+          "tier": "nano pages (<5K) sit at the top of the range",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Education is one of the three highest-engagement industries on Facebook. Meaningful interactions (comments, shares) are what the feed rewards — passive video views barely count."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Feed distribution depends on meaningful interaction in the first hours. Ask a question, reply to every comment, and post when your audience is online.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "instagram": {
+        "platform": "instagram",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "low",
+          "why": "Students and campus life, not procurement. Useful as proof-of-work a decision-maker might be sent, not as the pitch channel."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "1.8% average · 2.1% for higher education",
+          "tier": "≈3.4% median for accounts under 10K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Saves and shares are the strongest ranking signals; carousels are the best-performing format (~4.2%). Accounts under 10K followers get the highest engagement rates of any tier — a small audience is an advantage here, not a handicap."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Saves and shares decide whether a post is re-served. Carousels with a takeaway on every slide, a hook in the first frame, and a \"save this\" CTA outperform single images.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "youtube": {
+        "platform": "youtube",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "high",
+          "why": "Committees watch a 3-minute demo before replying to an email; faculty search \"how to\" constantly."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "views",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "3–5% of views",
+          "tier": null,
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Ranking is CTR × average view duration. Education and how-to is the single highest-engagement niche cross-platform (≈3.9%), and YouTube is a search engine: a video keeps finding viewers for years."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Thumbnail + title decide CTR; the first 30 seconds decide watch time. Both together decide impressions. Chapters and a clear payoff in the title help search.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "views",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "linkedin": {
+        "platform": "linkedin",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "high",
+          "why": "Heads of department, placement cells, registrars and edtech buyers are all here — and education is LinkedIn's highest-engagement industry."
+        },
+        "stage": "no-distribution",
+        "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": 1,
+            "display": "1",
+            "verdict": "ok",
+            "note": "1 item(s) in this range"
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "impressions",
+            "note": "The platform showed it to (almost) nobody"
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "engagement",
+            "note": "No engagement yet"
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": 512,
+            "display": "512",
+            "verdict": "ok",
+            "note": "512 followers"
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "clicks",
+            "note": "Nobody clicked through"
+          }
+        ],
+        "zeros": [
+          {
+            "key": "impressions",
+            "label": "Impressions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "reach",
+            "label": "Reach",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "clicks",
+            "label": "Clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "likes",
+            "label": "Reactions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "shares",
+            "label": "Reposts",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "saves",
+            "label": "Saves",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "sends",
+            "label": "Sends",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "follows",
+            "label": "Follows from posts",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagement",
+            "label": "Total engagement",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          }
+        ],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+          "tier": "≈5.6% median for accounts under 5K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Fix distribution before creative",
+            "detail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+          },
+          {
+            "priority": 2,
+            "title": "Write for the decision-maker search, not the feed",
+            "detail": "Name the institution type and the outcome in the first line (\"For colleges running manual attendance…\"). Committees share content that names their problem; students do not amplify it for you."
+          }
+        ],
+        "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+        "evidence": {
+          "published": 1,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0
+          },
+          "followers": 512,
+          "followersPublished": true,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 1,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 1,
+          "syncedPosts": 1,
+          "agedPosts": 1,
+          "oldestPostDays": 18,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "pinterest": {
+        "platform": "pinterest",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "low",
+          "why": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest."
+        },
+        "stage": "no-distribution",
+        "headline": "You published 3 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": 3,
+            "display": "3",
+            "verdict": "ok",
+            "note": "3 item(s) in this range"
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "impressions",
+            "note": "The platform showed it to (almost) nobody"
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "engagement",
+            "note": "No engagement yet"
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": 1284,
+            "display": "1.3K",
+            "verdict": "ok",
+            "note": "1.3K followers"
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "outboundClicks",
+            "note": "Nobody clicked through"
+          }
+        ],
+        "zeros": [
+          {
+            "key": "impressions",
+            "label": "Impressions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "clicks",
+            "label": "Pin clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "outboundClicks",
+            "label": "Outbound clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "saves",
+            "label": "Saves",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "closeups",
+            "label": "Closeups",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "views",
+            "label": "Video views",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagement",
+            "label": "Total engagement",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          }
+        ],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "1.9% average",
+          "tier": "≈3.2% median for accounts under 5K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Fix distribution before creative",
+            "detail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+          },
+          {
+            "priority": 2,
+            "title": "Write for the decision-maker search, not the feed",
+            "detail": "Name the institution type and the outcome in the first line (\"For colleges running manual attendance…\"). Committees share content that names their problem; students do not amplify it for you."
+          }
+        ],
+        "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+        "evidence": {
+          "published": 3,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {
+            "clicks": 0,
+            "saves": 0
+          },
+          "followers": 1284,
+          "followersPublished": true,
+          "converted": 0,
+          "convertedKey": "outboundClicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 3,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 3,
+          "syncedPosts": 2,
+          "agedPosts": 3,
+          "oldestPostDays": 24,
+          "accountGaugesEmpty": false,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "searchConsole": {
+        "platform": "searchConsole",
+        "audience": "institutions",
+        "audienceFit": {
+          "fit": "high",
+          "why": "A university evaluating a product searches for it. This is where that intent lands."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Converted",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "CTR depends on position: ~27% at #1, ~15% at #2, ~11% at #3",
+          "tier": null,
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "This is the only channel where an institution actively searches for a product. Ranking for the phrase a registrar or HOD would type is worth more than any social post."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Titles and meta descriptions decide CTR at a given position. Target the exact phrase a decision-maker types, and answer it in the first paragraph.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": null,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      }
+    },
+    "students": {
+      "facebook": {
+        "platform": "facebook",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "low",
+          "why": "College groups still exist, but the under-25 audience has largely left."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "2.9% average · 5.2% for education",
+          "tier": "nano pages (<5K) sit at the top of the range",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Education is one of the three highest-engagement industries on Facebook. Meaningful interactions (comments, shares) are what the feed rewards — passive video views barely count."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Feed distribution depends on meaningful interaction in the first hours. Ask a question, reply to every comment, and post when your audience is online.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "instagram": {
+        "platform": "instagram",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "high",
+          "why": "Where students actually spend attention; saves and shares spread campus content."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "1.8% average · 2.1% for higher education",
+          "tier": "≈3.4% median for accounts under 10K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Saves and shares are the strongest ranking signals; carousels are the best-performing format (~4.2%). Accounts under 10K followers get the highest engagement rates of any tier — a small audience is an advantage here, not a handicap."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Saves and shares decide whether a post is re-served. Carousels with a takeaway on every slide, a hook in the first frame, and a \"save this\" CTA outperform single images.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "youtube": {
+        "platform": "youtube",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "high",
+          "why": "Tutorials and demos are searched directly by students."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "views",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "engagement",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "3–5% of views",
+          "tier": null,
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Ranking is CTR × average view duration. Education and how-to is the single highest-engagement niche cross-platform (≈3.9%), and YouTube is a search engine: a video keeps finding viewers for years."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Thumbnail + title decide CTR; the first 30 seconds decide watch time. Both together decide impressions. Chapters and a clear payoff in the title help search.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "views",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "linkedin": {
+        "platform": "linkedin",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "medium",
+          "why": "Final-year students and placement season — internships and resumes."
+        },
+        "stage": "no-distribution",
+        "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": 1,
+            "display": "1",
+            "verdict": "ok",
+            "note": "1 item(s) in this range"
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "impressions",
+            "note": "The platform showed it to (almost) nobody"
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "engagement",
+            "note": "No engagement yet"
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": 512,
+            "display": "512",
+            "verdict": "ok",
+            "note": "512 followers"
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "clicks",
+            "note": "Nobody clicked through"
+          }
+        ],
+        "zeros": [
+          {
+            "key": "impressions",
+            "label": "Impressions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "reach",
+            "label": "Reach",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "clicks",
+            "label": "Clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "likes",
+            "label": "Reactions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "shares",
+            "label": "Reposts",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "saves",
+            "label": "Saves",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "sends",
+            "label": "Sends",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "follows",
+            "label": "Follows from posts",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagement",
+            "label": "Total engagement",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          }
+        ],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+          "tier": "≈5.6% median for accounts under 5K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Fix distribution before creative",
+            "detail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+          },
+          {
+            "priority": 2,
+            "title": "Write for the student search, not the feed",
+            "detail": "Name the outcome in the first line (\"Present in 4 seconds from your bench\"). Students share what makes them look clever to their friends."
+          }
+        ],
+        "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+        "evidence": {
+          "published": 1,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "saves": 0
+          },
+          "followers": 512,
+          "followersPublished": true,
+          "converted": 0,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 1,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 1,
+          "syncedPosts": 1,
+          "agedPosts": 1,
+          "oldestPostDays": 18,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "pinterest": {
+        "platform": "pinterest",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "medium",
+          "why": "Study aesthetics, notes and project inspiration are evergreen search traffic."
+        },
+        "stage": "no-distribution",
+        "headline": "You published 3 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": 3,
+            "display": "3",
+            "verdict": "ok",
+            "note": "3 item(s) in this range"
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "impressions",
+            "note": "The platform showed it to (almost) nobody"
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "engagement",
+            "note": "No engagement yet"
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": 1284,
+            "display": "1.3K",
+            "verdict": "ok",
+            "note": "1.3K followers"
+          },
+          {
+            "key": "converted",
+            "label": "Clicked through",
+            "value": 0,
+            "display": "0",
+            "verdict": "zero",
+            "sourceKey": "outboundClicks",
+            "note": "Nobody clicked through"
+          }
+        ],
+        "zeros": [
+          {
+            "key": "impressions",
+            "label": "Impressions",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "clicks",
+            "label": "Pin clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "outboundClicks",
+            "label": "Outbound clicks",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "saves",
+            "label": "Saves",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "closeups",
+            "label": "Closeups",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "views",
+            "label": "Video views",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagement",
+            "label": "Total engagement",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          },
+          {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "reason": "no-distribution",
+            "explanation": "Zero because the platform recorded 0 impressions — the content was not shown, not shown-and-ignored."
+          }
+        ],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "1.9% average",
+          "tier": "≈3.2% median for accounts under 5K followers",
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Fix distribution before creative",
+            "detail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+          },
+          {
+            "priority": 2,
+            "title": "Write for the student search, not the feed",
+            "detail": "Name the outcome in the first line (\"Present in 4 seconds from your bench\"). Students share what makes them look clever to their friends."
+          }
+        ],
+        "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+        "evidence": {
+          "published": 3,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {
+            "clicks": 0,
+            "saves": 0
+          },
+          "followers": 1284,
+          "followersPublished": true,
+          "converted": 0,
+          "convertedKey": "outboundClicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 3,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 3,
+          "syncedPosts": 2,
+          "agedPosts": 3,
+          "oldestPostDays": 24,
+          "accountGaugesEmpty": false,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      },
+      "searchConsole": {
+        "platform": "searchConsole",
+        "audience": "students",
+        "audienceFit": {
+          "fit": "medium",
+          "why": "Students search for solutions too, just with different words."
+        },
+        "stage": "unreachable",
+        "headline": "This channel could not be read: No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console.. Until it answers, every number below is missing rather than zero.",
+        "funnel": [
+          {
+            "key": "published",
+            "label": "Published",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "seen",
+            "label": "Seen",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "impressions",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "engaged",
+            "label": "Engaged",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "followed",
+            "label": "Followers",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "note": "This channel answered with an error, so the stage has no value."
+          },
+          {
+            "key": "converted",
+            "label": "Converted",
+            "value": null,
+            "display": "not read",
+            "verdict": "unavailable",
+            "sourceKey": "clicks",
+            "note": "This channel answered with an error, so the stage has no value."
+          }
+        ],
+        "zeros": [],
+        "benchmark": {
+          "metric": "engagement rate",
+          "yours": null,
+          "typical": "CTR depends on position: ~27% at #1, ~15% at #2, ~11% at #3",
+          "tier": null,
+          "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+          "note": "This is the only channel where an institution actively searches for a product. Ranking for the phrase a registrar or HOD would type is worth more than any social post."
+        },
+        "actions": [
+          {
+            "priority": 1,
+            "title": "Restore the connection before judging the content",
+            "detail": "No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read.",
+            "effort": "first"
+          }
+        ],
+        "mechanics": "Titles and meta descriptions decide CTR at a given position. Target the exact phrase a decision-maker types, and answer it in the first paragraph.",
+        "evidence": {
+          "published": 0,
+          "seen": 0,
+          "seenKey": "impressions",
+          "engaged": 0,
+          "engagedSource": null,
+          "postSums": {},
+          "followers": null,
+          "followersPublished": false,
+          "converted": null,
+          "convertedKey": "clicks",
+          "youngPosts": 0,
+          "lagging": false,
+          "postsRead": 0,
+          "notReported": false,
+          "seenPerPost": null,
+          "lowReach": false,
+          "identifiedPosts": 0,
+          "syncedPosts": 0,
+          "agedPosts": 0,
+          "oldestPostDays": null,
+          "accountGaugesEmpty": true,
+          "accountPermissions": null,
+          "accountPlatformStatus": null
+        }
+      }
+    }
+  },
+  "focus": {
+    "institutions": [
+      {
+        "platform": "youtube",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "high",
+        "audienceWhy": "Committees watch a 3-minute demo before replying to an email; faculty search \"how to\" constantly.",
+        "score": 4.8,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "searchConsole",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "high",
+        "audienceWhy": "A university evaluating a product searches for it. This is where that intent lands.",
+        "score": 4.8,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "linkedin",
+        "stage": "no-distribution",
+        "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "audienceFit": "high",
+        "audienceWhy": "Heads of department, placement cells, registrars and edtech buyers are all here — and education is LinkedIn's highest-engagement industry.",
+        "score": 4.5,
+        "firstAction": "Fix distribution before creative",
+        "firstActionDetail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+      },
+      {
+        "platform": "facebook",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "medium",
+        "audienceWhy": "Faculty and parent groups, and university pages still live here — good for credibility, weak for buying decisions.",
+        "score": 3.2,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "instagram",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "low",
+        "audienceWhy": "Students and campus life, not procurement. Useful as proof-of-work a decision-maker might be sent, not as the pitch channel.",
+        "score": 1.92,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "pinterest",
+        "stage": "no-distribution",
+        "headline": "You published 3 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "audienceFit": "low",
+        "audienceWhy": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest.",
+        "score": 1.8,
+        "firstAction": "Fix distribution before creative",
+        "firstActionDetail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+      }
+    ],
+    "students": [
+      {
+        "platform": "instagram",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "high",
+        "audienceWhy": "Where students actually spend attention; saves and shares spread campus content.",
+        "score": 4.8,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "INSTAGRAM_ID is not set in .env — Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Find the id via GET /{page-id}?fields=instagram_business_account using your page token, then set INSTAGRAM_ID. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "youtube",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "high",
+        "audienceWhy": "Tutorials and demos are searched directly by students.",
+        "score": 4.8,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "YouTube credentials are not configured — Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Set YOUTUBE_REFRESH_TOKEN, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "searchConsole",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "medium",
+        "audienceWhy": "Students search for solutions too, just with different words.",
+        "score": 3.2,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "No verified Search Console property found — Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Set GSC_SITE_URL in .env to a verified property (exact URL, e.g. https://example.com/ or sc-domain:example.com), or verify the property in Search Console. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      },
+      {
+        "platform": "linkedin",
+        "stage": "no-distribution",
+        "headline": "You published 1 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "audienceFit": "medium",
+        "audienceWhy": "Final-year students and placement season — internships and resumes.",
+        "score": 3,
+        "firstAction": "Fix distribution before creative",
+        "firstActionDetail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+      },
+      {
+        "platform": "pinterest",
+        "stage": "no-distribution",
+        "headline": "You published 3 item(s) and the algorithm served them to nobody — 0 impressions. This is a distribution problem, not an engagement problem: the platform is not pushing the content, so no amount of creative polish moves these numbers until reach exists.",
+        "audienceFit": "medium",
+        "audienceWhy": "Study aesthetics, notes and project inspiration are evergreen search traffic.",
+        "score": 3,
+        "firstAction": "Fix distribution before creative",
+        "firstActionDetail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. With 0 impressions recorded, the algorithm has no signal to work from — early interaction from real people (a department group, a faculty share, a comment within the first hour) is what starts it."
+      },
+      {
+        "platform": "facebook",
+        "stage": "unreachable",
+        "headline": "This channel could not be read: ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart.. Until it answers, every number below is missing rather than zero.",
+        "audienceFit": "low",
+        "audienceWhy": "College groups still exist, but the under-25 audience has largely left.",
+        "score": 1.92,
+        "firstAction": "Restore the connection before judging the content",
+        "firstActionDetail": "ACCESS_TOKEN is not set in .env — Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Add ACCESS_TOKEN (a page or long-lived user token) to .env and restart. Open the Connections page, re-check this channel's credentials, then refresh. No growth decision should be made from a channel that could not be read."
+      }
+    ]
+  },
+  "rich": {
+    "pinterest": {
+      "platform": "pinterest",
+      "audience": "institutions",
+      "audienceFit": {
+        "fit": "low",
+        "why": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest."
+      },
+      "stage": "healthy",
+      "headline": "The funnel is working end to end: 3 published → 23.7K impressions → 553 engagement → 92 outboundClicks. Now scale what already works.",
+      "funnel": [
+        {
+          "key": "published",
+          "label": "Published",
+          "value": 3,
+          "display": "3",
+          "verdict": "ok",
+          "note": "3 item(s) in this range"
+        },
+        {
+          "key": "seen",
+          "label": "Seen",
+          "value": 23700,
+          "display": "23.7K",
+          "verdict": "ok",
+          "sourceKey": "impressions",
+          "note": "23.7K impressions"
+        },
+        {
+          "key": "engaged",
+          "label": "Engaged",
+          "value": 553,
+          "display": "553",
+          "verdict": "ok",
+          "sourceKey": "engagement",
+          "note": "553 engagement"
+        },
+        {
+          "key": "followed",
+          "label": "Followers",
+          "value": 1284,
+          "display": "1.3K",
+          "verdict": "ok",
+          "note": "1.3K followers"
+        },
+        {
+          "key": "converted",
+          "label": "Clicked through",
+          "value": 92,
+          "display": "92",
+          "verdict": "ok",
+          "sourceKey": "outboundClicks",
+          "note": "92 outboundClicks"
+        }
+      ],
+      "zeros": [
+        {
+          "key": "closeups",
+          "label": "Closeups",
+          "reason": "no-activity",
+          "explanation": "No closeups on any of the 3 post(s) read in this range (they recorded 553 other interaction(s) between them), and the account-level closeups insight is empty too. This is a measured zero, not a missing metric.",
+          "source": "summed from posts"
+        }
+      ],
+      "benchmark": {
+        "metric": "engagement rate",
+        "yours": 2.33,
+        "typical": "1.9% average",
+        "tier": "≈3.2% median for accounts under 5K followers",
+        "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+        "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting."
+      },
+      "actions": [
+        {
+          "priority": 1,
+          "title": "Scale the format that produced this",
+          "detail": "Repeat the top-performing item's structure for universities and departments and put a small budget or a partner share behind it."
+        }
+      ],
+      "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+      "evidence": {
+        "published": 3,
+        "seen": 23700,
+        "seenKey": "impressions",
+        "engaged": 553,
+        "engagedSource": "account metric",
+        "postSums": {
+          "clicks": 412,
+          "saves": 141
+        },
+        "followers": 1284,
+        "followersPublished": true,
+        "converted": 92,
+        "convertedKey": "outboundClicks",
+        "youngPosts": 0,
+        "lagging": false,
+        "postsRead": 3,
+        "notReported": false,
+        "seenPerPost": 7900,
+        "lowReach": false,
+        "identifiedPosts": 3,
+        "syncedPosts": 2,
+        "agedPosts": 3,
+        "oldestPostDays": 24,
+        "accountGaugesEmpty": false,
+        "accountPermissions": null,
+        "accountPlatformStatus": null
+      }
+    },
+    "linkedin": {
+      "platform": "linkedin",
+      "audience": "institutions",
+      "audienceFit": {
+        "fit": "high",
+        "why": "Heads of department, placement cells, registrars and edtech buyers are all here — and education is LinkedIn's highest-engagement industry."
+      },
+      "stage": "healthy",
+      "headline": "The funnel is working end to end: 1 published → 5.4K impressions → 279 engagement → 88 clicks. Now scale what already works.",
+      "funnel": [
+        {
+          "key": "published",
+          "label": "Published",
+          "value": 1,
+          "display": "1",
+          "verdict": "ok",
+          "note": "1 item(s) in this range"
+        },
+        {
+          "key": "seen",
+          "label": "Seen",
+          "value": 5420,
+          "display": "5.4K",
+          "verdict": "ok",
+          "sourceKey": "impressions",
+          "note": "5.4K impressions"
+        },
+        {
+          "key": "engaged",
+          "label": "Engaged",
+          "value": 279,
+          "display": "279",
+          "verdict": "ok",
+          "sourceKey": "engagement",
+          "note": "279 engagement"
+        },
+        {
+          "key": "followed",
+          "label": "Followers",
+          "value": 512,
+          "display": "512",
+          "verdict": "ok",
+          "note": "512 followers"
+        },
+        {
+          "key": "converted",
+          "label": "Clicked through",
+          "value": 88,
+          "display": "88",
+          "verdict": "ok",
+          "sourceKey": "clicks",
+          "note": "88 clicks"
+        }
+      ],
+      "zeros": [
+        {
+          "key": "saves",
+          "label": "Saves",
+          "reason": "no-activity",
+          "explanation": "No saves on any of the 1 post(s) read in this range (they recorded 191 other interaction(s) between them), and the account-level saves insight is empty too. This is a measured zero, not a missing metric.",
+          "source": "summed from posts"
+        },
+        {
+          "key": "sends",
+          "label": "Sends",
+          "reason": "no-activity",
+          "explanation": "No sends on any of the 1 post(s) read in this range (they recorded 191 other interaction(s) between them), and the account-level sends insight is empty too. This is a measured zero, not a missing metric.",
+          "source": "summed from posts"
+        },
+        {
+          "key": "follows",
+          "label": "Follows from posts",
+          "reason": "no-activity",
+          "explanation": "No follows from posts on any of the 1 post(s) read in this range (they recorded 191 other interaction(s) between them), and the account-level follows from posts insight is empty too. This is a measured zero, not a missing metric.",
+          "source": "summed from posts"
+        }
+      ],
+      "benchmark": {
+        "metric": "engagement rate",
+        "yours": 5.15,
+        "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+        "tier": "≈5.6% median for accounts under 5K followers",
+        "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+        "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+      },
+      "actions": [
+        {
+          "priority": 1,
+          "title": "Scale the format that produced this",
+          "detail": "Repeat the top-performing item's structure for universities and departments and put a small budget or a partner share behind it."
+        }
+      ],
+      "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+      "evidence": {
+        "published": 1,
+        "seen": 5420,
+        "seenKey": "impressions",
+        "engaged": 279,
+        "engagedSource": "account metric",
+        "postSums": {
+          "likes": 156,
+          "comments": 23,
+          "shares": 12,
+          "saves": 0
+        },
+        "followers": 512,
+        "followersPublished": true,
+        "converted": 88,
+        "convertedKey": "clicks",
+        "youngPosts": 0,
+        "lagging": false,
+        "postsRead": 1,
+        "notReported": false,
+        "seenPerPost": 5420,
+        "lowReach": false,
+        "identifiedPosts": 1,
+        "syncedPosts": 1,
+        "agedPosts": 1,
+        "oldestPostDays": 18,
+        "accountGaugesEmpty": true,
+        "accountPermissions": null,
+        "accountPlatformStatus": null
+      }
+    }
+  },
+  "realCapture": {
+    "note": "pinterest = synced pins with zero metrics and empty account gauges (\"not measured\"); linkedin = the same publishing pattern WITH metrics (the control).",
+    "pinterest": {
+      "payload": {
+        "notice": "6 pins found and every one of them is known to Pinterest (real pin id + URL, syncStatus \"synced\"), yet Pinterest reported 0 impressions/engagement for all of them — the oldest is 32 day(s) old, far beyond Pinterest's 24–48 h reporting lag. Pin count, board count, monthly views and account type all come back empty for @kishorprajapati1040 as well. The connection itself is fine — it is marked active and already grants boards:read, pins:read, user_accounts:read, ads:read — so this is not a missing scope and re-authorising will not change it. Pinterest only serves organic analytics (impressions, saves, pin clicks, outbound clicks) to BUSINESS accounts, so these zeros mean \"not measured\", not \"nobody saw your pins\". Fix: convert @kishorprajapati1040 to a free Business account (Pinterest → Settings → Account management → Convert to business), then reconnect it in Zernio so the new entitlement is picked up. Until then, read the real numbers in Pinterest's own analytics. (1 pin(s) are still under 48 h old and may simply be lagging.) Triggered analytics sync for 1 external pins (1 accepted).",
+        "overview": {
+          "impressions": {
+            "key": "impressions",
+            "label": "Impressions",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "clicks": {
+            "key": "clicks",
+            "label": "Pin clicks",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "outboundClicks": {
+            "key": "outboundClicks",
+            "label": "Outbound clicks",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "saves": {
+            "key": "saves",
+            "label": "Saves",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "closeups": {
+            "key": "closeups",
+            "label": "Closeups",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "views": {
+            "key": "views",
+            "label": "Video views",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "engagement": {
+            "key": "engagement",
+            "label": "Total engagement",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "engagementRate": {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "kind": "rate",
+            "unit": "%",
+            "group": "Engagement",
+            "total": 0,
+            "previous": null,
+            "trend": 0,
+            "hasData": false,
+            "description": "Total engagement ÷ impressions",
+            "currentHalfRate": null
+          },
+          "posts": {
+            "key": "posts",
+            "label": "Pins published",
+            "kind": "count",
+            "unit": "",
+            "group": "Activity",
+            "total": 6,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "followers": {
+            "key": "followers",
+            "label": "Followers",
+            "kind": "gauge",
+            "unit": "",
+            "group": "Audience",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false,
+            "change": 0,
+            "source": "follower-stats",
+            "unavailable": true,
+            "unavailableReason": "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report."
+          },
+          "pins": {
+            "key": "pins",
+            "label": "Total pins",
+            "kind": "gauge",
+            "unit": "",
+            "group": "Audience",
+            "total": 6,
+            "previous": null,
+            "trend": 0,
+            "hasData": true,
+            "source": "published pins"
+          },
+          "boards": {
+            "key": "boards",
+            "label": "Boards",
+            "kind": "gauge",
+            "unit": "",
+            "group": "Audience",
+            "total": 1,
+            "previous": null,
+            "trend": 0,
+            "hasData": true
+          },
+          "monthlyViews": {
+            "key": "monthlyViews",
+            "label": "Monthly views",
+            "kind": "gauge",
+            "unit": "",
+            "group": "Audience",
+            "total": 0,
+            "previous": null,
+            "trend": 0,
+            "hasData": false,
+            "unavailable": true,
+            "unavailableReason": "Pinterest's public API does not expose monthly views, so Zernio cannot report them."
+          }
+        },
+        "posts": [
+          {
+            "postId": "1127166613023434329",
+            "content": "Aaj ka plan?\n\nAaj ka plan?\npoll: Garba pakka / pehle attendance 😅",
+            "title": null,
+            "publishedAt": "2026-10-20T01:35:31.617Z",
+            "date": "2026-10-20",
+            "platformUrl": "https://www.pinterest.com/pin/1127166613023434329/",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": null,
+                "thumbnail": "https://i.pinimg.com/564x/1b/86/ca/1b86caf682cf88eeca5bdaa12170b18e.jpg",
+                "mediaStatus": "unavailable",
+                "unavailableReason": "platform_withheld"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/1b/86/ca/1b86caf682cf88eeca5bdaa12170b18e.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6ad462c70edd18bc5d4bd3c9",
+            "zernioDocId": "6ad62f7d8024457fec7120af",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb1c92b73b07bd6216c817",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-18T01:35:31.617Z",
+            "date": "2026-10-18",
+            "platformUrl": "",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": null,
+                "thumbnail": "https://i.pinimg.com/564x/6e/dd/2d/6edd2dd6cb4e0bb2536f77c482468b27.jpg",
+                "mediaStatus": "unavailable",
+                "unavailableReason": "platform_withheld"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/6e/dd/2d/6edd2dd6cb4e0bb2536f77c482468b27.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb1c92b73b07bd6216c817",
+            "zernioDocId": "reconstructed_pin_doc_2",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb12beced2a63cf5f8936d",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-17T01:35:31.617Z",
+            "date": "2026-10-17",
+            "platformUrl": "",
+            "mediaType": "image",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg",
+                "thumbnail": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/5a/47/22/5a4722e8bc5d7f1b4c52f69e7566af07.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb12beced2a63cf5f8936d",
+            "zernioDocId": "reconstructed_pin_doc_3",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb11daa6f390d66e5391db",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-15T01:35:31.617Z",
+            "date": "2026-10-15",
+            "platformUrl": "",
+            "mediaType": "image",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg",
+                "thumbnail": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/6e/3f/cc/6e3fcc104424bc2fdb8d2210a7604166.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb11daa6f390d66e5391db",
+            "zernioDocId": "reconstructed_pin_doc_4",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb1102a98c701bd1a030df",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-13T01:35:31.617Z",
+            "date": "2026-10-13",
+            "platformUrl": "",
+            "mediaType": "image",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg",
+                "thumbnail": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/8e/27/63/8e2763e9742c7836a61cbfba0996cf92.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb1102a98c701bd1a030df",
+            "zernioDocId": "reconstructed_pin_doc_5",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "reconstructed_pin_doc_6",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-09-18T18:23:31.617Z",
+            "date": "2026-09-18",
+            "platformUrl": "",
+            "mediaType": "image",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg",
+                "thumbnail": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg"
+              }
+            ],
+            "thumbnailUrl": "https://i.pinimg.com/564x/c4/47/49/c447494d344c82cbc5f91168a53ea73e.jpg",
+            "status": "published",
+            "platform": "pinterest",
+            "accountUsername": "kishorprajapati1040",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": null,
+            "zernioDocId": "reconstructed_pin_doc_6",
+            "analytics": {
+              "impressions": 0,
+              "reach": 0,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          }
+        ],
+        "totals": {
+          "impressions": 0,
+          "reach": 0,
+          "likes": 0,
+          "comments": 0,
+          "shares": 0,
+          "saves": 0,
+          "sends": 0,
+          "clicks": 0,
+          "outboundClicks": 0,
+          "closeups": 0,
+          "views": 0,
+          "follows": 0,
+          "reposts": 0,
+          "profileViews": 0,
+          "websiteClicks": 0,
+          "engagement": 0
+        },
+        "meta": {
+          "account": {
+            "zernioAccountId": "6aab857a8d284ffb210cbec0",
+            "platform": "pinterest",
+            "username": "kishorprajapati1040",
+            "displayName": "kishorprajapati1040",
+            "profilePicture": "https://i.pinimg.com/600x600_R/09/3a/df/093adfded15d978f4d5360701eb05432.jpg",
+            "profileUrl": "https://pinterest.com/kishorprajapati1040",
+            "followers": 0,
+            "following": null,
+            "pinCount": null,
+            "boardCount": null,
+            "monthlyViews": null,
+            "externalPostCount": 0,
+            "lastSyncedAt": null,
+            "connectedAt": "2026-09-17T06:15:22.110Z",
+            "tokenExpiresAt": "2026-11-10T04:29:46.916Z",
+            "isActive": true,
+            "accountType": null,
+            "permissions": [
+              "boards:read",
+              "boards:write",
+              "pins:read",
+              "pins:write",
+              "user_accounts:read",
+              "ads:read",
+              "ads:write"
+            ],
+            "platformStatus": "active",
+            "platformStatusReason": null,
+            "needsReconnection": false,
+            "enabled": true,
+            "scopes": null,
+            "followersCount": 0,
+            "followersLastUpdated": null,
+            "lastSuccessfulPublishAt": null,
+            "rateLimitedUntil": null,
+            "byokConfigured": true,
+            "rawStats": {
+              "pinCount": null,
+              "boardCount": null,
+              "monthlyViews": null
+            }
+          },
+          "boards": [
+            {
+              "id": "1127166681679490974",
+              "name": "Testing 1",
+              "pinCount": null,
+              "privacy": "PUBLIC",
+              "url": null
+            }
+          ],
+          "sync": {
+            "skipped": false,
+            "attempted": 1,
+            "synced": 1,
+            "failed": 0,
+            "alreadySynced": 6,
+            "externalPosts": 6,
+            "withoutUrl": 5,
+            "accountSweep": true,
+            "errors": [],
+            "note": "Sync asks Pinterest for the pin metrics. If they stay 0 after 48 h, the account is not entitled to organic analytics (Pinterest serves those to Business accounts only)."
+          },
+          "metricAvailability": {
+            "posts": 6,
+            "allZero": true,
+            "identified": 6,
+            "synced": 6,
+            "external": 6,
+            "agedPastLag": 5,
+            "newestHours": 36,
+            "oldestDays": 32,
+            "beyondLag": true,
+            "accountGaugesEmpty": true,
+            "verdict": "not-reported"
+          }
+        }
+      },
+      "diagnosis": {
+        "institutions": {
+          "platform": "pinterest",
+          "audience": "institutions",
+          "audienceFit": {
+            "fit": "low",
+            "why": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest."
+          },
+          "stage": "not-reported",
+          "headline": "6 pin(s) are known to Pinterest — each has a real pin id and URL and is marked synced — yet every metric is 0, including pins up to 32 days old (well past the 24–48 h reporting lag), and every account-level gauge (pin count, board count, monthly views, account type) is empty too. Pinterest only serves organic analytics to BUSINESS accounts, so these zeros mean \"not measured\", not \"nobody saw them\". Do not rewrite the content over this number — fix the account type first.",
+          "funnel": [
+            {
+              "key": "published",
+              "label": "Published",
+              "value": 6,
+              "display": "6",
+              "verdict": "ok",
+              "note": "6 item(s) in this range"
+            },
+            {
+              "key": "seen",
+              "label": "Seen",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "impressions",
+              "note": "6 item(s) are known to the platform (real id + URL, marked synced) but it returns no metrics for them"
+            },
+            {
+              "key": "engaged",
+              "label": "Engaged",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "engagement",
+              "note": "No engagement yet"
+            },
+            {
+              "key": "followed",
+              "label": "Followers",
+              "value": null,
+              "display": "not published",
+              "verdict": "unavailable",
+              "note": "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report."
+            },
+            {
+              "key": "converted",
+              "label": "Clicked through",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "outboundClicks",
+              "note": "Nobody clicked through"
+            }
+          ],
+          "zeros": [
+            {
+              "key": "impressions",
+              "label": "Impressions",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "clicks",
+              "label": "Pin clicks",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "outboundClicks",
+              "label": "Outbound clicks",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "saves",
+              "label": "Saves",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "closeups",
+              "label": "Closeups",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "views",
+              "label": "Video views",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "engagement",
+              "label": "Total engagement",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "engagementRate",
+              "label": "Engagement rate",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "followers",
+              "label": "Followers",
+              "reason": "unpublished",
+              "explanation": "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report."
+            },
+            {
+              "key": "monthlyViews",
+              "label": "Monthly views",
+              "reason": "unpublished",
+              "explanation": "Pinterest's public API does not expose monthly views, so Zernio cannot report them."
+            }
+          ],
+          "benchmark": {
+            "metric": "engagement rate",
+            "yours": null,
+            "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting.",
+            "typical": "1.9% average",
+            "tier": "≈3.2% median for accounts under 5K followers",
+            "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data."
+          },
+          "actions": [
+            {
+              "priority": 1,
+              "title": "Convert @kishorprajapati1040 to a Business account (free)",
+              "detail": "Pinterest only serves organic analytics — impressions, saves, pin clicks, outbound clicks — to Business accounts. In Pinterest: Settings → Account management → Convert to business. Nothing about the account name, boards or pins changes, and it is free. This is the one change that makes every Pinterest card on this dashboard fill in.",
+              "effort": "5 minutes"
+            },
+            {
+              "priority": 2,
+              "title": "Reconnect Pinterest in Zernio after converting",
+              "detail": "The token already grants boards:read, pins:read, user_accounts:read, ads:read and the connection is marked active (connected 2026-09-17) — so no scope is missing and re-authorising on its own changes nothing. Reconnect only AFTER the account is a Business account, so Pinterest re-evaluates the entitlement.",
+              "effort": "5 minutes"
+            },
+            {
+              "priority": 3,
+              "title": "Until then, read the truth in Pinterest itself",
+              "detail": "pinterest.com/analytics (business accounts only) shows impressions per pin. Cross-check one of the 6 pins listed below: if Pinterest shows impressions there while this dashboard shows 0, the gap is the connection — not your content."
+            },
+            {
+              "priority": 4,
+              "title": "Keep pinning for universities and departments regardless",
+              "detail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. A pin is indexed like a search result, so the work is not wasted — it just cannot be measured from here until the account entitlement is fixed."
+            }
+          ],
+          "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+          "evidence": {
+            "published": 6,
+            "seen": 0,
+            "seenKey": "impressions",
+            "engaged": 0,
+            "engagedSource": null,
+            "postSums": {
+              "clicks": 0,
+              "saves": 0
+            },
+            "followers": null,
+            "followersPublished": false,
+            "converted": 0,
+            "convertedKey": "outboundClicks",
+            "youngPosts": 1,
+            "lagging": true,
+            "postsRead": 6,
+            "notReported": true,
+            "seenPerPost": null,
+            "lowReach": false,
+            "identifiedPosts": 6,
+            "syncedPosts": 6,
+            "agedPosts": 5,
+            "oldestPostDays": 32,
+            "accountGaugesEmpty": true,
+            "accountPermissions": [
+              "boards:read",
+              "boards:write",
+              "pins:read",
+              "pins:write",
+              "user_accounts:read",
+              "ads:read",
+              "ads:write"
+            ],
+            "accountPlatformStatus": "active"
+          }
+        },
+        "students": {
+          "platform": "pinterest",
+          "audience": "students",
+          "audienceFit": {
+            "fit": "medium",
+            "why": "Study aesthetics, notes and project inspiration are evergreen search traffic."
+          },
+          "stage": "not-reported",
+          "headline": "6 pin(s) are known to Pinterest — each has a real pin id and URL and is marked synced — yet every metric is 0, including pins up to 32 days old (well past the 24–48 h reporting lag), and every account-level gauge (pin count, board count, monthly views, account type) is empty too. Pinterest only serves organic analytics to BUSINESS accounts, so these zeros mean \"not measured\", not \"nobody saw them\". Do not rewrite the content over this number — fix the account type first.",
+          "funnel": [
+            {
+              "key": "published",
+              "label": "Published",
+              "value": 6,
+              "display": "6",
+              "verdict": "ok",
+              "note": "6 item(s) in this range"
+            },
+            {
+              "key": "seen",
+              "label": "Seen",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "impressions",
+              "note": "6 item(s) are known to the platform (real id + URL, marked synced) but it returns no metrics for them"
+            },
+            {
+              "key": "engaged",
+              "label": "Engaged",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "engagement",
+              "note": "No engagement yet"
+            },
+            {
+              "key": "followed",
+              "label": "Followers",
+              "value": null,
+              "display": "not published",
+              "verdict": "unavailable",
+              "note": "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report."
+            },
+            {
+              "key": "converted",
+              "label": "Clicked through",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "outboundClicks",
+              "note": "Nobody clicked through"
+            }
+          ],
+          "zeros": [
+            {
+              "key": "impressions",
+              "label": "Impressions",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "clicks",
+              "label": "Pin clicks",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "outboundClicks",
+              "label": "Outbound clicks",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "saves",
+              "label": "Saves",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "closeups",
+              "label": "Closeups",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "views",
+              "label": "Video views",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "engagement",
+              "label": "Total engagement",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "engagementRate",
+              "label": "Engagement rate",
+              "reason": "not-reported",
+              "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 32 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+            },
+            {
+              "key": "followers",
+              "label": "Followers",
+              "reason": "unpublished",
+              "explanation": "Pinterest's API does not publish a follower count for business accounts, so Zernio has nothing to report."
+            },
+            {
+              "key": "monthlyViews",
+              "label": "Monthly views",
+              "reason": "unpublished",
+              "explanation": "Pinterest's public API does not expose monthly views, so Zernio cannot report them."
+            }
+          ],
+          "benchmark": {
+            "metric": "engagement rate",
+            "yours": null,
+            "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting.",
+            "typical": "1.9% average",
+            "tier": "≈3.2% median for accounts under 5K followers",
+            "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data."
+          },
+          "actions": [
+            {
+              "priority": 1,
+              "title": "Convert @kishorprajapati1040 to a Business account (free)",
+              "detail": "Pinterest only serves organic analytics — impressions, saves, pin clicks, outbound clicks — to Business accounts. In Pinterest: Settings → Account management → Convert to business. Nothing about the account name, boards or pins changes, and it is free. This is the one change that makes every Pinterest card on this dashboard fill in.",
+              "effort": "5 minutes"
+            },
+            {
+              "priority": 2,
+              "title": "Reconnect Pinterest in Zernio after converting",
+              "detail": "The token already grants boards:read, pins:read, user_accounts:read, ads:read and the connection is marked active (connected 2026-09-17) — so no scope is missing and re-authorising on its own changes nothing. Reconnect only AFTER the account is a Business account, so Pinterest re-evaluates the entitlement.",
+              "effort": "5 minutes"
+            },
+            {
+              "priority": 3,
+              "title": "Until then, read the truth in Pinterest itself",
+              "detail": "pinterest.com/analytics (business accounts only) shows impressions per pin. Cross-check one of the 6 pins listed below: if Pinterest shows impressions there while this dashboard shows 0, the gap is the connection — not your content."
+            },
+            {
+              "priority": 4,
+              "title": "Keep pinning for students regardless",
+              "detail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. A pin is indexed like a search result, so the work is not wasted — it just cannot be measured from here until the account entitlement is fixed."
+            }
+          ],
+          "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+          "evidence": {
+            "published": 6,
+            "seen": 0,
+            "seenKey": "impressions",
+            "engaged": 0,
+            "engagedSource": null,
+            "postSums": {
+              "clicks": 0,
+              "saves": 0
+            },
+            "followers": null,
+            "followersPublished": false,
+            "converted": 0,
+            "convertedKey": "outboundClicks",
+            "youngPosts": 1,
+            "lagging": true,
+            "postsRead": 6,
+            "notReported": true,
+            "seenPerPost": null,
+            "lowReach": false,
+            "identifiedPosts": 6,
+            "syncedPosts": 6,
+            "agedPosts": 5,
+            "oldestPostDays": 32,
+            "accountGaugesEmpty": true,
+            "accountPermissions": [
+              "boards:read",
+              "boards:write",
+              "pins:read",
+              "pins:write",
+              "user_accounts:read",
+              "ads:read",
+              "ads:write"
+            ],
+            "accountPlatformStatus": "active"
+          }
+        }
+      }
+    },
+    "linkedin": {
+      "payload": {
+        "notice": "Triggered analytics sync for 1 external posts (1 accepted).",
+        "overview": {
+          "impressions": {
+            "key": "impressions",
+            "label": "Impressions",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 93,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "reach": {
+            "key": "reach",
+            "label": "Reach",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 43,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "clicks": {
+            "key": "clicks",
+            "label": "Clicks",
+            "kind": "sum",
+            "unit": "",
+            "group": "Performance",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "likes": {
+            "key": "likes",
+            "label": "Reactions",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 2,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "comments": {
+            "key": "comments",
+            "label": "Comments",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "shares": {
+            "key": "shares",
+            "label": "Reposts",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "saves": {
+            "key": "saves",
+            "label": "Saves",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "sends": {
+            "key": "sends",
+            "label": "Sends",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "follows": {
+            "key": "follows",
+            "label": "Follows from posts",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false
+          },
+          "engagement": {
+            "key": "engagement",
+            "label": "Total engagement",
+            "kind": "sum",
+            "unit": "",
+            "group": "Engagement",
+            "total": 2,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "engagementRate": {
+            "key": "engagementRate",
+            "label": "Engagement rate",
+            "kind": "rate",
+            "unit": "%",
+            "group": "Engagement",
+            "total": 0,
+            "previous": null,
+            "trend": 0,
+            "hasData": false,
+            "description": "Total engagement ÷ impressions",
+            "currentHalfRate": 1.15
+          },
+          "posts": {
+            "key": "posts",
+            "label": "Posts published",
+            "kind": "count",
+            "unit": "",
+            "group": "Activity",
+            "total": 8,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true
+          },
+          "followers": {
+            "key": "followers",
+            "label": "Followers",
+            "kind": "gauge",
+            "unit": "",
+            "group": "Audience",
+            "total": 0,
+            "previous": 0,
+            "trend": 0,
+            "hasData": false,
+            "change": 0,
+            "source": "follower-stats",
+            "unavailable": true,
+            "unavailableReason": "LinkedIn only publishes follower counts for Company Pages. Personal profiles expose neither followers nor connections through the API."
+          },
+          "views": {
+            "key": "views",
+            "label": "Views",
+            "kind": "sum",
+            "unit": "",
+            "group": "Other",
+            "total": 5,
+            "previous": 0,
+            "trend": 100,
+            "hasData": true,
+            "extra": true
+          }
+        },
+        "posts": [
+          {
+            "postId": "urn:li:ugcPost:7517925769025699840",
+            "content": "Aaj ka plan?\npoll: Garba pakka / pehle attendance 😅",
+            "title": null,
+            "publishedAt": "2026-10-20T01:35:31.889Z",
+            "date": "2026-10-20",
+            "platformUrl": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7517925769025699840/",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": "https://media.zernio.com/media/1792303809618_sjozd3ga_4.mp4",
+                "thumbnail": "https://media.zernio.com/media/1792303809618_sjozd3ga_4.mp4"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1792303809618_sjozd3ga_4.mp4",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6ad462c70edd18bc5d4bd3c9",
+            "zernioDocId": "6ad62f8295da94eabaa6e0e5",
+            "analytics": {
+              "impressions": 8,
+              "reach": 2,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb1c92b73b07bd6216c817",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-18T01:35:31.889Z",
+            "date": "2026-10-18",
+            "platformUrl": "",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": "https://media.zernio.com/media/1791695937589_0mlsh0i0_3.mp4",
+                "thumbnail": "https://media.zernio.com/media/1791695937589_0mlsh0i0_3.mp4"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791695937589_0mlsh0i0_3.mp4",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb1c92b73b07bd6216c817",
+            "zernioDocId": "reconstructed_li_doc_2",
+            "analytics": {
+              "impressions": 9,
+              "reach": 4,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 2,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb12beced2a63cf5f8936d",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-17T01:35:31.889Z",
+            "date": "2026-10-17",
+            "platformUrl": "",
+            "mediaType": "carousel",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693498263_2ohkpwmj_file_000000005fdc820aa358080578dfd355.png",
+                "thumbnail": "https://media.zernio.com/media/1791693498263_2ohkpwmj_file_000000005fdc820aa358080578dfd355.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693496190_h883cawk_file_00000000ae848210a0eece1104ff0ea1.png",
+                "thumbnail": "https://media.zernio.com/media/1791693496190_h883cawk_file_00000000ae848210a0eece1104ff0ea1.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693493778_t4n44aot_file_00000000abc482089e4ec9d0002194fe.png",
+                "thumbnail": "https://media.zernio.com/media/1791693493778_t4n44aot_file_00000000abc482089e4ec9d0002194fe.png"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791693498263_2ohkpwmj_file_000000005fdc820aa358080578dfd355.png",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb12beced2a63cf5f8936d",
+            "zernioDocId": "reconstructed_li_doc_3",
+            "analytics": {
+              "impressions": 10,
+              "reach": 5,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb19a20853a5e7d3c35071",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-16T01:35:31.889Z",
+            "date": "2026-10-16",
+            "platformUrl": "",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": "https://media.zernio.com/media/1791695244030_hj7t5xcv_attendx-reel-final.mp4",
+                "thumbnail": "https://media.zernio.com/media/1791695244030_hj7t5xcv_attendx-reel-final.mp4"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791695244030_hj7t5xcv_attendx-reel-final.mp4",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb19a20853a5e7d3c35071",
+            "zernioDocId": "reconstructed_li_doc_4",
+            "analytics": {
+              "impressions": 20,
+              "reach": 13,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 2,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb11daa6f390d66e5391db",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-15T01:35:31.889Z",
+            "date": "2026-10-15",
+            "platformUrl": "",
+            "mediaType": "carousel",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693267817_cplwn5t9_file_00000000dbf08246b7e37ef84bfb27cc.png",
+                "thumbnail": "https://media.zernio.com/media/1791693267817_cplwn5t9_file_00000000dbf08246b7e37ef84bfb27cc.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693269638_mlbzphml_file_000000003b8882469547640183c0b642.png",
+                "thumbnail": "https://media.zernio.com/media/1791693269638_mlbzphml_file_000000003b8882469547640183c0b642.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693271488_da15u2xu_file_000000002854824684241bfc5115a90a.png",
+                "thumbnail": "https://media.zernio.com/media/1791693271488_da15u2xu_file_000000002854824684241bfc5115a90a.png"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791693267817_cplwn5t9_file_00000000dbf08246b7e37ef84bfb27cc.png",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb11daa6f390d66e5391db",
+            "zernioDocId": "reconstructed_li_doc_5",
+            "analytics": {
+              "impressions": 15,
+              "reach": 8,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb1741b6fdbf11fd8130b0",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-14T01:35:31.889Z",
+            "date": "2026-10-14",
+            "platformUrl": "",
+            "mediaType": "video",
+            "mediaItems": [
+              {
+                "type": "video",
+                "url": "https://media.zernio.com/media/1791694614525_fpycmngf_attendx-prototype-walkthrough.mp4",
+                "thumbnail": "https://media.zernio.com/media/1791694614525_fpycmngf_attendx-prototype-walkthrough.mp4"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791694614525_fpycmngf_attendx-prototype-walkthrough.mp4",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb1741b6fdbf11fd8130b0",
+            "zernioDocId": "reconstructed_li_doc_6",
+            "analytics": {
+              "impressions": 1,
+              "reach": 1,
+              "likes": 0,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 1,
+              "follows": 0,
+              "engagement": 0,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6acb1102a98c701bd1a030df",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-10-13T01:35:31.889Z",
+            "date": "2026-10-13",
+            "platformUrl": "",
+            "mediaType": "carousel",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693051070_4aqbudct_Screenshot_2026-10-11_095638.png",
+                "thumbnail": "https://media.zernio.com/media/1791693051070_4aqbudct_Screenshot_2026-10-11_095638.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693053338_ykm67r96_Screenshot_2026-10-11_095631.png",
+                "thumbnail": "https://media.zernio.com/media/1791693053338_ykm67r96_Screenshot_2026-10-11_095631.png"
+              },
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1791693055379_hzam9n8l_Screenshot_2026-10-11_095618.png",
+                "thumbnail": "https://media.zernio.com/media/1791693055379_hzam9n8l_Screenshot_2026-10-11_095618.png"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1791693051070_4aqbudct_Screenshot_2026-10-11_095638.png",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6acb1102a98c701bd1a030df",
+            "zernioDocId": "reconstructed_li_doc_7",
+            "analytics": {
+              "impressions": 24,
+              "reach": 9,
+              "likes": 1,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 1,
+              "engagementRate": 0
+            }
+          },
+          {
+            "postId": "6aacb9137a644cb28b6333f8",
+            "content": "",
+            "title": null,
+            "publishedAt": "2026-09-18T18:23:31.889Z",
+            "date": "2026-09-18",
+            "platformUrl": "",
+            "mediaType": "image",
+            "mediaItems": [
+              {
+                "type": "image",
+                "url": "https://media.zernio.com/media/1789704336279_07e35rp4_Gemini_Generated_Image_n7i4zhn7i4zhn7i4.png",
+                "thumbnail": "https://media.zernio.com/media/1789704336279_07e35rp4_Gemini_Generated_Image_n7i4zhn7i4zhn7i4.png"
+              }
+            ],
+            "thumbnailUrl": "https://media.zernio.com/media/1789704336279_07e35rp4_Gemini_Generated_Image_n7i4zhn7i4zhn7i4.png",
+            "status": "published",
+            "platform": "linkedin",
+            "accountUsername": "kishor prajapati",
+            "boardName": null,
+            "isExternal": true,
+            "syncStatus": "synced",
+            "latePostId": "6aacb9137a644cb28b6333f8",
+            "zernioDocId": "reconstructed_li_doc_8",
+            "analytics": {
+              "impressions": 6,
+              "reach": 1,
+              "likes": 1,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0,
+              "sends": 0,
+              "clicks": 0,
+              "outboundClicks": 0,
+              "views": 0,
+              "follows": 0,
+              "engagement": 1,
+              "engagementRate": 0
+            }
+          }
+        ],
+        "totals": {
+          "impressions": 93,
+          "reach": 43,
+          "likes": 2,
+          "comments": 0,
+          "shares": 0,
+          "saves": 0,
+          "sends": 0,
+          "clicks": 0,
+          "outboundClicks": 0,
+          "closeups": 0,
+          "views": 5,
+          "follows": 0,
+          "reposts": 0,
+          "profileViews": 0,
+          "websiteClicks": 0,
+          "engagement": 2
+        },
+        "meta": {
+          "account": {
+            "zernioAccountId": "6aab85698d284ffb210cbe73",
+            "platform": "linkedin",
+            "username": "kishor prajapati",
+            "displayName": "kishor prajapati",
+            "profilePicture": "https://media.licdn.com/dms/image/v2/D4E03AQE3ixxITiNjDw/profile-displayphoto-scale_400_400/B4EaEphufMJkAg-/0/1791698070409?e=1794441600&v=beta&t=0kuvThTyLcyjm0mjYVPOLBJPN-aiyFTKLgiZkp7skik",
+            "profileUrl": "https://www.linkedin.com/in/kishor-prajapati-1a3ab8437/",
+            "followers": 0,
+            "following": null,
+            "pinCount": null,
+            "boardCount": null,
+            "monthlyViews": null,
+            "externalPostCount": 0,
+            "lastSyncedAt": null,
+            "connectedAt": "2026-09-17T06:15:05.066Z",
+            "tokenExpiresAt": "2026-11-17T13:23:43.535Z",
+            "isActive": true,
+            "accountType": "personal",
+            "permissions": [
+              "openid",
+              "profile",
+              "r_basicprofile",
+              "email",
+              "w_member_social",
+              "w_member_social_feed",
+              "r_member_postAnalytics",
+              "r_member_profileAnalytics",
+              "r_1st_connections_size",
+              "w_organization_social",
+              "w_organization_social_feed",
+              "rw_organization_admin",
+              "r_organization_social",
+              "r_organization_social_feed",
+              "r_organization_followers",
+              "r_ads",
+              "rw_ads",
+              "r_ads_reporting",
+              "r_marketing_leadgen_automation",
+              "rw_conversions"
+            ],
+            "platformStatus": "active",
+            "platformStatusReason": null,
+            "needsReconnection": false,
+            "enabled": true,
+            "scopes": [
+              "email",
+              "openid",
+              "profile",
+              "r_1st_connections_size",
+              "r_ads",
+              "r_ads_reporting",
+              "r_basicprofile",
+              "r_marketing_leadgen_automation",
+              "r_member_postAnalytics",
+              "r_member_profileAnalytics",
+              "r_organization_followers",
+              "r_organization_social",
+              "r_organization_social_feed",
+              "rw_ads",
+              "rw_conversions",
+              "rw_organization_admin",
+              "w_member_social",
+              "w_member_social_feed",
+              "w_organization_social",
+              "w_organization_social_feed"
+            ],
+            "followersCount": 0,
+            "followersLastUpdated": "2026-10-21T05:39:41.289Z",
+            "lastSuccessfulPublishAt": null,
+            "rateLimitedUntil": null,
+            "byokConfigured": true,
+            "rawStats": {
+              "pinCount": null,
+              "boardCount": null,
+              "monthlyViews": null
+            }
+          },
+          "boards": null,
+          "sync": {
+            "skipped": false,
+            "attempted": 1,
+            "synced": 1,
+            "failed": 0,
+            "alreadySynced": 8,
+            "externalPosts": 8,
+            "withoutUrl": 7,
+            "accountSweep": true,
+            "errors": [],
+            "note": "Analytics for freshly synced posts can still lag 24–48h."
+          },
+          "metricAvailability": {
+            "posts": 8,
+            "allZero": false,
+            "identified": 8,
+            "synced": 8,
+            "external": 8,
+            "agedPastLag": 7,
+            "newestHours": 36,
+            "oldestDays": 32,
+            "beyondLag": true,
+            "accountGaugesEmpty": true,
+            "verdict": "reporting"
+          }
+        }
+      },
+      "diagnosis": {
+        "institutions": {
+          "platform": "linkedin",
+          "audience": "institutions",
+          "audienceFit": {
+            "fit": "high",
+            "why": "Heads of department, placement cells, registrars and edtech buyers are all here — and education is LinkedIn's highest-engagement industry."
+          },
+          "stage": "no-conversion",
+          "headline": "93 impressions and 2 engagement, but 0 clicks. Attention exists; there is no path from the post to the destination. Reach is the binding constraint here: 11.6 impressions per post across 8 post(s) — the platform showed this content to almost nobody, so there was never a real chance for it to convert.",
+          "funnel": [
+            {
+              "key": "published",
+              "label": "Published",
+              "value": 8,
+              "display": "8",
+              "verdict": "ok",
+              "note": "8 item(s) in this range"
+            },
+            {
+              "key": "seen",
+              "label": "Seen",
+              "value": 93,
+              "display": "93",
+              "verdict": "ok",
+              "sourceKey": "impressions",
+              "note": "93 impressions — only 11.6 per post, which is why nothing downstream moved"
+            },
+            {
+              "key": "engaged",
+              "label": "Engaged",
+              "value": 2,
+              "display": "2",
+              "verdict": "ok",
+              "sourceKey": "engagement",
+              "note": "2 engagement"
+            },
+            {
+              "key": "followed",
+              "label": "Followers",
+              "value": null,
+              "display": "not published",
+              "verdict": "unavailable",
+              "note": "LinkedIn only publishes follower counts for Company Pages. Personal profiles expose neither followers nor connections through the API."
+            },
+            {
+              "key": "converted",
+              "label": "Clicked through",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "clicks",
+              "note": "Nobody clicked through"
+            }
+          ],
+          "zeros": [
+            {
+              "key": "clicks",
+              "label": "Clicks",
+              "reason": "no-conversion",
+              "explanation": "Attention existed but nothing pointed at a destination, or the destination was not worth the click."
+            },
+            {
+              "key": "comments",
+              "label": "Comments",
+              "reason": "no-activity",
+              "explanation": "No comments on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level comments insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "shares",
+              "label": "Reposts",
+              "reason": "no-activity",
+              "explanation": "No reposts on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level reposts insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "saves",
+              "label": "Saves",
+              "reason": "no-activity",
+              "explanation": "No saves on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level saves insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "sends",
+              "label": "Sends",
+              "reason": "no-activity",
+              "explanation": "No sends on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level sends insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "follows",
+              "label": "Follows from posts",
+              "reason": "no-activity",
+              "explanation": "No follows from posts on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level follows from posts insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "engagementRate",
+              "label": "Engagement rate",
+              "reason": "no-activity",
+              "explanation": "No engagement rate recorded in this range."
+            },
+            {
+              "key": "followers",
+              "label": "Followers",
+              "reason": "unpublished",
+              "explanation": "LinkedIn only publishes follower counts for Company Pages. Personal profiles expose neither followers nor connections through the API."
+            }
+          ],
+          "benchmark": {
+            "metric": "engagement rate",
+            "yours": 2.15,
+            "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+            "tier": "≈5.6% median for accounts under 5K followers",
+            "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+            "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+          },
+          "actions": [
+            {
+              "priority": 1,
+              "title": "Fix reach before anything else",
+              "detail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. At 11.6 impressions per post the algorithm is not distributing this content, so no headline, thumbnail or CTA change can be evaluated yet. Post 2–3× a week for four weeks, get a real person to engage within the first hour, and keep any destination link out of the post body — a bare link suppresses reach.",
+              "effort": "4 weeks"
+            },
+            {
+              "priority": 2,
+              "title": "Put one destination in every post",
+              "detail": "Link in the first comment, and a reason to click (\"the 2-minute demo for a placement cell\")."
+            }
+          ],
+          "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+          "evidence": {
+            "published": 8,
+            "seen": 93,
+            "seenKey": "impressions",
+            "engaged": 2,
+            "engagedSource": "account metric",
+            "postSums": {
+              "likes": 2,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0
+            },
+            "followers": null,
+            "followersPublished": false,
+            "converted": 0,
+            "convertedKey": "clicks",
+            "youngPosts": 1,
+            "lagging": false,
+            "postsRead": 8,
+            "notReported": false,
+            "seenPerPost": 11.6,
+            "lowReach": true,
+            "identifiedPosts": 8,
+            "syncedPosts": 8,
+            "agedPosts": 7,
+            "oldestPostDays": 32,
+            "accountGaugesEmpty": true,
+            "accountPermissions": [
+              "openid",
+              "profile",
+              "r_basicprofile",
+              "email",
+              "w_member_social",
+              "w_member_social_feed",
+              "r_member_postAnalytics",
+              "r_member_profileAnalytics",
+              "r_1st_connections_size",
+              "w_organization_social",
+              "w_organization_social_feed",
+              "rw_organization_admin",
+              "r_organization_social",
+              "r_organization_social_feed",
+              "r_organization_followers",
+              "r_ads",
+              "rw_ads",
+              "r_ads_reporting",
+              "r_marketing_leadgen_automation",
+              "rw_conversions"
+            ],
+            "accountPlatformStatus": "active"
+          }
+        },
+        "students": {
+          "platform": "linkedin",
+          "audience": "students",
+          "audienceFit": {
+            "fit": "medium",
+            "why": "Final-year students and placement season — internships and resumes."
+          },
+          "stage": "no-conversion",
+          "headline": "93 impressions and 2 engagement, but 0 clicks. Attention exists; there is no path from the post to the destination. Reach is the binding constraint here: 11.6 impressions per post across 8 post(s) — the platform showed this content to almost nobody, so there was never a real chance for it to convert.",
+          "funnel": [
+            {
+              "key": "published",
+              "label": "Published",
+              "value": 8,
+              "display": "8",
+              "verdict": "ok",
+              "note": "8 item(s) in this range"
+            },
+            {
+              "key": "seen",
+              "label": "Seen",
+              "value": 93,
+              "display": "93",
+              "verdict": "ok",
+              "sourceKey": "impressions",
+              "note": "93 impressions — only 11.6 per post, which is why nothing downstream moved"
+            },
+            {
+              "key": "engaged",
+              "label": "Engaged",
+              "value": 2,
+              "display": "2",
+              "verdict": "ok",
+              "sourceKey": "engagement",
+              "note": "2 engagement"
+            },
+            {
+              "key": "followed",
+              "label": "Followers",
+              "value": null,
+              "display": "not published",
+              "verdict": "unavailable",
+              "note": "LinkedIn only publishes follower counts for Company Pages. Personal profiles expose neither followers nor connections through the API."
+            },
+            {
+              "key": "converted",
+              "label": "Clicked through",
+              "value": 0,
+              "display": "0",
+              "verdict": "zero",
+              "sourceKey": "clicks",
+              "note": "Nobody clicked through"
+            }
+          ],
+          "zeros": [
+            {
+              "key": "clicks",
+              "label": "Clicks",
+              "reason": "no-conversion",
+              "explanation": "Attention existed but nothing pointed at a destination, or the destination was not worth the click."
+            },
+            {
+              "key": "comments",
+              "label": "Comments",
+              "reason": "no-activity",
+              "explanation": "No comments on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level comments insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "shares",
+              "label": "Reposts",
+              "reason": "no-activity",
+              "explanation": "No reposts on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level reposts insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "saves",
+              "label": "Saves",
+              "reason": "no-activity",
+              "explanation": "No saves on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level saves insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "sends",
+              "label": "Sends",
+              "reason": "no-activity",
+              "explanation": "No sends on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level sends insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "follows",
+              "label": "Follows from posts",
+              "reason": "no-activity",
+              "explanation": "No follows from posts on any of the 8 post(s) read in this range (they recorded 2 other interaction(s) between them), and the account-level follows from posts insight is empty too. This is a measured zero, not a missing metric.",
+              "source": "summed from posts"
+            },
+            {
+              "key": "engagementRate",
+              "label": "Engagement rate",
+              "reason": "no-activity",
+              "explanation": "No engagement rate recorded in this range."
+            },
+            {
+              "key": "followers",
+              "label": "Followers",
+              "reason": "unpublished",
+              "explanation": "LinkedIn only publishes follower counts for Company Pages. Personal profiles expose neither followers nor connections through the API."
+            }
+          ],
+          "benchmark": {
+            "metric": "engagement rate",
+            "yours": 2.15,
+            "typical": "3.9% average · 3.0–4.0% for education (highest of any industry)",
+            "tier": "≈5.6% median for accounts under 5K followers",
+            "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data.",
+            "note": "Document/carousel posts lead at ≈7% engagement. Dwell time and comments in the first hour decide distribution; a bare external link suppresses reach, so put links in the first comment."
+          },
+          "actions": [
+            {
+              "priority": 1,
+              "title": "Fix reach before anything else",
+              "detail": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment. At 11.6 impressions per post the algorithm is not distributing this content, so no headline, thumbnail or CTA change can be evaluated yet. Post 2–3× a week for four weeks, get a real person to engage within the first hour, and keep any destination link out of the post body — a bare link suppresses reach.",
+              "effort": "4 weeks"
+            },
+            {
+              "priority": 2,
+              "title": "Put one destination in every post",
+              "detail": "Link in the first comment, and a reason to click (\"the 2-minute demo for a placement cell\")."
+            }
+          ],
+          "mechanics": "Text-with-image and document/carousel posts get the most dwell time. Post from a personal profile, tag the institution, and put any external link in the first comment.",
+          "evidence": {
+            "published": 8,
+            "seen": 93,
+            "seenKey": "impressions",
+            "engaged": 2,
+            "engagedSource": "account metric",
+            "postSums": {
+              "likes": 2,
+              "comments": 0,
+              "shares": 0,
+              "saves": 0
+            },
+            "followers": null,
+            "followersPublished": false,
+            "converted": 0,
+            "convertedKey": "clicks",
+            "youngPosts": 1,
+            "lagging": false,
+            "postsRead": 8,
+            "notReported": false,
+            "seenPerPost": 11.6,
+            "lowReach": true,
+            "identifiedPosts": 8,
+            "syncedPosts": 8,
+            "agedPosts": 7,
+            "oldestPostDays": 32,
+            "accountGaugesEmpty": true,
+            "accountPermissions": [
+              "openid",
+              "profile",
+              "r_basicprofile",
+              "email",
+              "w_member_social",
+              "w_member_social_feed",
+              "r_member_postAnalytics",
+              "r_member_profileAnalytics",
+              "r_1st_connections_size",
+              "w_organization_social",
+              "w_organization_social_feed",
+              "rw_organization_admin",
+              "r_organization_social",
+              "r_organization_social_feed",
+              "r_organization_followers",
+              "r_ads",
+              "rw_ads",
+              "r_ads_reporting",
+              "r_marketing_leadgen_automation",
+              "rw_conversions"
+            ],
+            "accountPlatformStatus": "active"
+          }
+        }
+      }
+    }
+  }
+}

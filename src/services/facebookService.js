@@ -12,6 +12,7 @@ const { parseDateRange, dateRangeMeta, toDateStr } = require('../utils/dateUtils
 const demo = require('../utils/demographics');
 const { transformMetrics, buildOverview } = require('../utils/transform');
 const { fetchMetricGroup, insightWindows } = require('../utils/graphInsights');
+const { fetchPagePosts, backfillFromPosts } = require('../utils/metaPosts');
 const { round } = require('../utils/metrics');
 
 const GROUPS = [
@@ -28,9 +29,12 @@ async function fetchInsights(query) {
   const { since, until } = parseDateRange(query);
   const url = `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.FACEBOOK_PAGE_ID}/insights`;
 
-  const [accountInfo, demographics, ...results] = await Promise.all([
+  const [accountInfo, demographics, pagePosts, ...results] = await Promise.all([
     getAccountDetails().then((d) => d.facebook).catch((e) => ({ error: e.message })),
     fetchDemographics().catch((e) => ({ ...demo.empty('Meta Graph API · page_fans demographics', 'Demographics unavailable: ' + (e.message || e), ['age', 'gender', 'countries', 'cities', 'devices']), unit: 'count' })),
+    // Page posts: fill the Content grid, and supply engagement numbers for the
+    // retired account-level insights. Optional — never fatal.
+    fetchPagePosts(pt, { since, until }).catch((e) => ({ ok: false, posts: [], totals: null, errors: [{ endpoint: 'posts', message: e.message }] })),
     // Each group is requested in ≤30-day windows (Meta rejects longer ranges)
     // and, if Meta rejects the parameter set, metric by metric so one retired
     // metric cannot take the whole group down.
@@ -90,7 +94,8 @@ async function fetchInsights(query) {
 
   const hardFailures = errors.filter((e) => !e.optional);
   const pageProfile = accountInfo && !accountInfo.error ? accountInfo : null;
-  const haveAnything = raw.length > 0 || Boolean(pageProfile) || demographics?.available === true;
+  const haveAnything =
+    raw.length > 0 || Boolean(pageProfile) || demographics?.available === true || (pagePosts?.posts?.length || 0) > 0;
 
   // Degrade, don't fail: as long as SOMETHING came back (metrics, the page
   // profile or demographics) the client gets a payload with a notice instead of
@@ -129,12 +134,42 @@ async function fetchInsights(query) {
     if (gauge !== null && !overview.followers) {
       overview.followers = {
         key: 'followers', id: 'page_fans', label: 'Page followers', kind: 'gauge', unit: '',
-        group: 'Audience', total: gauge, previous: null, trend: 0, hasData: gauge > 0,
-        source: 'page_profile',
+        group: 'Audience', total: gauge, previous: null, trend: null, trendBasis: null, hasData: gauge > 0,
+        source: 'page_profile', followerSource: page.followerSource || null,
       };
     }
+    for (const fe of page.fieldErrors || []) {
+      errors.push({ group: 'page_profile', fields: fe.fields, optional: true, message: fe.message, code: fe.code, hint: fe.hint || null });
+    }
   } else if (accountInfo?.error) {
-    errors.push({ group: 'page_profile', optional: true, message: accountInfo.error, hint: accountInfo.hint || null });
+    errors.push({ group: 'page_profile', optional: true, message: accountInfo.error, hint: accountInfo.hint || null, code: accountInfo.code || null });
+  }
+
+  // Meta retired page_fans/page_impressions on current Graph versions, so the
+  // follower gauge may have no source at all. Say so instead of showing a 0 that
+  // reads like a measurement — the dashboard hides `unavailable` cards.
+  if (!overview.followers) {
+    overview.followers = {
+      key: 'followers', id: 'page_fans', label: 'Page followers', kind: 'gauge', unit: '', group: 'Audience',
+      total: 0, previous: null, trend: null, trendBasis: null, hasData: false,
+      unavailable: true,
+      unavailableReason: 'Meta no longer serves page_fans for this Page and the token cannot read followers_count, so a follower total is not published.',
+    };
+  }
+
+  // Posts → Content grid + engagement cards the retired insights left empty.
+  const posts = pagePosts?.posts || [];
+  const filledFromPosts = backfillFromPosts(overview, pagePosts?.totals, {
+    label: 'Page posts',
+    platform: 'facebook',
+    note: 'Meta retired page_impressions/page_post_engagements for some Pages, so these come from the posts themselves',
+  });
+  if (!pagePosts?.ok && pagePosts?.errors?.length) {
+    errors.push({
+      group: 'page_posts', optional: true,
+      message: `Page posts could not be read (${pagePosts.errors.map((e) => `${e.endpoint}: ${e.message}`).join(' | ')})`,
+      hint: 'Reading posts needs the pages_read_user_content or pages_manage_posts permission.',
+    });
   }
 
   // Derived engagement rate for the card grid.
@@ -143,7 +178,7 @@ async function fetchInsights(query) {
   if (reach > 0) {
     overview.engagementRate = {
       key: 'engagementRate', label: 'Engagement rate', kind: 'rate', unit: '%', group: 'Engagement',
-      total: round((eng / reach) * 100, 2), previous: null, trend: 0, hasData: eng > 0, derived: true,
+      total: round((eng / reach) * 100, 2), previous: null, trend: null, trendBasis: null, hasData: eng > 0, derived: true,
       formula: 'Post engagements ÷ reach',
     };
   }
@@ -154,6 +189,11 @@ async function fetchInsights(query) {
       raw.length
         ? `${hardFailures.length} metric group(s) unavailable for this range: ${hardFailures.map((e) => e.metrics).join(' · ')}`
         : `No Page insights for this range (${hardFailures.map((e) => e.message).join(' · ')})`
+    );
+  }
+  if (filledFromPosts.length) {
+    noticeParts.push(
+      `${pagePosts?.totals?.posts ?? posts.length} Page post(s) in this range; ${filledFromPosts.join(', ')} are summed from those posts because Meta no longer serves them as Page insights.`
     );
   }
   if (recovered) noticeParts.push(`${recovered} group(s) were retried metric by metric; retired metrics were skipped.`);
@@ -177,11 +217,15 @@ async function fetchInsights(query) {
       windows: windowsUsed,
       clampedToRecent: clamped,
       recoveredGroups: recovered,
+      postCount: pagePosts?.totals?.posts ?? 0,
+      postsEndpoint: pagePosts?.endpoint || null,
+      filledFromPosts,
     },
     overview,
     timeseries,
     metrics,
     demographics,
+    ...(posts.length ? { posts, topPosts: posts } : {}),
     ...(errors.length ? { partialErrors: errors } : {}),
     ...(notice ? { notice } : {}),
   };

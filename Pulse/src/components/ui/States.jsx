@@ -1,4 +1,5 @@
-import { AlertTriangle, Inbox, PlugZap, RefreshCw, Info, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { AlertTriangle, ChevronDown, Inbox, PlugZap, RefreshCw, Info, Loader2 } from 'lucide-react'
 import { cls } from '../../lib/cls'
 
 export function Skeleton({ className = '' }) {
@@ -104,18 +105,40 @@ export function UnconfiguredState({ platform, message, hint }) {
   )
 }
 
-/** Inline notice bar for backend `notice` / partialErrors text. */
-export function NoticeBar({ children, tone = 'warn', className = '', icon = null }) {
+/**
+ * Inline notice bar for backend `notice` / partialErrors text.
+ *
+ * `clamp` keeps a long backend notice from turning the top of a page into a
+ * paragraph: the first N lines show, the rest stays in the DOM behind one click.
+ * Clamped with CSS (not by cutting the string) so the full text is still there
+ * for screen readers, search and the smoke test.
+ */
+export function NoticeBar({ children, tone = 'warn', className = '', icon = null, clamp = 0 }) {
+  const [open, setOpen] = useState(false)
   const tones = {
     warn: 'bg-warn-soft border-warn-line text-warn',
     info: 'bg-brand-soft border-brand-line text-brand-ink',
     error: 'bg-neg-soft border-neg-line text-neg',
     ok: 'bg-pos-soft border-pos-line text-pos',
   }
+  const clampClass = clamp > 0 && !open ? `line-clamp-${clamp}` : ''
   return (
-    <div className={cls('flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 text-[12.5px] leading-relaxed', tones[tone], className)}>
+    <div className={cls('flex items-start gap-2.5 rounded-xl border px-3.5 py-2 text-[12.5px] leading-snug', tones[tone], className)}>
       <span className="mt-0.5 shrink-0">{icon || <Info className="w-3.5 h-3.5" strokeWidth={2.2} />}</span>
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 flex-1">
+        <div className={clampClass}>{children}</div>
+        {clamp > 0 ? (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-medium underline underline-offset-2 opacity-80 hover:opacity-100"
+          >
+            <ChevronDown className={cls('w-3 h-3 transition-transform', open && 'rotate-180')} strokeWidth={2.4} aria-hidden="true" />
+            {open ? 'Show less' : 'Read the full note'}
+          </button>
+        ) : null}
+      </div>
     </div>
   )
 }

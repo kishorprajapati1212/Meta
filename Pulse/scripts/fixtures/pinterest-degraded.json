@@ -3,8 +3,8 @@
   "platform": "pinterest",
   "meta": {
     "dateRange": {
-      "from": "2026-09-15",
-      "to": "2026-10-15"
+      "from": "2026-09-22",
+      "to": "2026-10-22"
     },
     "source": "Zernio",
     "hasAnalyticsAccess": false,
@@ -51,6 +51,19 @@
           "reason": "no accountId",
           "attempted": 0
         }
+      },
+      "metricAvailability": {
+        "posts": 3,
+        "allZero": true,
+        "identified": 3,
+        "synced": 2,
+        "external": 1,
+        "agedPastLag": 2,
+        "newestHours": 0,
+        "oldestDays": 18,
+        "beyondLag": true,
+        "accountGaugesEmpty": true,
+        "verdict": "not-reported"
       }
     }
   },
@@ -64,7 +77,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "clicks": {
@@ -75,7 +89,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "outboundClicks": {
@@ -86,7 +101,8 @@
         "group": "Performance",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "saves": {
@@ -97,7 +113,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "closeups": {
@@ -108,7 +125,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "views": {
@@ -119,7 +137,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "engagement": {
@@ -130,7 +149,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": 0,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "engagementRate": {
@@ -141,7 +161,8 @@
         "group": "Engagement",
         "total": 0,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false,
         "description": "Total engagement ÷ impressions",
         "currentHalfRate": null
@@ -154,7 +175,8 @@
         "group": "Activity",
         "total": 3,
         "previous": 1,
-        "trend": 200,
+        "trend": null,
+        "trendBasis": null,
         "hasData": true
       },
       "followers": {
@@ -166,6 +188,7 @@
         "total": 1284,
         "previous": 1197,
         "trend": 7.3,
+        "trendBasis": "second-half-vs-first-half",
         "hasData": true,
         "change": 87,
         "source": "follower-stats"
@@ -176,10 +199,12 @@
         "kind": "gauge",
         "unit": "",
         "group": "Audience",
-        "total": 0,
+        "total": 3,
         "previous": null,
-        "trend": 0,
-        "hasData": false
+        "trend": null,
+        "trendBasis": null,
+        "hasData": true,
+        "source": "published pins"
       },
       "boards": {
         "key": "boards",
@@ -189,7 +214,8 @@
         "group": "Audience",
         "total": 0,
         "previous": null,
-        "trend": 0,
+        "trend": null,
+        "trendBasis": null,
         "hasData": false
       },
       "monthlyViews": {
@@ -200,13 +226,16 @@
         "group": "Audience",
         "total": 0,
         "previous": null,
-        "trend": 0,
-        "hasData": false
+        "trend": null,
+        "trendBasis": null,
+        "hasData": false,
+        "unavailable": true,
+        "unavailableReason": "Pinterest's public API does not expose monthly views, so Zernio cannot report them."
       }
     },
     "timeseries": [
       {
-        "date": "2026-09-15",
+        "date": "2026-09-22",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -225,7 +254,7 @@
         "hasData": false
       },
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -244,7 +273,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -263,7 +292,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -282,7 +311,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -301,7 +330,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -320,7 +349,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -339,7 +368,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -358,7 +387,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -377,7 +406,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -396,7 +425,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -415,7 +444,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -434,7 +463,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "posts": 1,
         "impressions": 0,
         "reach": 0,
@@ -453,7 +482,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -472,7 +501,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -491,7 +520,7 @@
         "hasData": true
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -510,7 +539,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -529,7 +558,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -548,7 +577,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -567,7 +596,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -586,7 +615,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -605,7 +634,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -624,7 +653,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -643,7 +672,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -662,7 +691,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "posts": 1,
         "impressions": 0,
         "reach": 0,
@@ -681,7 +710,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -700,7 +729,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -719,7 +748,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -738,7 +767,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -757,7 +786,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "posts": 0,
         "impressions": 0,
         "reach": 0,
@@ -776,7 +805,7 @@
         "hasData": true
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "posts": 1,
         "impressions": 0,
         "reach": 0,
@@ -800,17 +829,20 @@
         "postId": "pin_1",
         "content": "Pin 1 — design inspiration board",
         "title": "Pin 1",
-        "publishedAt": "2026-10-15T13:35:16.131Z",
-        "date": "2026-10-15",
+        "publishedAt": "2026-10-22T10:59:20.362Z",
+        "date": "2026-10-22",
         "platformUrl": "https://pinterest.com/pin/1000",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-1.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "UI Design",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -831,17 +863,20 @@
         "postId": "pin_2",
         "content": "Pin 2 — design inspiration board",
         "title": "Pin 2",
-        "publishedAt": "2026-10-09T13:35:16.131Z",
-        "date": "2026-10-09",
+        "publishedAt": "2026-10-16T10:59:20.362Z",
+        "date": "2026-10-16",
         "platformUrl": "https://pinterest.com/pin/1001",
         "mediaType": "video",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-2.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Dev Setup",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -862,17 +897,20 @@
         "postId": "pin_3",
         "content": "Pin 3 — design inspiration board",
         "title": "Pin 3",
-        "publishedAt": "2026-09-27T13:35:16.131Z",
-        "date": "2026-09-27",
+        "publishedAt": "2026-10-04T10:59:20.362Z",
+        "date": "2026-10-04",
         "platformUrl": "https://pinterest.com/pin/1002",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-3.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Inspiration",
         "isExternal": true,
         "syncStatus": "pending",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -895,17 +933,20 @@
         "postId": "pin_1",
         "content": "Pin 1 — design inspiration board",
         "title": "Pin 1",
-        "publishedAt": "2026-10-15T13:35:16.131Z",
-        "date": "2026-10-15",
+        "publishedAt": "2026-10-22T10:59:20.362Z",
+        "date": "2026-10-22",
         "platformUrl": "https://pinterest.com/pin/1000",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-1.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "UI Design",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -926,17 +967,20 @@
         "postId": "pin_2",
         "content": "Pin 2 — design inspiration board",
         "title": "Pin 2",
-        "publishedAt": "2026-10-09T13:35:16.131Z",
-        "date": "2026-10-09",
+        "publishedAt": "2026-10-16T10:59:20.362Z",
+        "date": "2026-10-16",
         "platformUrl": "https://pinterest.com/pin/1001",
         "mediaType": "video",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-2.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Dev Setup",
         "isExternal": false,
         "syncStatus": "synced",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -957,17 +1001,20 @@
         "postId": "pin_3",
         "content": "Pin 3 — design inspiration board",
         "title": "Pin 3",
-        "publishedAt": "2026-09-27T13:35:16.131Z",
-        "date": "2026-09-27",
+        "publishedAt": "2026-10-04T10:59:20.362Z",
+        "date": "2026-10-04",
         "platformUrl": "https://pinterest.com/pin/1002",
         "mediaType": "image",
         "mediaItems": [],
         "thumbnailUrl": "https://example.com/pin-3.jpg",
         "status": "published",
         "platform": "pinterest",
+        "accountUsername": null,
         "boardName": "Inspiration",
         "isExternal": true,
         "syncStatus": "pending",
+        "latePostId": null,
+        "zernioDocId": null,
         "analytics": {
           "impressions": 0,
           "reach": 0,
@@ -1020,157 +1067,354 @@
     },
     "followerTimeseries": [
       {
-        "date": "2026-09-16",
+        "date": "2026-09-23",
         "followers": 1197,
         "growth": 0
       },
       {
-        "date": "2026-09-17",
+        "date": "2026-09-24",
         "followers": 1200,
         "growth": 3
       },
       {
-        "date": "2026-09-18",
+        "date": "2026-09-25",
         "followers": 1203,
         "growth": 3
       },
       {
-        "date": "2026-09-19",
+        "date": "2026-09-26",
         "followers": 1206,
         "growth": 3
       },
       {
-        "date": "2026-09-20",
+        "date": "2026-09-27",
         "followers": 1209,
         "growth": 3
       },
       {
-        "date": "2026-09-21",
+        "date": "2026-09-28",
         "followers": 1212,
         "growth": 3
       },
       {
-        "date": "2026-09-22",
+        "date": "2026-09-29",
         "followers": 1215,
         "growth": 3
       },
       {
-        "date": "2026-09-23",
+        "date": "2026-09-30",
         "followers": 1218,
         "growth": 3
       },
       {
-        "date": "2026-09-24",
+        "date": "2026-10-01",
         "followers": 1221,
         "growth": 3
       },
       {
-        "date": "2026-09-25",
+        "date": "2026-10-02",
         "followers": 1224,
         "growth": 3
       },
       {
-        "date": "2026-09-26",
+        "date": "2026-10-03",
         "followers": 1227,
         "growth": 3
       },
       {
-        "date": "2026-09-27",
+        "date": "2026-10-04",
         "followers": 1230,
         "growth": 3
       },
       {
-        "date": "2026-09-28",
+        "date": "2026-10-05",
         "followers": 1233,
         "growth": 3
       },
       {
-        "date": "2026-09-29",
+        "date": "2026-10-06",
         "followers": 1236,
         "growth": 3
       },
       {
-        "date": "2026-09-30",
+        "date": "2026-10-07",
         "followers": 1239,
         "growth": 3
       },
       {
-        "date": "2026-10-01",
+        "date": "2026-10-08",
         "followers": 1242,
         "growth": 3
       },
       {
-        "date": "2026-10-02",
+        "date": "2026-10-09",
         "followers": 1245,
         "growth": 3
       },
       {
-        "date": "2026-10-03",
+        "date": "2026-10-10",
         "followers": 1248,
         "growth": 3
       },
       {
-        "date": "2026-10-04",
+        "date": "2026-10-11",
         "followers": 1251,
         "growth": 3
       },
       {
-        "date": "2026-10-05",
+        "date": "2026-10-12",
         "followers": 1254,
         "growth": 3
       },
       {
-        "date": "2026-10-06",
+        "date": "2026-10-13",
         "followers": 1257,
         "growth": 3
       },
       {
-        "date": "2026-10-07",
+        "date": "2026-10-14",
         "followers": 1260,
         "growth": 3
       },
       {
-        "date": "2026-10-08",
+        "date": "2026-10-15",
         "followers": 1263,
         "growth": 3
       },
       {
-        "date": "2026-10-09",
+        "date": "2026-10-16",
         "followers": 1266,
         "growth": 3
       },
       {
-        "date": "2026-10-10",
+        "date": "2026-10-17",
         "followers": 1269,
         "growth": 3
       },
       {
-        "date": "2026-10-11",
+        "date": "2026-10-18",
         "followers": 1272,
         "growth": 3
       },
       {
-        "date": "2026-10-12",
+        "date": "2026-10-19",
         "followers": 1275,
         "growth": 3
       },
       {
-        "date": "2026-10-13",
+        "date": "2026-10-20",
         "followers": 1278,
         "growth": 3
       },
       {
-        "date": "2026-10-14",
+        "date": "2026-10-21",
         "followers": 1281,
         "growth": 3
       },
       {
-        "date": "2026-10-15",
+        "date": "2026-10-22",
         "followers": 1284,
         "growth": 3
       }
     ],
-    "boards": []
+    "demographics": {
+      "available": false,
+      "source": "Zernio",
+      "unit": "share",
+      "asOf": null,
+      "note": "Zernio’s public API does not expose audience demographics (age, gender, location) for Pinterest. The audience section below therefore only shows what the platform itself publishes.",
+      "gender": null,
+      "age": null,
+      "countries": null,
+      "cities": null,
+      "devices": null,
+      "missing": [
+        "age",
+        "gender",
+        "countries",
+        "cities",
+        "devices"
+      ]
+    },
+    "boards": [],
+    "diagnosis": {
+      "platform": "pinterest",
+      "audience": "institutions",
+      "audienceFit": {
+        "fit": "low",
+        "why": "Resource and lesson-planning searches exist, but institutions do not buy from Pinterest."
+      },
+      "stage": "not-reported",
+      "headline": "3 pin(s) are known to Pinterest — each has a real pin id and URL and is marked synced — yet every metric is 0, including pins up to 18 days old (well past the 24–48 h reporting lag), and every account-level gauge (pin count, board count, monthly views, account type) is empty too. Pinterest only serves organic analytics to BUSINESS accounts, so these zeros mean \"not measured\", not \"nobody saw them\". Do not rewrite the content over this number — fix the account type first.",
+      "funnel": [
+        {
+          "key": "published",
+          "label": "Published",
+          "value": 3,
+          "display": "3",
+          "verdict": "ok",
+          "note": "3 item(s) in this range"
+        },
+        {
+          "key": "seen",
+          "label": "Seen",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "impressions",
+          "note": "3 item(s) are known to the platform (real id + URL, marked synced) but it returns no metrics for them"
+        },
+        {
+          "key": "engaged",
+          "label": "Engaged",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "engagement",
+          "note": "No engagement yet"
+        },
+        {
+          "key": "followed",
+          "label": "Followers",
+          "value": 1284,
+          "display": "1.3K",
+          "verdict": "ok",
+          "note": "1.3K followers"
+        },
+        {
+          "key": "converted",
+          "label": "Clicked through",
+          "value": 0,
+          "display": "0",
+          "verdict": "zero",
+          "sourceKey": "outboundClicks",
+          "note": "Nobody clicked through"
+        }
+      ],
+      "zeros": [
+        {
+          "key": "impressions",
+          "label": "Impressions",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "clicks",
+          "label": "Pin clicks",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "outboundClicks",
+          "label": "Outbound clicks",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "saves",
+          "label": "Saves",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "closeups",
+          "label": "Closeups",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "views",
+          "label": "Video views",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "engagement",
+          "label": "Total engagement",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "engagementRate",
+          "label": "Engagement rate",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "boards",
+          "label": "Boards",
+          "reason": "not-reported",
+          "explanation": "Pinterest returned this pin (id and URL are known, syncStatus \"synced\") but reported no metrics for it — the oldest such pin is 18 day(s) old, so this is not the 24–48 h lag. Organic analytics are only served for Pinterest BUSINESS accounts."
+        },
+        {
+          "key": "monthlyViews",
+          "label": "Monthly views",
+          "reason": "unpublished",
+          "explanation": "Pinterest's public API does not expose monthly views, so Zernio cannot report them."
+        }
+      ],
+      "benchmark": {
+        "metric": "engagement rate",
+        "yours": null,
+        "note": "Pins are indexed like search results, not like a feed. A fresh pin usually takes 2–4 weeks before impressions appear, and it can keep driving traffic for months. Keywords in the pin title and board name do the targeting.",
+        "typical": "1.9% average",
+        "tier": "≈3.2% median for accounts under 5K followers",
+        "reference": "Published 2026 industry benchmarks (Hootsuite, Socialinsider, Quid/Rival IQ, SociaVault) — a reference range, not your data."
+      },
+      "actions": [
+        {
+          "priority": 1,
+          "title": "Convert the Pinterest account to a Business account (free)",
+          "detail": "Pinterest only serves organic analytics — impressions, saves, pin clicks, outbound clicks — to Business accounts. In Pinterest: Settings → Account management → Convert to business. Nothing about the account name, boards or pins changes, and it is free. This is the one change that makes every Pinterest card on this dashboard fill in.",
+          "effort": "5 minutes"
+        },
+        {
+          "priority": 2,
+          "title": "Reconnect Pinterest in Zernio after converting",
+          "detail": "The connection was authorised while the account was not a business account. Disconnect and reconnect after converting so the new entitlement is picked up (pins:read, boards:read, user_accounts:read).",
+          "effort": "5 minutes"
+        },
+        {
+          "priority": 3,
+          "title": "Until then, read the truth in Pinterest itself",
+          "detail": "pinterest.com/analytics (business accounts only) shows impressions per pin. Cross-check one of the 3 pins listed below: if Pinterest shows impressions there while this dashboard shows 0, the gap is the connection — not your content."
+        },
+        {
+          "priority": 4,
+          "title": "Keep pinning for universities and departments regardless",
+          "detail": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality. A pin is indexed like a search result, so the work is not wasted — it just cannot be measured from here until the account entitlement is fixed."
+        }
+      ],
+      "mechanics": "Keyword-rich pin titles, vertical 2:3 creative, and boards named for what an institution would search (\"college attendance tracking\", \"campus management\"). Volume and consistency beat virality.",
+      "evidence": {
+        "published": 3,
+        "seen": 0,
+        "seenKey": "impressions",
+        "engaged": 0,
+        "engagedSource": null,
+        "postSums": {
+          "clicks": 0,
+          "saves": 0
+        },
+        "followers": 1284,
+        "followersPublished": true,
+        "converted": 0,
+        "convertedKey": "outboundClicks",
+        "youngPosts": 1,
+        "lagging": true,
+        "postsRead": 3,
+        "notReported": true,
+        "seenPerPost": null,
+        "lowReach": false,
+        "identifiedPosts": 3,
+        "syncedPosts": 2,
+        "agedPosts": 2,
+        "oldestPostDays": 18,
+        "accountGaugesEmpty": true,
+        "accountPermissions": null,
+        "accountPlatformStatus": null
+      }
+    }
   },
-  "notice": "Could not read the Zernio account list (HTTP 500 — upstream boom). 3 pins found, but Zernio returned zero impressions/engagement for them. Pinterest metrics lag 24–48h and only fill in for pins Zernio can read (pins:read + user_accounts:read scopes)."
+  "notice": "Could not read the Zernio account list (HTTP 500 — upstream boom). 3 pins found and every one of them is known to Pinterest (real pin id + URL, syncStatus \"synced\"), yet Pinterest reported 0 impressions/engagement for all of them — the oldest is 18 day(s) old, far beyond Pinterest's 24–48 h reporting lag. Pin count, board count, monthly views and account type all come back empty for the pinterest account as well. Pinterest only serves organic analytics (impressions, saves, pin clicks, outbound clicks) to BUSINESS accounts, so these zeros mean \"not measured\", not \"nobody saw your pins\". Fix: convert the pinterest account to a free Business account (Pinterest → Settings → Account management → Convert to business), then reconnect it in Zernio so the new entitlement is picked up. Until then, read the real numbers in Pinterest's own analytics. (1 pin(s) are still under 48 h old and may simply be lagging.)"
 }

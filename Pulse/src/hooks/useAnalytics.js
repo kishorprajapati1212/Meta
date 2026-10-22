@@ -34,7 +34,7 @@ async function withRetry(fn, tries = BACKOFF_MS.length + 1, onRetry) {
   throw lastErr
 }
 
-export function useAnalytics(range, { sample = false, autoRefreshMs = 0 } = {}) {
+export function useAnalytics(range, { sample = false, autoRefreshMs = 0, audience = 'institutions' } = {}) {
   const [data, setData] = useState(null)
   const [health, setHealth] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -61,7 +61,7 @@ export function useAnalytics(range, { sample = false, autoRefreshMs = 0 } = {}) 
     if (sample) {
       await new Promise((r) => setTimeout(r, 220))
       if (!mounted.current) return
-      setData(sampleCombined(range))
+      setData(sampleCombined(range, audience))
       setHealth(sampleHealth())
       setLastUpdated(new Date())
       setLoading(false)
@@ -71,7 +71,7 @@ export function useAnalytics(range, { sample = false, autoRefreshMs = 0 } = {}) 
     }
 
     const [combinedRes, healthRes] = await Promise.allSettled([
-      withRetry(() => fetchCombined(range), BACKOFF_MS.length + 1, () => mounted.current && setRetrying(true)),
+      withRetry(() => fetchCombined(range, { audience }), BACKOFF_MS.length + 1, () => mounted.current && setRetrying(true)),
       withRetry(() => fetchHealth(), 2),
     ])
     if (!mounted.current) return
@@ -94,7 +94,8 @@ export function useAnalytics(range, { sample = false, autoRefreshMs = 0 } = {}) 
     setLoading(false)
     setRefreshing(false)
     first.current = false
-  }, [range, sample])
+    // `audience` re-ranks the growth diagnosis server-side, so it must refetch.
+  }, [range, sample, audience])
 
   useEffect(() => {
     first.current = true
@@ -111,6 +112,9 @@ export function useAnalytics(range, { sample = false, autoRefreshMs = 0 } = {}) 
     data,
     platformData: data?.data || null,
     summary: data?.data?.summary || null,
+    // v4.3.0: ranked "where to focus" list + the audience it was ranked for.
+    focus: data?.data?.focus || [],
+    diagnosedAudience: data?.data?.audience || audience,
     health,
     // Normalised across API versions: v4.1 sends data.details, v4.0 only sent
     // data.platforms as strings — both end up as the same rich shape.

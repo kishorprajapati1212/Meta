@@ -97,47 +97,92 @@ async function getPageAccessToken() {
   }
 }
 
+/**
+ * graphFields — read a Graph node in tolerant layers.
+ *
+ * One rejected field 400s the WHOLE request, which is why the page header used
+ * to come back empty ("Request failed with status code 400", Meta's real message
+ * thrown away). Each layer is its own request: identity fields first (always
+ * allowed for a page token), then counts and extras that some tokens/versions
+ * refuse. Whatever Meta serves is kept, and every refusal is reported with the
+ * upstream message so it can be explained instead of guessed at.
+ */
+async function graphFields(nodeId, token, layers) {
+  const data = {};
+  const errors = [];
+  for (const layer of layers) {
+    try {
+      const r = await axios.get(`${config.FB_API_BASE}/${config.FB_API_VERSION}/${nodeId}`, {
+        params: { fields: layer.join(','), access_token: token },
+        timeout: 20000,
+      });
+      Object.assign(data, r.data || {});
+    } catch (e) {
+      const fbErr = e.response?.data?.error;
+      const message = fbErr?.message || e.message || 'Unknown Meta API error';
+      const code = fbErr?.code || null;
+      const status = e.response?.status || null;
+      const m = String(message).toLowerCase();
+      errors.push({
+        fields: layer.join(','),
+        message,
+        code,
+        status,
+        hint:
+          code === 190 || m.includes('oauthexception') || m.includes('session has expired')
+            ? 'The Page/user token is expired — generate a new ACCESS_TOKEN.'
+            : m.includes('permission') || m.includes('pages_read_engagement')
+            ? 'The token lacks the permission for these fields; the rest of the profile still loads.'
+            : null,
+      });
+    }
+  }
+  return { data, errors };
+}
+
 /** Which page/account details are attached to the working token. */
 async function getAccountDetails() {
   const out = { facebook: null, instagram: null };
   try {
     const pt = await getPageAccessToken();
-    const { data } = await axios.get(
-      `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.FACEBOOK_PAGE_ID}`,
-      {
-        params: {
-          fields: 'id,name,username,fan_count,followers_count,category,link,picture.width(200),verification_status,rating',
-          access_token: pt,
-        },
-        timeout: 20000,
-      }
-    );
-    out.facebook = {
-      id: data.id,
-      name: data.name,
-      username: data.username || null,
-      followers: data.followers_count?.follower_count ?? data.fan_count ?? null,
-      likes: data.fan_count ?? null,
-      category: data.category || null,
-      link: data.link || null,
-      picture: data.picture?.data?.url || null,
-    };
+    const { data, errors } = await graphFields(config.FACEBOOK_PAGE_ID, pt, [
+      ['id', 'name', 'link', 'category', 'username', 'picture.width(200)'],
+      ['followers_count'],
+      ['fan_count'],
+      ['about', 'verification_status'],
+    ]);
+    if (data.id || data.name) {
+      out.facebook = {
+        id: data.id,
+        name: data.name,
+        username: data.username || null,
+        followers: data.followers_count?.follower_count ?? data.fan_count ?? null,
+        followerSource: data.followers_count?.follower_count != null ? 'followers_count' : data.fan_count != null ? 'fan_count' : null,
+        likes: data.fan_count ?? null,
+        category: data.category || null,
+        link: data.link || null,
+        picture: data.picture?.data?.url || null,
+        about: data.about || null,
+        ...(errors.length ? { fieldErrors: errors } : {}),
+      };
+    } else {
+      out.facebook = {
+        error: errors[0]?.message || 'Page profile unavailable',
+        hint: errors[0]?.hint || null,
+        code: errors[0]?.code || null,
+        fieldErrors: errors,
+      };
+    }
   } catch (e) {
-    out.facebook = { error: e.message, hint: e.hint || null };
+    out.facebook = { error: e.message, hint: e.hint || null, code: e.code || null };
   }
 
   if (config.INSTAGRAM_ID && config.USER_ACCESS_TOKEN) {
-    try {
-      const { data } = await axios.get(
-        `${config.FB_API_BASE}/${config.FB_API_VERSION}/${config.INSTAGRAM_ID}`,
-        {
-          params: {
-            fields: 'id,username,name,followers_count,follows_count,media_count,profile_picture_url,website',
-            access_token: config.USER_ACCESS_TOKEN,
-          },
-          timeout: 20000,
-        }
-      );
+    const { data, errors } = await graphFields(config.INSTAGRAM_ID, config.USER_ACCESS_TOKEN, [
+      ['id', 'username', 'name', 'profile_picture_url', 'website'],
+      ['followers_count', 'follows_count', 'media_count'],
+    ]);
+    if (data.id || data.username) {
       out.instagram = {
         id: data.id,
         username: data.username || null,
@@ -147,12 +192,13 @@ async function getAccountDetails() {
         mediaCount: data.media_count ?? null,
         picture: data.profile_picture_url || null,
         website: data.website || null,
+        ...(errors.length ? { fieldErrors: errors } : {}),
       };
-    } catch (e) {
-      out.instagram = { error: e.message, hint: e.hint || null };
+    } else {
+      out.instagram = { error: errors[0]?.message || 'Instagram profile unavailable', hint: errors[0]?.hint || null, fieldErrors: errors };
     }
   }
   return out;
 }
 
-module.exports = { getPageAccessToken, getAccountDetails, metaError };
+module.exports = { getPageAccessToken, getAccountDetails, graphFields, metaError };

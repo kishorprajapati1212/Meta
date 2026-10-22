@@ -7,7 +7,7 @@ const r = Router();
 r.get('/', async (req, res) => {
   try {
     const { value: d } = await fetchWithFallback('linkedin', () => fetchLinkedIn(req.query), req.query);
-    res.json(platformEnvelope('linkedin', d));
+    res.json(platformEnvelope('linkedin', d, null, { audience: req.query.audience }));
   } catch (e) {
     const er = errorResponse(e);
     res.status(er.httpStatus).json(er.body);
